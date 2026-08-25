@@ -32,7 +32,7 @@ services:
              uv run python manage.py seed_demo &&
              uv run python manage.py runserver 0.0.0.0:8000"
     ports:
-      - "8000:8000"
+      - "18473:8000"
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.prod
       SECRET_KEY: desenvolvimento-local-troque-antes-de-publicar-123456789
@@ -40,7 +40,7 @@ services:
       DATABASE_URL: postgres://postgres:postgres@db:5432/sistema_interno
       REDIS_URL: redis://redis:6379/0
       ALLOWED_HOSTS: localhost,127.0.0.1
-      CSRF_TRUSTED_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
+      CSRF_TRUSTED_ORIGINS: http://localhost:18473,http://127.0.0.1:18473
     depends_on:
       db:
         condition: service_healthy
