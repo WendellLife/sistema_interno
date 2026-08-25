@@ -6,4 +6,4 @@ WORKDIR /app
 COPY pyproject.toml uv.lock* ./
 RUN uv sync --frozen --no-install-project || uv sync --no-install-project
 COPY . .
-CMD ["uv", "run", "gunicorn", "config.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000"]
+CMD ["sh", "-c", "uv run python manage.py collectstatic --noinput && uv run python manage.py migrate --noinput && exec uv run gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:${PORT:-8000}"]
