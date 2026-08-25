@@ -1,0 +1,72 @@
+{% extends "web/base.html" %}{% load ui %}
+{% block titulo %}{{ c.numero }}{% endblock %}{% block modulo %}Tarefa em andamento{% endblock %}
+{% block conteudo %}
+<div class="tela__head" x-data="{ comentar: false, cancelar: false }">
+  <div>
+    <div class="codigo" style="margin-bottom:6px">{{ c.numero }}</div>
+    <h1>{{ c.titulo }}</h1>
+    <div class="tela__chips"><i class="chip {{ c.prioridade|chip_prioridade }}">{{ c.get_prioridade_display }}</i><i class="chip chip-neutral">{{ c.categoria.nome }}</i><i class="chip {{ c.status|chip_status }}">{{ c.get_status_display }}</i>{% if c.categoria.exige_documentacao %}<i class="chip chip-warn" title="Entrega bloqueada até publicar as seções obrigatórias">Exige documentação</i>{% endif %}</div>
+  </div>
+  {% if pode_editar and c.aberto %}
+  <div class="tela__acoes">
+    {% for valor, rotulo in proximos %}<button class="btn btn--secundario" hx-post="{% url 'web:transicao' c.pk %}" hx-vals='{"status": "{{ valor }}"}' hx-target="#modal-erro">→ {{ rotulo }}</button>{% endfor %}
+    {% if pode_entregar_status %}<button class="btn btn--primario" hx-post="{% url 'web:transicao' c.pk %}" hx-vals='{"status": "entregue"}' hx-target="#modal-erro">{% include "web/partials/_icone.html" with nome="enviar" %} Enviar entrega</button>{% endif %}
+    <button class="btn btn--secundario" @click="comentar = !comentar">Comentar</button>
+    {% if pode_cancelar %}<button class="btn btn--perigo btn--sm" @click="cancelar = true">Cancelar chamado</button>{% endif %}
+  </div>
+  <div class="overlay" x-show="cancelar" x-cloak @click.self="cancelar = false" style="display:none">
+    <form class="modal" hx-post="{% url 'web:transicao' c.pk %}" hx-target="#modal-erro">{% csrf_token %}<input type="hidden" name="status" value="cancelado">
+      <div class="modal__head"><h2>Cancelar {{ c.numero }}</h2></div>
+      <div class="campo"><label for="just">Justificativa</label><textarea id="just" name="comentario" required minlength="5" placeholder="Por que este chamado não segue"></textarea><span class="ajuda">Fica registrado no histórico e na auditoria.</span></div>
+      <div class="modal__rodape"><button type="button" class="btn btn--secundario" @click="cancelar = false">Voltar</button><button class="btn btn--perigo">Cancelar chamado</button></div>
+    </form>
+  </div>
+  {% endif %}
+</div>
+
+<div class="grid-cards">
+  <div class="pilha">
+    <div class="card"><div class="meta">
+      <div><div class="overline">Solicitante</div><div class="meta__valor">{{ c.solicitante.nome }}</div><div class="meta__sub">{{ c.setor_origem.nome }}</div></div>
+      <div><div class="overline">Aberto em</div><div class="meta__valor mono">{{ c.criado_em|date:"d/m H:i" }}</div><div class="meta__sub">{{ c.criado_em|timesince }} atrás</div></div>
+      <div><div class="overline">SLA</div><div class="meta__valor mono">{% if c.sla_previsto %}{{ c.sla_previsto|date:"d/m H:i" }}{% else %}—{% endif %}</div><div class="meta__sub">{{ c|sla_texto }}</div></div>
+      <div><div class="overline">Responsável</div><div class="meta__valor">{{ c.responsavel.nome|default:"—" }}</div><div class="meta__sub">{{ c.horas_previstas_min|horas }} previstas</div></div>
+    </div></div>
+
+    <div id="card-apontamento">{% include "web/tarefas/_apontamento.html" %}</div>
+
+    <div class="card">
+      <div class="card__head"><h2>Documentação</h2><div class="acoes">{% if pode_entregar %}<i class="chip chip-ok">Completa</i>{% elif c.categoria.exige_documentacao %}<i class="chip chip-warn">{{ faltando|length }} obrigatória{{ faltando|length|pluralize }} faltando</i>{% endif %}</div></div>
+      <div>
+        {% for d, st in documentos %}
+        <div class="doc__linha">
+          <div class="doc__secao">{{ d.get_secao_display }}{% if d.obrigatorio %}<span class="doc__obrig" title="Obrigatória para entrega">*</span>{% endif %}</div>
+          <div class="doc__resumo">{% if d.versao_atual %}{{ d.versao_atual.conteudo|truncatechars:120 }}{% else %}<span class="muted">—</span>{% endif %}</div>
+          <div><button class="chip {% if st == 'publicado' %}chip-ok{% elif st == 'rascunho' %}chip-warn{% else %}chip-neutral{% endif %}" style="cursor:pointer;border:0" hx-get="{% url 'web:editor_documento' c.pk d.secao %}" hx-target="#modal-erro">{% if st == "publicado" %}Publicado{% elif st == "rascunho" %}Rascunho{% else %}Falta{% endif %}</button></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="pilha">
+    <div class="card" x-data="{ aberto: false }" x-init="$watch('aberto', v => v && $refs.txt.focus())" @keydown.window="if ($event.key === 'c' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) aberto = true">
+      <div class="card__head"><h2>Comentários</h2><div class="acoes"><button class="btn btn--sm btn--secundario" @click="aberto = !aberto">Comentar</button></div></div>
+      <form x-show="aberto" style="display:grid;gap:8px;margin-bottom:12px" hx-post="{% url 'web:comentar' c.pk %}" hx-target="#comentarios" hx-on::after-request="if(event.detail.successful){this.reset(); aberto=false}">
+        {% csrf_token %}
+        <textarea x-ref="txt" name="texto" required placeholder="Escreva para o solicitante ou para a equipe" style="min-height:80px;padding:8px 10px;border:1px solid var(--border-default);border-radius:12px"></textarea>
+        <div style="display:flex;gap:10px;align-items:center">{% if eh_ti %}<label style="font-size:12.5px;display:flex;gap:6px;align-items:center"><input type="checkbox" name="interno"> Interno (só TI vê)</label>{% endif %}<button class="btn btn--primario btn--sm" style="margin-left:auto">Publicar comentário</button></div>
+      </form>
+      <div id="comentarios">{% include "web/tarefas/_comentarios.html" %}</div>
+    </div>
+
+    <div class="card">
+      <div class="card__head"><h2>Histórico</h2>{% if anexos %}<div class="acoes muted" style="font-size:12px">{{ anexos|length }} anexo{{ anexos|length|pluralize }}</div>{% endif %}</div>
+      {% for a in anexos %}<div style="font-size:12.5px;margin-bottom:4px"><a href="{{ a.arquivo.url }}">{{ a.nome_original }}</a> <span class="muted mono">{{ a.tamanho_bytes|filesizeformat }}</span></div>{% endfor %}
+      <div style="margin-top:{% if anexos %}10px{% else %}0{% endif %}">
+        {% for h in historico %}<div class="hist__linha"><div class="hist__hora">{{ h.quando|date:"d/m H:i" }}</div><div>{{ h.texto }}{% if h.usuario %} <span class="muted">· {{ h.usuario.nome }}</span>{% endif %}</div></div>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

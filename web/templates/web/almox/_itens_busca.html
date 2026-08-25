@@ -1,0 +1,2 @@
+{% for l in itens %}<button type="button" class="item-opt" @click="escolher({{ l.i.id }}, '{{ l.i.codigo|escapejs }}', '{{ l.i.descricao|escapejs }}', '{{ l.i.unidade }}', '{{ l.saldo|floatformat:'-3' }}', '{{ l.i.estoque_minimo|floatformat:'-3' }}', '{{ l.i.custo_unitario }}')"><span class="codigo">{{ l.i.codigo }}</span><span>{{ l.i.descricao }}</span><span class="mono muted">saldo {{ l.saldo|floatformat:"-3" }} {{ l.i.unidade }}</span></button>
+{% empty %}<div class="muted" style="padding:8px;font-size:12.5px">Nenhum item encontrado.</div>{% endfor %}

@@ -1,0 +1,55 @@
+{% extends "web/base.html" %}{% load ui %}
+{% block titulo %}Compras{% endblock %}{% block modulo %}Compras{% endblock %}{% block conteudo_classe %}conteudo--largo{% endblock %}
+{% block conteudo %}
+<div class="tela__head" x-data="{ cotar: false, exportar: false }">
+  <div><h1>Compras</h1><p class="tela__sub">visão dos setores · consumo de {{ periodo.0|date:"d/m" }} a {{ periodo.1|date:"d/m" }}</p></div>
+  <div class="tela__acoes"><button class="btn btn--secundario" @click="exportar = true">Exportar</button>{% if pode_editar %}<button class="btn btn--primario" @click="cotar = true">{% include "web/partials/_icone.html" with nome="mais" %} Abrir cotação</button>{% endif %}</div>
+  {% with relatorio_export="consumo" %}{% include "web/partials/_modal_exportar.html" %}{% endwith %}
+  {% if pode_editar %}
+  <div class="overlay" x-show="cotar" x-cloak @click.self="cotar = false" style="display:none">
+    <form class="modal" hx-post="{% url 'web:cotacao_nova' %}" hx-target="#modal-erro">{% csrf_token %}
+      <div class="modal__head"><h2>Abrir cotação</h2><button type="button" class="btn btn--fantasma btn--sm modal__fechar" @click="cotar = false" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button></div>
+      <div class="form-grid">
+        <div class="campo campo--full"><label>Item</label><select name="item" required>{% for i in itens %}<option value="{{ i.id }}">{{ i.codigo }} — {{ i.descricao }}</option>{% endfor %}</select></div>
+        <div class="campo"><label>Quantidade</label><input type="number" step="0.001" min="0.001" name="quantidade" required></div>
+        <div class="campo"><label>Prazo de resposta</label><input type="date" name="prazo_resposta" required></div>
+        <div class="campo campo--full"><label>Fornecedores convidados</label><input name="fornecedores" placeholder="separe por vírgula — as propostas são registradas conforme chegam"></div>
+      </div>
+      <div class="modal__rodape"><button type="button" class="btn btn--secundario" @click="cotar = false">Cancelar</button><button class="btn btn--primario">Abrir cotação</button></div>
+    </form>
+  </div>
+  {% endif %}
+</div>
+<div class="kpis">
+  <div class="card kpi {% if kpis.rupturas %}kpi--ruim{% endif %}"><div class="kpi__valor mono">{{ kpis.rupturas }}</div><div class="kpi__rotulo">Itens em ruptura</div></div>
+  <div class="card kpi"><div class="kpi__valor mono">{{ kpis.solicitacoes }}</div><div class="kpi__rotulo">Solicitações abertas</div></div>
+  <div class="card kpi"><div class="kpi__valor mono">R$ {{ kpis.consumo_mes|floatformat:0 }}</div><div class="kpi__rotulo">Consumo do mês</div></div>
+  <div class="card kpi"><div class="kpi__valor mono">{{ kpis.cotacoes }}</div><div class="kpi__rotulo">Cotações abertas</div></div>
+</div>
+<div class="card card--flush" style="margin-bottom:16px"><div class="card__head" style="padding:18px 22px 0"><h2>Consumo e ruptura por setor</h2></div>
+<div class="tabela-wrap"><div style="min-width:960px">
+  <div class="setor-linha setor-linha--head"><span>Setor</span><span>C. custo</span><span>Consumo/mês</span><span>Abaixo do mínimo</span><span>Mais consumido</span><span>Ação</span></div>
+  {% for l in linhas %}
+  <a class="setor-linha" href="{% url 'web:almoxarifado' %}?setor={{ l.s.id }}"><span class="titulo-linha">{{ l.s.nome }}</span><span class="mono">{{ l.cc.codigo|default:"—" }}</span><span class="mono">R$ {{ l.consumo|floatformat:0 }}</span><span class="mono">{{ l.abaixo }}{% if l.rupturas %} <span style="color:var(--ll-danger)">({{ l.rupturas }} em ruptura)</span>{% endif %}</span><span class="titulo-linha">{{ l.mais }}</span><span><i class="chip {{ l.acao.0 }}">{{ l.acao.1 }}</i></span></a>
+  {% endfor %}
+</div></div></div>
+<div class="grid-cards" style="grid-template-columns:repeat(auto-fit,minmax(340px,1fr))">
+  <div class="card"><div class="card__head"><h2>Fila de reposição</h2><div class="acoes muted" style="font-size:12px">{{ fila|length }} alerta{{ fila|length|pluralize }}</div></div>
+    {% for a in fila %}<div class="fila__linha"><span><span class="codigo">{{ a.item.codigo }}</span> {{ a.item.descricao }}<span class="sub-linha">{{ a.setor.sigla }} · {{ a.get_origem_display }} · {{ a.criado_em|date:"d/m" }}</span></span><span class="mono">{{ a.saldo|floatformat:"-3" }} / mín {{ a.minimo|floatformat:"-3" }}</span>{% if pode_editar %}<button class="btn btn--sm btn--secundario" hx-post="{% url 'web:alerta_resolver' a.pk %}" hx-target="#modal-erro" hx-confirm="Marcar como resolvido?">Resolvido</button>{% endif %}</div>
+    {% empty %}<div class="vazio">Nenhum item aguardando reposição</div>{% endfor %}</div>
+  <div class="card"><div class="card__head"><h2>Consumo sem OS</h2><div class="acoes muted" style="font-size:12px">saídas sem referência de trabalho</div></div>
+    {% for m in sem_os %}<div class="mov__linha"><span class="hist__hora">{{ m.criado_em|date:"d/m H:i" }}</span><span>{{ m.quantidade|floatformat:"-3" }} {{ m.item.unidade }} {{ m.item.descricao }}<span class="sub-linha">{{ m.setor.sigla }} · {{ m.usuario.nome }}{% if m.centro_custo %} · CC {{ m.centro_custo.codigo }}{% endif %}</span></span><span class="mono muted">R$ {% widthratio m.quantidade 1 m.item.custo_unitario %}</span></div>
+    {% empty %}<div class="vazio">Nenhum consumo sem OS no mês</div>{% endfor %}</div>
+  <div class="card" style="grid-column:1/-1"><div class="card__head"><h2>Cotações</h2></div>
+    {% for c in cotacoes %}
+    <div class="cot" x-data="{ nova: false }">
+      <div class="sol__head"><span class="codigo">{{ c.item.codigo }}</span><b>{{ c.item.descricao }}</b><span class="mono muted">{{ c.quantidade|floatformat:"-3" }} {{ c.item.unidade }}</span><i class="chip {% if c.status == 'aberta' %}chip-info{% else %}chip-teal{% endif %}">{{ c.get_status_display }}</i><span class="muted" style="margin-left:auto;font-size:11.5px">resposta até {{ c.prazo_resposta|date:"d/m" }}</span></div>
+      {% if c.propostas.all %}<div class="prop__head"><span>Fornecedor</span><span>Valor unit.</span><span>Total</span><span>Prazo</span><span></span></div>
+      {% for pr in c.propostas.all %}<div class="prop__linha"><span>{{ pr.fornecedor }}</span><span class="mono">R$ {{ pr.valor_unitario|floatformat:2 }}</span><span class="mono">R$ {% widthratio pr.valor_unitario 1 c.quantidade %}</span><span class="mono">{{ pr.prazo_entrega_dias }} dias</span><span>{% if pode_editar %}<button class="btn btn--sm btn--primario" hx-post="{% url 'web:proposta_escolher' pr.pk %}" hx-target="#modal-erro" hx-confirm="Escolher {{ pr.fornecedor }}? A cotação será fechada.">Escolher</button>{% endif %}</span></div>{% endfor %}{% endif %}
+      {% if pode_editar %}<button class="btn btn--sm btn--fantasma" @click="nova = !nova">+ Registrar proposta</button>
+      <form x-show="nova" x-cloak class="form-grid" style="grid-template-columns:2fr 1fr 1fr auto;align-items:end;margin-top:8px" hx-post="{% url 'web:cotacao_proposta' c.pk %}" hx-target="#modal-erro">{% csrf_token %}
+        <div class="campo"><label>Fornecedor</label><input name="fornecedor" required></div><div class="campo"><label>Valor unitário</label><input type="number" step="0.01" name="valor_unitario" required></div><div class="campo"><label>Prazo (dias)</label><input type="number" name="prazo_entrega_dias" required min="0"></div><button class="btn btn--sm btn--primario">Salvar</button></form>{% endif %}
+    </div>
+    {% empty %}<div class="vazio">Nenhuma cotação aberta</div>{% endfor %}</div>
+</div>
+{% endblock %}

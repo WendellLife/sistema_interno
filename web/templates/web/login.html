@@ -1,0 +1,13 @@
+{% load static %}<!doctype html>
+<html lang="pt-br"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Entrar · Life Laboral</title>
+<link rel="stylesheet" href="{% static 'css/app.css' %}"></head>
+<body class="ll-body"><div class="login"><div class="login__card">
+  <div class="login__hero"><img src="{% static 'img/logo-horizontal.png' %}" alt="Life Laboral"><p>Sistema interno — chamados, horas, documentação e almoxarifado.</p></div>
+  <form class="login__form" method="post">{% csrf_token %}
+    {% if form.non_field_errors %}<div class="aviso aviso--danger">Usuário ou senha não conferem. Confira e tente de novo.</div>{% endif %}
+    <div class="campo"><label for="id_username">Usuário</label><input id="id_username" name="username" autofocus autocomplete="username" required></div>
+    <div class="campo"><label for="id_password">Senha</label><input id="id_password" name="password" type="password" autocomplete="current-password" required></div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="btn btn--primario" type="submit" style="justify-content:center">Entrar</button>
+  </form>
+</div></div></body></html>

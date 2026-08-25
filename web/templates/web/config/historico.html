@@ -1,0 +1,17 @@
+{% extends "web/base.html" %}
+{% block titulo %}Histórico de mudanças{% endblock %}{% block modulo %}Histórico de mudanças{% endblock %}
+{% block conteudo %}
+<div class="tela__head"><div><h1>Histórico de mudanças</h1><p class="tela__sub">quem mudou o quê — lido direto da auditoria, que só cresce</p></div><div class="tela__acoes"><a class="btn btn--secundario" href="/api/v1/relatorios/auditoria/?formato=xlsx{% if filtros.objeto %}&objeto={{ filtros.objeto }}{% endif %}" target="_blank">Exportar</a></div></div>
+<form class="filtros" method="get">
+  <select name="objeto" onchange="this.form.submit()"><option value="">Todos os objetos</option>{% for t in tipos %}<option value="{{ t }}" {% if filtros.objeto == t %}selected{% endif %}>{{ t }}</option>{% endfor %}</select>
+  <select name="usuario" onchange="this.form.submit()"><option value="">Todos os usuários</option>{% for u in usuarios %}<option value="{{ u.id }}" {% if filtros.usuario == u.id|stringformat:"s" %}selected{% endif %}>{{ u.nome }}</option>{% endfor %}</select>
+  <input name="acao" value="{{ filtros.acao|default:'' }}" placeholder="ação (ex.: chamado.entregue)" style="min-height:36px;padding:6px 10px;border:1px solid var(--border-default);border-radius:12px">
+  <button class="btn btn--secundario btn--sm">Filtrar</button>
+</form>
+<div class="card card--flush"><div class="tabela-wrap"><div style="min-width:960px">
+  <div class="aud aud--head"><span>Quando</span><span>Quem</span><span>Ação</span><span>Objeto</span><span>Antes → depois</span></div>
+  {% for a in pagina %}<div class="aud"><span class="mono muted">{{ a.quando|date:"d/m/Y H:i:s" }}</span><span>{{ a.usuario.nome|default:"sistema" }}</span><span class="mono" style="font-size:12px">{{ a.acao }}</span><span class="mono" style="font-size:12px">{{ a.objeto_tipo }}:{{ a.objeto_id }}</span><span class="mono" style="font-size:11.5px;white-space:pre-wrap">{{ a.antes|default:"∅" }} → {{ a.depois|default:"∅" }}</span></div>
+  {% empty %}<div class="vazio">Nada registrado com esses filtros.</div>{% endfor %}
+  {% if pagina.has_other_pages %}<div class="paginacao">{% if pagina.has_previous %}<a href="?{{ filtros.urlencode }}&pagina={{ pagina.previous_page_number }}">‹ Anterior</a>{% endif %}<span class="muted">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>{% if pagina.has_next %}<a href="?{{ filtros.urlencode }}&pagina={{ pagina.next_page_number }}">Próxima ›</a>{% endif %}</div>{% endif %}
+</div></div></div>
+{% endblock %}

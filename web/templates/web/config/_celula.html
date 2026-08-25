@@ -1,0 +1,1 @@
+<button class="cel cel--{{ nivel|default:'-'|slugify }}" hx-post="{% url 'web:config_permissao' %}" hx-vals='{"papel": "{{ papel }}", "modulo": "{{ modulo }}"}' hx-target="#cel-{{ papel }}-{{ modulo }}" title="{{ papel }} · {{ modulo }}">{% if nivel == "E" %}editar{% elif nivel == "V" %}ver{% else %}sem acesso{% endif %}</button>

@@ -1,0 +1,21 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_DB: sistema_interno, POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres }
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/sistema_interno
+      SECRET_KEY: ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync
+      - run: uv run ruff check .
+      - run: uv run python manage.py makemigrations --check --dry-run
+      - run: uv run pytest --cov --cov-fail-under=80

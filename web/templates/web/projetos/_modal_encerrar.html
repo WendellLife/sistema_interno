@@ -1,0 +1,11 @@
+<div class="overlay" x-data @click.self="$el.remove()" @keydown.escape.window="$el.remove()">
+  <form class="modal" hx-post="{% url 'web:projeto_mover' p.pk %}" hx-target="#modal-erro">{% csrf_token %}<input type="hidden" name="fase" value="{{ fase }}">
+    <div class="modal__head"><h2>{% if fase == "concluido" %}Concluir{% else %}Cancelar{% endif %} “{{ p.nome }}”</h2></div>
+    <p class="muted" style="margin:0 0 12px">Encerrar exige data e situação final — é o que aparece no histórico e nos indicadores de desvio.</p>
+    <div class="form-grid">
+      <div class="campo"><label>Encerrado em</label><input type="date" name="encerrado_em" required></div>
+      <div class="campo campo--full"><label>Situação final</label><input name="situacao_final" required maxlength="180" placeholder="{% if fase == 'concluido' %}Entregue com escopo reduzido{% else %}Cancelado a pedido do setor{% endif %}"></div>
+    </div>
+    <div class="modal__rodape"><button type="button" class="btn btn--secundario" @click="$root.remove()">Voltar</button><button class="btn btn--primario">Confirmar</button></div>
+  </form>
+</div>

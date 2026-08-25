@@ -1,0 +1,13 @@
+<div class="overlay" x-show="exportar" x-cloak @click.self="exportar = false" @keydown.escape.window="exportar = false" style="display:none">
+  <form class="modal" role="dialog" aria-labelledby="exp-titulo" method="get" action="/api/v1/relatorios/{{ relatorio_export|default:'horas' }}/" target="_blank" x-data="{ relatorio: '{{ relatorio_export|default:'horas' }}' }" :action="'/api/v1/relatorios/' + relatorio + '/'">
+    <div class="modal__head"><h2 id="exp-titulo">Exportar</h2><button type="button" class="btn btn--fantasma btn--sm modal__fechar" @click="exportar = false" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button></div>
+    <div class="form-grid">
+      <div class="campo"><label>Relatório</label><select x-model="relatorio"><option value="horas">Horas por tipo/pessoa</option><option value="retrabalho">Retrabalho por motivo</option><option value="sla">Cumprimento de SLA</option><option value="consumo">Consumo de almoxarifado</option><option value="auditoria">Histórico de mudanças</option></select></div>
+      <div class="campo"><label>Formato</label><select name="formato"><option value="xlsx">XLSX</option><option value="csv">CSV</option><option value="pdf">PDF</option></select></div>
+      <div class="campo"><label>De</label><input type="date" name="de" value="{{ d.periodo.de|date:'Y-m-d' }}"></div>
+      <div class="campo"><label>Até</label><input type="date" name="ate" value="{{ d.periodo.ate|date:'Y-m-d' }}"></div>
+      {% if setores %}<div class="campo campo--full"><label>Escopo</label><select name="setor"><option value="">Todos os setores</option>{% for s in setores %}<option value="{{ s.id }}" {% if setor and setor.id == s.id %}selected{% endif %}>Só {{ s.nome }}</option>{% endfor %}</select></div>{% endif %}
+    </div>
+    <div class="modal__rodape"><span class="nota">Acima de 5.000 linhas o arquivo é enviado por e-mail.</span><button type="button" class="btn btn--secundario" @click="exportar = false">Cancelar</button><button class="btn btn--primario">Gerar arquivo</button></div>
+  </form>
+</div>

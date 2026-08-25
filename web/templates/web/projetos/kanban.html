@@ -1,0 +1,56 @@
+{% extends "web/base.html" %}{% load ui %}
+{% block titulo %}Projetos de TI{% endblock %}{% block modulo %}Projetos de TI{% endblock %}{% block conteudo_classe %}conteudo--projetos{% endblock %}
+{% block header_extra %}{% if setores %}<form method="get"><select name="setor" onchange="this.form.submit()" aria-label="Setor" style="min-height:32px;padding:4px 8px;border:1px solid var(--border-default);border-radius:10px;font-size:12.5px"><option value="">Todos os setores</option>{% for s in setores %}<option value="{{ s.id }}" {% if request.GET.setor == s.id|stringformat:"s" %}selected{% endif %}>{{ s.nome }}</option>{% endfor %}</select></form>{% endif %}{% endblock %}
+{% block conteudo %}
+<div class="tela__head" x-data="{ novo: false }">
+  <div><h1>Projetos de TI</h1><p class="tela__sub">portfólio e capacidade · {{ kpis.abertos }} projeto{{ kpis.abertos|pluralize }} aberto{{ kpis.abertos|pluralize }}</p></div>
+  <div class="tela__acoes"><a class="btn btn--secundario" href="{% url 'web:projetos_historico' %}">Projetos concluídos/cancelados</a>{% if pode_editar %}<button class="btn btn--primario" @click="novo = true">{% include "web/partials/_icone.html" with nome="mais" %} Novo projeto</button>{% endif %}</div>
+  {% if pode_editar %}
+  <div class="overlay" x-show="novo" x-cloak @click.self="novo = false" @keydown.escape.window="novo = false" style="display:none">
+    <form class="modal modal--largo" hx-post="{% url 'web:projeto_novo' %}" hx-target="#modal-erro">{% csrf_token %}
+      <div class="modal__head"><h2>Novo projeto</h2><button type="button" class="btn btn--fantasma btn--sm modal__fechar" @click="novo = false" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button></div>
+      <div class="form-grid">
+        <div class="campo campo--full"><label>Nome</label><input name="nome" required maxlength="180"></div>
+        <div class="campo"><label>Setor solicitante</label><select name="setor_solicitante" required>{% for s in todos_setores %}<option value="{{ s.id }}">{{ s.nome }}</option>{% endfor %}</select></div>
+        <div class="campo"><label>Patrocinador</label><select name="patrocinador" required>{% for u in usuarios %}<option value="{{ u.id }}">{{ u.nome }} · {{ u.setor.sigla }}</option>{% endfor %}</select></div>
+        <div class="campo campo--full"><label>Descrição do problema</label><textarea name="descricao" placeholder="Fica na seção 'Contexto e problema' da documentação do projeto"></textarea></div>
+        <div class="campo"><label>Horas estimadas</label><input type="number" name="horas_estimadas" min="0" value="0"></div>
+        <div class="campo"><label>Responsável de TI</label><select name="responsavel"><option value="">—</option>{% for u in ti %}<option value="{{ u.id }}">{{ u.nome }}</option>{% endfor %}</select></div>
+        <div class="campo"><label>Início previsto</label><input type="date" name="inicio_previsto"></div>
+        <div class="campo"><label>Fim previsto</label><input type="date" name="fim_previsto"></div>
+      </div>
+      <div class="aviso aviso--warn" style="margin-top:12px">Projetos com mudança de regra de negócio exigem documentação antes da implantação.</div>
+      <div class="modal__rodape"><button type="button" class="btn btn--secundario" @click="novo = false">Cancelar</button><button class="btn btn--primario">Criar projeto</button></div>
+    </form>
+  </div>
+  {% endif %}
+</div>
+
+<div class="kpis">
+  <div class="card kpi"><div class="kpi__valor mono">{{ kpis.abertos }}</div><div class="kpi__rotulo">Projetos abertos</div></div>
+  <div class="card kpi"><div class="kpi__valor mono">{{ kpis.em_desenvolvimento }}</div><div class="kpi__rotulo">Em desenvolvimento</div></div>
+  <div class="card kpi {% if kpis.em_risco %}kpi--ruim{% endif %}"><div class="kpi__valor mono">{{ kpis.em_risco }}</div><div class="kpi__rotulo">Com prazo estourado</div></div>
+  <div class="card kpi"><div class="kpi__valor mono">{{ kpis.horas_realizadas|floatformat:0 }}h <span style="font-size:14px;color:var(--text-muted)">/ {{ kpis.horas_previstas }}h</span></div><div class="kpi__rotulo">Horas realizadas / previstas</div></div>
+</div>
+
+<div class="kanban">
+  {% for fase, rotulo, ps in colunas %}
+  <div class="kanban__col">
+    <div class="kanban__head"><span>{{ rotulo }}</span><b class="menu__badge">{{ ps|length }}</b></div>
+    {% for p in ps %}
+    <div class="pcard" x-data="{ mover: false }">
+      <div class="pcard__nome">{{ p.nome }}</div>
+      <div class="sub-linha">{{ p.setor_solicitante.sigla }}{% if p.responsavel %} · <span class="avatar avatar--mini">{{ p.responsavel.nome|slice:":1" }}</span> {{ p.responsavel.nome }}{% endif %}</div>
+      <div class="pcard__horas mono">{{ p.horas_estimadas }}h / <span class="{% if p.estourou %}estourou{% endif %}">{{ p.minutos_realizados|horas_dec }}h</span></div>
+      <div class="barra barra--fina {% if p.em_risco %}danger{% else %}ok{% endif %}"><i style="width:{{ p.progresso }}%"></i></div>
+      <div class="pcard__rodape">{% if p.em_risco %}<i class="chip chip-danger">Prazo estourado</i>{% elif p.fim_previsto %}<span class="mono muted" style="font-size:11px">até {{ p.fim_previsto|date:"d/m" }}</span>{% endif %}
+        {% if pode_editar %}<button class="btn btn--sm btn--fantasma" style="margin-left:auto" @click="mover = !mover">Mover</button>{% endif %}</div>
+      {% if pode_editar %}<form x-show="mover" x-cloak style="display:flex;gap:6px;margin-top:8px" hx-post="{% url 'web:projeto_mover' p.pk %}" hx-target="#modal-erro">{% csrf_token %}
+        <select name="fase" style="flex:1;min-height:32px;border:1px solid var(--border-default);border-radius:8px;font-size:12px">{% for f, r in fases %}{% if f != fase %}<option value="{{ f }}">{{ r }}</option>{% endif %}{% endfor %}<option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select>
+        <button class="btn btn--sm btn--primario">Ir</button></form>{% endif %}
+    </div>
+    {% empty %}<div class="kanban__vazio">—</div>{% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

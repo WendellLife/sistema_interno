@@ -1,0 +1,62 @@
+[project]
+name = "sistema-interno"
+version = "0.1.0"
+description = "Sistema interno Life Laboral — chamados, horas, documentação, almoxarifado e projetos"
+requires-python = ">=3.12"
+dependencies = [
+  "django==5.1.*",
+  "djangorestframework==3.15.*",
+  "djangorestframework-simplejwt==5.3.*",
+  "django-filter==24.*",
+  "psycopg[binary]==3.2.*",
+  "celery[redis]==5.4.*",
+  "django-celery-beat==2.7.*",
+  "django-storages[s3]==1.14.*",
+  "python-decouple==3.8",
+  "structlog==24.*",
+  "sentry-sdk==2.*",
+  "django-prometheus==2.3.*",
+  "openpyxl==3.1.*",
+  "weasyprint==62.*",
+  "workalendar==17.*",
+  "qrcode[pil]==8.*",
+]
+
+[dependency-groups]
+dev = [
+  "pytest-django",
+  "pytest-cov",
+  "factory-boy",
+  "ruff",
+  "mypy",
+  "django-stubs",
+  "djangorestframework-stubs",
+  "django-debug-toolbar",
+  "django-extensions",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DJ"]
+ignore = ["E501"]  # linhas longas: formatação fica a cargo do `ruff format`
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+addopts = "--reuse-db"
+
+[tool.coverage.run]
+omit = ["*/migrations/*", "*/tests/*", "config/*", "manage.py"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+ignore_missing_imports = true
+exclude = ["migrations"]
+
+[tool.django-stubs]
+django_settings_module = "config.settings.dev"

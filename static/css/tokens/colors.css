@@ -1,0 +1,77 @@
+/* Life Laboral — Color tokens
+ * Sampled from the brand wordmark & marketing collateral.
+ * Teal is the signature; blue is the institutional partner; deep navy anchors
+ * dark/marketing surfaces. Keep the palette calm, clinical and trustworthy.
+ */
+:root {
+  /* ---- Brand core (raw) ---- */
+  --ll-teal:            #43B5B6; /* signature — símbolo + "LABORAL" */
+  --ll-teal-600:        #34999a;
+  --ll-teal-700:        #2b8283;
+  --ll-teal-300:        #7fcecf;
+  --ll-teal-100:        #d8f0f0;
+  --ll-teal-050:        #eef9f9;
+
+  --ll-blue:            #0086C4; /* institutional — "LIFE" + tagline */
+  --ll-blue-600:        #0a6fa3;
+  --ll-blue-700:        #0d5b85;
+  --ll-blue-300:        #62b8de;
+  --ll-blue-100:        #cfe8f4;
+  --ll-blue-050:        #eaf5fb;
+
+  --ll-navy:            #0D4B86; /* deep marketing blue */
+  --ll-navy-800:        #0a3a6b;
+  --ll-navy-900:        #082c52; /* deepest — hero backgrounds */
+
+  /* ---- Neutrals (cool grey, faintly teal-tinted) ---- */
+  --ll-ink:             #12232e; /* primary text on light */
+  --ll-slate-700:       #33454f;
+  --ll-slate-500:       #5b6b74; /* secondary text */
+  --ll-slate-400:       #84949c;
+  --ll-slate-300:       #b7c1c7;
+  --ll-slate-200:       #d9e0e4;
+  --ll-slate-100:       #eceff1;
+  --ll-slate-050:       #f5f7f8;
+  --ll-white:           #ffffff;
+
+  /* ---- Semantic status ---- */
+  --ll-success:         #2f9e6b;
+  --ll-success-bg:      #e4f4ec;
+  --ll-warning:         #d9922b;
+  --ll-warning-bg:      #fbf0dc;
+  --ll-danger:          #d24b46;
+  --ll-danger-bg:       #fbe7e6;
+  --ll-info:            var(--ll-blue);
+  --ll-info-bg:         var(--ll-blue-050);
+
+  /* ---- Semantic aliases (use these in product code) ---- */
+  --color-primary:          var(--ll-teal);
+  --color-primary-hover:    var(--ll-teal-600);
+  --color-primary-active:   var(--ll-teal-700);
+  --color-primary-soft:     var(--ll-teal-050);
+  --color-secondary:        var(--ll-blue);
+  --color-secondary-hover:  var(--ll-blue-600);
+  --color-secondary-soft:   var(--ll-blue-050);
+
+  --text-strong:        var(--ll-ink);
+  --text-body:          var(--ll-slate-700);
+  --text-muted:         var(--ll-slate-500);
+  --text-on-brand:      var(--ll-white);
+  --text-link:          var(--ll-blue);
+
+  --surface-page:       var(--ll-slate-050);
+  --surface-card:       var(--ll-white);
+  --surface-sunken:     var(--ll-slate-100);
+  --surface-brand:      var(--ll-teal);
+  --surface-brand-deep: var(--ll-navy-900);
+
+  --border-subtle:      var(--ll-slate-200);
+  --border-default:     var(--ll-slate-300);
+  --border-strong:      var(--ll-slate-400);
+  --focus-ring:         color-mix(in srgb, var(--ll-teal) 55%, transparent);
+
+  /* ---- Signature gradients ---- */
+  --gradient-brand:  linear-gradient(120deg, var(--ll-blue) 0%, var(--ll-teal) 100%);
+  --gradient-hero:   linear-gradient(135deg, var(--ll-navy-900) 0%, var(--ll-navy) 45%, var(--ll-blue-600) 100%);
+  --gradient-soft:   linear-gradient(120deg, var(--ll-blue-050) 0%, var(--ll-teal-050) 100%);
+}

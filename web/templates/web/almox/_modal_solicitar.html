@@ -1,0 +1,28 @@
+<div class="overlay" x-show="modal === 'solicitar'" x-cloak @click.self="modal = null" style="display:none">
+  <form class="modal modal--largo" role="dialog" aria-labelledby="sol-titulo" hx-post="{% url 'web:almox_solicitar' %}{% if setores %}?setor={{ setor.id }}{% endif %}" hx-target="#modal-erro"
+        x-data="{ linhas: [{id:'', codigo:'', desc:'', un:'', saldo:0, qtd:''}], q: '', alvo: 0,
+                  escolher(id, codigo, desc, un, saldo) { this.linhas[this.alvo] = {...this.linhas[this.alvo], id, codigo, desc, un, saldo: parseFloat(saldo)}; this.q=''; document.getElementById('sol-res').innerHTML=''; } }">
+    {% csrf_token %}
+    <div class="modal__head"><h2 id="sol-titulo">Solicitar material</h2><button type="button" class="btn btn--fantasma btn--sm modal__fechar" @click="modal = null" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button></div>
+    <div class="campo" style="margin-bottom:10px"><label>Buscar item</label><input placeholder="Código, descrição ou código Sankhya" x-model="q" hx-get="{% url 'web:almox_itens_busca' %}{% if setores %}?setor={{ setor.id }}{% endif %}" hx-trigger="keyup changed delay:200ms" hx-target="#sol-res" name="q" autocomplete="off"><div id="sol-res" class="item-res"></div></div>
+    <div class="linhas">
+      <template x-for="(l, i) in linhas" :key="i">
+        <div class="linha-item" :class="{ ativa: alvo === i }" @click="alvo = i">
+          <input type="hidden" name="item" :value="l.id">
+          <span class="codigo" x-text="l.codigo || '—'"></span>
+          <span><span x-text="l.desc || 'Clique aqui e busque um item acima'"></span><span class="sub-linha" x-show="l.id">saldo <b x-text="l.saldo"></b> <span x-text="l.un"></span></span></span>
+          <input type="number" step="0.001" min="0.001" name="quantidade" placeholder="Qtd" x-model="l.qtd" style="width:96px;min-height:40px">
+          <span class="chip chip-warn" x-show="l.id && parseFloat(l.qtd) > l.saldo" x-cloak>acima do saldo</span>
+          <button type="button" class="btn btn--sm btn--fantasma" @click.stop="linhas.splice(i,1); if(!linhas.length) linhas.push({id:'',codigo:'',desc:'',un:'',saldo:0,qtd:''})" aria-label="Remover">{% include "web/partials/_icone.html" with nome="fechar" %}</button>
+        </div>
+      </template>
+      <button type="button" class="btn btn--sm btn--secundario" @click="linhas.push({id:'',codigo:'',desc:'',un:'',saldo:0,qtd:''}); alvo = linhas.length-1">+ Outro item</button>
+    </div>
+    <div class="form-grid" style="margin-top:14px">
+      <div class="campo"><label>Centro de custo <span style="color:var(--ll-danger)">*</span></label><select name="centro_custo" required>{% for c in ccs %}<option value="{{ c.id }}">{{ c.codigo }} — {{ c.descricao }}</option>{% endfor %}</select></div>
+      <div class="campo"><label>OS / projeto</label><input name="os_ref" maxlength="30" placeholder="OS 88213"></div>
+      <div class="campo campo--full"><label style="display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" name="urgente"> Urgente — linha parada ou risco de segurança</label></div>
+    </div>
+    <div class="modal__rodape"><span class="nota">Vai para aprovação do gerente do setor.</span><button type="button" class="btn btn--secundario" @click="modal = null">Cancelar</button><button class="btn btn--primario">Enviar solicitação</button></div>
+  </form>
+</div>

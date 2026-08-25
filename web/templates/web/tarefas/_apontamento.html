@@ -1,0 +1,60 @@
+{% load ui %}
+<div class="card" x-data="{ manual: {{ reabrir_manual|yesno:'true,false' }}, retrab: null }">
+  <div class="card__head"><h2>Apontamento de horas</h2><div class="acoes"><span class="muted" style="font-size:12px;align-self:center">total <b class="mono">{{ total_min|horas }}</b>{% if pendentes %} · {{ pendentes }} aguardando aprovação{% endif %}</span><button class="btn btn--sm btn--secundario" @click="manual = true">Lançamento manual</button></div></div>
+  {% if aviso %}<div class="aviso aviso--ok" x-data x-init="toast('{{ aviso|escapejs }}')">{{ aviso }}</div>{% endif %}
+  {% if erro %}<div class="aviso aviso--danger"><b>{{ erro.mensagem|default:"" }}</b>{% for k, v in erro.items %}{% if k != "mensagem" and k != "erro" and k != "conflitante_id" %}<div>{{ v|join:" " }}</div>{% endif %}{% endfor %}</div>{% endif %}
+  {% if ativo and not ativo_neste %}<div class="aviso aviso--warn">Seu cronômetro está rodando em <b>{{ ativo.tipo.nome }}</b> de outro chamado. Iniciar aqui pausa aquele.</div>{% endif %}
+
+  <div x-data="cronometro('{% url 'web:cronometro_estado' %}')">
+    {% for l in linhas %}
+    <div class="apont__linha {% if l.ativo %}ativo{% endif %}">
+      <div class="apont__tipo"><i class="dot {% if l.ativo %}ativo{% endif %}"></i>{{ l.tipo.nome }}</div>
+      <div class="barra {% if l.tipo.exige_causa %}retrabalho{% else %}ok{% endif %}"><i style="width:{{ l.minutos|pct:maximo }}%"></i></div>
+      <div class="apont__total">{% if l.ativo %}<span x-text="texto">0:00:00</span>{% else %}{{ l.minutos|horas }}{% endif %}</div>
+      <div style="text-align:right">
+        {% if l.ativo %}
+          <button class="btn btn--sm btn--primario" hx-post="{% url 'web:cronometro' c.pk %}" hx-vals='{"acao": "parar"}' hx-target="#card-apontamento">{% include "web/partials/_icone.html" with nome="stop" %} Parar</button>
+        {% elif l.tipo.exige_causa %}
+          <button class="btn btn--sm btn--secundario" @click="retrab = retrab === {{ l.tipo.id }} ? null : {{ l.tipo.id }}">{% include "web/partials/_icone.html" with nome="play" %} Iniciar</button>
+        {% else %}
+          <button class="btn btn--sm btn--secundario" hx-post="{% url 'web:cronometro' c.pk %}" hx-vals='{"acao": "iniciar", "tipo": "{{ l.tipo.id }}"}' hx-target="#card-apontamento">{% include "web/partials/_icone.html" with nome="play" %} Iniciar</button>
+        {% endif %}
+      </div>
+    </div>
+    {% if l.tipo.exige_causa %}
+    <form class="retrab" x-show="retrab === {{ l.tipo.id }}{% if tipo_erro == l.tipo.id|stringformat:'s' %} || true{% endif %}" x-cloak style="display:none" hx-post="{% url 'web:cronometro' c.pk %}" hx-target="#card-apontamento">
+      {% csrf_token %}<input type="hidden" name="acao" value="iniciar"><input type="hidden" name="tipo" value="{{ l.tipo.id }}">
+      <p><b>Motivo de retrabalho é obrigatório.</b> É o que permite atacar a causa (requisito incompleto, mudança de escopo…) em vez de só absorver o custo. Sem causa não grava.</p>
+      <div class="form-grid">
+        <div class="campo"><label>Motivo</label><select name="motivo_retrabalho" required><option value="">Escolha…</option>{% for m in motivos %}<option value="{{ m.id }}">{{ m.nome }}</option>{% endfor %}</select></div>
+        <div class="campo"><label>Detalhe (mín. 15 caracteres)</label><input name="detalhe_retrabalho" minlength="15" required placeholder="O que foi refeito e por quê"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn--sm btn--secundario" @click="retrab = null">Cancelar</button><button class="btn btn--sm btn--primario">Iniciar retrabalho</button></div>
+    </form>
+    {% endif %}
+    {% endfor %}
+    <div class="apont__rodape"><span class="muted">Cronômetro</span>{% if ativo_neste %}<span class="apont__relogio" x-text="texto">0:00:00</span><span class="muted">em {{ ativo.tipo.nome }} desde {{ ativo.inicio|date:"H:i" }}</span>{% else %}<span class="muted">parado</span>{% endif %}</div>
+  </div>
+
+  <div class="overlay" x-show="manual" x-cloak @click.self="manual = false" @keydown.escape.window="manual = false" style="display:none">
+    <form class="modal" role="dialog" aria-labelledby="manual-titulo" hx-post="{% url 'web:lancamento_manual' c.pk %}" hx-target="#card-apontamento"
+          x-data="{ tipoRetrab: false }">
+      {% csrf_token %}
+      <div class="modal__head"><h2 id="manual-titulo">Lançamento manual de horas</h2><button type="button" class="btn btn--fantasma btn--sm modal__fechar" @click="manual = false" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button></div>
+      {% if erro and reabrir_manual %}<div class="aviso aviso--danger">{{ erro.mensagem }}{% for k, v in erro.items %}{% if k not in "mensagem erro conflitante_id" %} {{ v|join:" " }}{% endif %}{% endfor %}</div>{% endif %}
+      <div class="form-grid" hx-get="{% url 'web:previa_manual' c.pk %}" hx-trigger="change from:closest form" hx-include="closest form" hx-target="#avisos-manual">
+        <div class="campo"><label>Tipo</label><select name="tipo" required @change="tipoRetrab = $el.selectedOptions[0].dataset.causa === '1'">{% for l in linhas %}<option value="{{ l.tipo.id }}" data-causa="{{ l.tipo.exige_causa|yesno:'1,0' }}">{{ l.tipo.nome }}</option>{% endfor %}</select></div>
+        <div class="campo"><label>Data</label><input type="date" name="data" value="{{ hoje|date:'Y-m-d' }}" required></div>
+        <div class="campo"><label>Início</label><input type="time" name="inicio" required></div>
+        <div class="campo"><label>Fim</label><input type="time" name="fim" required></div>
+        <div class="campo campo--full"><label>Chamado</label><input value="{{ c.numero }} — {{ c.titulo }}" disabled></div>
+        <div class="campo campo--full"><label>Observação</label><input name="observacao" maxlength="240"></div>
+        <template x-if="tipoRetrab"><div class="campo campo--full retrab" style="margin:0"><p>Retrabalho exige motivo e detalhe.</p>
+          <select name="motivo_retrabalho"><option value="">Motivo…</option>{% for m in motivos %}<option value="{{ m.id }}">{{ m.nome }}</option>{% endfor %}</select>
+          <input name="detalhe_retrabalho" minlength="15" placeholder="O que foi refeito e por quê (mín. 15 caracteres)"></div></template>
+      </div>
+      <div id="avisos-manual" style="margin-top:12px"></div>
+      <div class="modal__rodape"><button type="button" class="btn btn--secundario" @click="manual = false">Cancelar</button><button class="btn btn--primario">Lançar horas</button></div>
+    </form>
+  </div>
+</div>

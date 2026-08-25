@@ -1,0 +1,18 @@
+{% extends "web/base.html" %}
+{% block titulo %}Leitura de QR Code{% endblock %}{% block modulo %}Almoxarifado / QR Code{% endblock %}
+{% block conteudo %}
+<div class="tela__head"><div><h1>Leitura de QR Code</h1><p class="tela__sub">{{ setor.nome }} · aponte a câmera para a etiqueta ou digite o código</p></div><div class="tela__acoes"><a class="btn btn--secundario" href="{% url 'web:almoxarifado' %}">Voltar</a></div></div>
+<div class="grid-cards" style="grid-template-columns:minmax(280px,420px) 1fr">
+  <div class="card qr__camera" x-data="{ ativa: false, erro: '' }">
+    <div class="qr__moldura"><video x-ref="v" x-show="ativa" playsinline muted style="width:100%;border-radius:12px"></video><div x-show="!ativa" class="qr__placeholder">{% include "web/partials/_icone.html" with nome="busca" %}<span>Câmera</span></div></div>
+    <button class="btn btn--secundario" style="width:100%;justify-content:center;min-height:44px" @click="try { const s = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); $refs.v.srcObject = s; $refs.v.play(); ativa = true; if ('BarcodeDetector' in window) { const d = new BarcodeDetector({formats:['qr_code']}); const loop = async () => { if(!ativa) return; try { const codes = await d.detect($refs.v); if (codes.length) { document.getElementById('qr-codigo').value = codes[0].rawValue.split('/').pop(); htmx.trigger('#qr-form', 'submit'); } } catch(e){} requestAnimationFrame(loop); }; loop(); } else { erro = 'Este navegador não lê QR pela câmera; digite o código.'; } } catch(e) { erro = 'Sem acesso à câmera; digite o código.'; }" x-text="ativa ? 'Câmera ativa' : 'Ligar câmera'"></button>
+    <p class="muted" style="font-size:12px;margin:10px 0 0" x-text="erro"></p>
+    <form id="qr-form" style="margin-top:12px;display:flex;gap:8px" hx-get="{% url 'web:almox_qr' %}" hx-target="#qr-resultado" hx-push-url="false">
+      {% if request.GET.setor %}<input type="hidden" name="setor" value="{{ request.GET.setor }}">{% endif %}
+      <input id="qr-codigo" name="codigo" value="{{ codigo }}" placeholder="MRO-4471" style="flex:1;min-height:44px;padding:8px 12px;border:1px solid var(--border-default);border-radius:12px;font-family:var(--font-mono)" autofocus autocomplete="off">
+      <button class="btn btn--primario" style="min-height:44px">Buscar</button>
+    </form>
+  </div>
+  <div id="qr-resultado">{% include "web/almox/_qr_resultado.html" %}</div>
+</div>
+{% endblock %}

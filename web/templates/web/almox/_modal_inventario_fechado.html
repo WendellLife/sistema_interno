@@ -1,0 +1,8 @@
+<div class="overlay" x-data @click.self="location.reload()">
+  <div class="modal" role="dialog">
+    <div class="modal__head"><h2>Rodada #{{ inv.pk }} fechada</h2></div>
+    <p style="margin:0 0 8px"><b>{{ inv.divergencias }}</b> divergência{{ inv.divergencias|pluralize }} · impacto <b class="mono">R$ {{ inv.impacto_valor|floatformat:2 }}</b>.</p>
+    <p class="muted" style="margin:0">Cada divergência virou um ajuste de estoque com justificativa "Inventário #{{ inv.pk }}" — está nos movimentos de hoje e na auditoria.</p>
+    <div class="modal__rodape"><button class="btn btn--primario" @click="location.reload()">Voltar ao almoxarifado</button></div>
+  </div>
+</div>

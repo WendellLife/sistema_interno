@@ -1,0 +1,57 @@
+{% load static ui %}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block titulo %}Sistema interno{% endblock %} · Life Laboral</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  <script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
+  <script src="{% static 'js/app.js' %}"></script>
+</head>
+<body class="ll-body" x-data="{ buscaAberta: false }" @abrir-busca.window="buscaAberta = true; $nextTick(() => $refs.q.focus())" @keydown.escape.window="buscaAberta = false">
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar__logo"><a href="{% url 'web:tarefas' %}"><img src="{% static 'img/logo-horizontal.png' %}" alt="Life Laboral"></a></div>
+    <div class="sidebar__perfil">
+      <div class="avatar">{{ me.nome|slice:":1" }}</div>
+      <div><strong>{{ me.nome }}</strong><span>{{ papel_principal }} · {{ me.setor.sigla }}</span></div>
+    </div>
+    <nav class="menu" aria-label="Principal">
+      {% for item in menu %}
+        {% if item.grupo %}<div class="menu__grupo">{{ item.grupo }}</div>{% endif %}
+        <a class="menu__item {% if item.chave == secao_ativa %}ativo{% endif %}" href="{% url item.rota %}">
+          {% include "web/partials/_icone.html" with nome=item.chave %}
+          <span>{{ item.rotulo }}</span>
+          {% if item.chave == "tarefa" and cronometro_ativo %}<i class="menu__dot" title="Cronômetro ativo"></i>
+          {% elif item.badge %}<b class="menu__badge {% if item.chave == 'almoxarifado' or item.chave == 'compras' %}menu__badge--warn{% endif %}">{{ item.badge }}</b>{% endif %}
+        </a>
+      {% endfor %}
+    </nav>
+    <div class="sidebar__rodape"><form method="post" action="{% url 'web:sair' %}">{% csrf_token %}<button class="btn btn--fantasma btn--sm" type="submit"><span>Sair</span></button></form></div>
+  </aside>
+  <div>
+    <header class="header">
+      <div class="header__crumb">Life Laboral / <b>{% block modulo %}Central de tarefas{% endblock %}</b></div>
+      {% block header_extra %}{% endblock %}
+      <div class="header__busca" role="button" tabindex="0" @click="$dispatch('abrir-busca')" @keydown.enter="$dispatch('abrir-busca')">
+        {% include "web/partials/_icone.html" with nome="busca" %} Buscar chamado, item, projeto… <kbd>/</kbd>
+      </div>
+      <div class="header__avatar"><div class="avatar">{{ me.nome|slice:":1" }}</div><div><b>{{ me.nome }}</b><small>{{ papel_principal }}</small></div></div>
+    </header>
+    <main class="conteudo {% block conteudo_classe %}{% endblock %}">{% block conteudo %}{% endblock %}</main>
+  </div>
+</div>
+
+<div class="overlay" x-show="buscaAberta" x-cloak @click.self="buscaAberta = false" style="display:none; align-items:start; padding-top:80px">
+  <div class="modal" role="dialog" aria-label="Busca global">
+    <div class="campo"><input x-ref="q" type="search" name="q" placeholder="Buscar chamado, projeto, item ou solicitação" autocomplete="off"
+      hx-get="{% url 'web:busca' %}" hx-trigger="keyup changed delay:250ms" hx-target="#busca-resultados"></div>
+    <div id="busca-resultados" class="busca-res"></div>
+  </div>
+</div>
+<div id="modal-erro"></div>
+{% block scripts %}{% endblock %}
+</body>
+</html>

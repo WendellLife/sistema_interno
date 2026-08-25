@@ -1,0 +1,48 @@
+{% extends "web/base.html" %}{% load ui %}
+{% block titulo %}SLA e permissões{% endblock %}{% block modulo %}SLA e permissões{% endblock %}
+{% block conteudo %}
+<div class="tela__head"><div><h1>SLA e permissões</h1><p class="tela__sub">o que muda aqui vale na hora, para todos — cada alteração fica na auditoria</p></div><div class="tela__acoes"><a class="btn btn--secundario" href="{% url 'web:historico' %}">Histórico de mudanças</a></div></div>
+<div class="grid-cards">
+  <div class="card">
+    <form hx-post="{% url 'web:config_salvar_sla' %}" hx-target="#modal-erro" x-data="{ sim: {{ simulacao.no_prazo }}, total: {{ simulacao.total }}, pct: {{ simulacao.percentual }},
+        async simular(form) { const p = new URLSearchParams(new FormData(form)); const r = await fetch('{% url 'web:config_simular_sla' %}?' + p); const d = await r.json(); this.sim = d.no_prazo; this.total = d.total; this.pct = d.percentual; } }" @input.debounce.300ms="simular($el)">
+      {% csrf_token %}
+      <div class="card__head"><h2>SLA por prioridade</h2><div class="acoes muted" style="font-size:12px">horas úteis · 08–12 / 13–17</div></div>
+      {% for valor, rotulo, exemplo, horas in sla %}
+      <div class="sla__linha"><span><i class="dot dot--{{ valor }}"></i><b>{{ rotulo }}</b><span class="sub-linha">{{ exemplo }}</span></span><input type="number" name="{{ valor }}" value="{{ horas }}" min="1" max="999" required><span class="mono muted" style="font-size:12px">{{ horas }}h</span></div>
+      {% endfor %}
+      <div class="aviso aviso--muted" style="margin-top:12px">Com estas regras, <b x-text="sim"></b> dos <b x-text="total"></b> chamados abertos estariam no prazo (<b x-text="pct + '%'"></b>).</div>
+      <div class="modal__rodape" style="margin-top:12px"><span class="nota">Aplica a todas as categorias.</span><button class="btn btn--primario">Salvar regras</button></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card__head"><h2>Matriz de permissões</h2><div class="acoes muted" style="font-size:12px">clique: ver → editar → sem acesso</div></div>
+    <div class="matriz">
+      <div class="matriz__linha matriz__linha--head"><span></span>{% for p in papeis %}<span>{{ p }}</span>{% endfor %}</div>
+      {% for chave, rotulo in modulos %}
+      <div class="matriz__linha"><span class="matriz__modulo">{{ rotulo }}</span>{% for p in papeis %}{% with cel=p|add:":"|add:chave %}<span id="cel-{{ p }}-{{ chave }}">{% include "web/config/_celula.html" with papel=p modulo=chave nivel=matriz|get_item:cel %}</span>{% endwith %}{% endfor %}</div>
+      {% endfor %}
+    </div>
+    <p class="muted" style="font-size:12px;margin:12px 0 0">Administrador tem acesso total e não aparece na matriz.</p>
+  </div>
+
+  <div class="card"><div class="card__head"><h2>Tipos de trabalho</h2></div>
+    {% for t in tipos %}<div class="cad__linha"><span><b>{{ t.nome }}</b><span class="sub-linha">{{ t.slug }}</span></span>
+      <button class="chip {% if t.exige_causa %}chip-danger{% else %}chip-neutral{% endif %}" hx-post="{% url 'web:config_flag' 'tipo' t.pk 'exige_causa' %}" hx-target="#modal-erro">{% if t.exige_causa %}exige causa{% else %}sem causa{% endif %}</button>
+      <button class="chip {% if t.contabiliza_capacidade %}chip-ok{% else %}chip-neutral{% endif %}" hx-post="{% url 'web:config_flag' 'tipo' t.pk 'contabiliza_capacidade' %}" hx-target="#modal-erro">{% if t.contabiliza_capacidade %}conta capacidade{% else %}fora da capacidade{% endif %}</button></div>{% endfor %}
+    <form class="cad__novo" hx-post="{% url 'web:config_novo' 'tipo' %}" hx-target="#modal-erro">{% csrf_token %}<input name="nome" placeholder="Novo tipo" required><button class="btn btn--sm btn--secundario">Adicionar</button></form></div>
+
+  <div class="card"><div class="card__head"><h2>Motivos de retrabalho</h2></div>
+    {% for m in motivos %}<div class="cad__linha"><span>{{ m.nome }}</span></div>{% endfor %}
+    <form class="cad__novo" hx-post="{% url 'web:config_novo' 'motivo' %}" hx-target="#modal-erro">{% csrf_token %}<input name="nome" placeholder="Novo motivo" required><button class="btn btn--sm btn--secundario">Adicionar</button></form></div>
+
+  <div class="card"><div class="card__head"><h2>Categorias de chamado</h2></div>
+    {% for c in categorias %}<div class="cad__linha"><span><b>{{ c.nome }}</b><span class="sub-linha">{{ c.slug }}</span></span><button class="chip {% if c.exige_documentacao %}chip-warn{% else %}chip-neutral{% endif %}" hx-post="{% url 'web:config_flag' 'categoria' c.pk 'exige_documentacao' %}" hx-target="#modal-erro">{% if c.exige_documentacao %}exige documentação{% else %}documentação opcional{% endif %}</button></div>{% endfor %}
+    <form class="cad__novo" hx-post="{% url 'web:config_novo' 'categoria' %}" hx-target="#modal-erro">{% csrf_token %}<input name="nome" placeholder="Nova categoria" required><button class="btn btn--sm btn--secundario">Adicionar</button></form></div>
+
+  <div class="card"><div class="card__head"><h2>Setores e centros de custo</h2></div>
+    {% for s in setores %}<div class="cad__linha"><span><b>{{ s.nome }}</b> <span class="muted">{{ s.sigla }}</span><span class="sub-linha">{% for cc in s.centros_custo.all %}<span class="mono">{{ cc.codigo }}</span> {{ cc.descricao }}{% if not forloop.last %} · {% endif %}{% empty %}sem centro de custo — solicitações deste setor serão recusadas{% endfor %}</span></span></div>{% endfor %}
+    <form class="cad__novo" hx-post="{% url 'web:config_novo' 'centro_custo' %}" hx-target="#modal-erro">{% csrf_token %}<select name="setor">{% for s in setores %}<option value="{{ s.id }}">{{ s.sigla }}</option>{% endfor %}</select><input name="codigo" placeholder="Código" required style="width:90px"><input name="nome" placeholder="Descrição" required><button class="btn btn--sm btn--secundario">Adicionar</button></form></div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+<div class="overlay" x-data @click.self="$el.remove()" @keydown.escape.window="$el.remove()">
+  <div class="modal" role="dialog" aria-labelledby="erro-titulo">
+    <div class="modal__head">{% include "web/partials/_icone.html" with nome="alerta" %}<h2 id="erro-titulo">Não foi possível concluir</h2><button class="btn btn--fantasma btn--sm modal__fechar" @click="$root.remove()" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button></div>
+    <p style="margin:0 0 6px;font-weight:600;color:var(--text-strong)">{{ erro.mensagem }}</p>
+    {% if erro.de %}<p class="muted" style="margin:0">Situação atual: <b>{{ erro.de }}</b>. Siga a ordem do fluxo: triagem → fila → execução → testes → entregue.</p>{% endif %}
+    {% if erro.erro == "justificativa_obrigatoria" %}<p class="muted" style="margin:0">Escreva o motivo no campo de comentário e tente cancelar de novo.</p>{% endif %}
+    {% if erro.erro == "sem_permissao" %}<p class="muted" style="margin:0">Peça ao responsável do setor ou ao gerente de TI.</p>{% endif %}
+    <div class="modal__rodape"><button class="btn btn--secundario" @click="$root.remove()">Entendi</button></div>
+  </div>
+</div>

@@ -1,0 +1,35 @@
+/* Life Laboral — Radii, shadows, borders, motion
+ * Cards are generously rounded and float on soft, low-contrast shadows —
+ * clinical-calm, never harsh. The medical cross & símbolo are the only
+ * decorative motifs; keep chrome quiet so they read.
+ */
+:root {
+  /* Radii — friendly, rounded (matches the wordmark's soft terminals) */
+  --radius-xs:   4px;
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-2xl:  32px;
+  --radius-pill: 999px;
+
+  /* Borders */
+  --border-width: 1px;
+  --border-hair:  1px solid var(--border-subtle);
+
+  /* Shadows — cool-tinted, soft, layered */
+  --shadow-xs:  0 1px 2px rgba(13, 75, 134, 0.06);
+  --shadow-sm:  0 2px 6px rgba(13, 75, 134, 0.07);
+  --shadow-md:  0 8px 22px rgba(13, 75, 134, 0.09);
+  --shadow-lg:  0 18px 46px rgba(13, 75, 134, 0.13);
+  --shadow-brand: 0 14px 34px rgba(67, 181, 182, 0.32);
+  --shadow-focus: 0 0 0 4px var(--focus-ring);
+
+  /* Motion — gentle, no bounce; calm & reassuring */
+  --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1); /* @kind other */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+  --dur-fast:   130ms; /* @kind other */
+  --dur-base:   210ms; /* @kind other */
+  --dur-slow:   340ms; /* @kind other */
+  --transition-base: all var(--dur-base) var(--ease-standard);
+}

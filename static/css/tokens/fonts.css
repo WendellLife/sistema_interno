@@ -1,0 +1,16 @@
+/* Life Laboral — Webfonts
+ *
+ * TRUE BRAND FONT: **Codec Pro** (Zetafonts, commercial) — found embedded as
+ * CodecPro-Regular / CodecPro-Bold in the institutional A4 receituário.
+ *
+ * No font binaries were supplied, so this system ships free equivalents.
+ * Chosen stand-in (2026-08): **Manrope** — a geometric semi-condensed sans, the
+ * closest free match to Codec Pro's engineered proportions, and tighter than
+ * Poppins (the previous stand-in) at both UI and 8.5pt print sizes.
+ *   --font-display → Manrope
+ *   --font-body    → Manrope        (single family: one voice, fewer webfont bytes)
+ *   --font-mono    → IBM Plex Mono  (HRN values, hashes, document numbers)
+ * → If you license Codec Pro, drop the .woff2 files beside this file and
+ *   replace the @import with @font-face rules pointing at them.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');

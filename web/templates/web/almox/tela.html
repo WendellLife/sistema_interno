@@ -1,0 +1,66 @@
+{% extends "web/base.html" %}{% load ui %}
+{% block titulo %}Almoxarifado{% endblock %}{% block modulo %}Almoxarifado{% endblock %}{% block conteudo_classe %}conteudo--largo{% endblock %}
+{% block header_extra %}{% if setores %}<form method="get"><select name="setor" onchange="this.form.submit()" aria-label="Setor" style="min-height:32px;padding:4px 8px;border:1px solid var(--border-default);border-radius:10px;font-size:12.5px">{% for s in setores %}<option value="{{ s.id }}" {% if s.id == setor.id %}selected{% endif %}>{{ s.nome }}</option>{% endfor %}</select></form>{% endif %}
+{% if kpis.alertas %}<span class="chip chip-warn">{% include "web/partials/_icone.html" with nome="alerta" %} {{ kpis.alertas }} alerta{{ kpis.alertas|pluralize }} de reposição</span>{% endif %}{% endblock %}
+{% block conteudo %}
+<div class="tela__head" x-data="{ modal: null }" @keydown.escape.window="modal = null">
+  <div><h1>Almoxarifado</h1><p class="tela__sub">{{ setor.nome }}{% if cc %} · centro de custo <span class="mono">{{ cc.codigo }}</span>{% endif %}</p></div>
+  <div class="tela__acoes">
+    <a class="btn btn--secundario" href="{% url 'web:almox_qr' %}{% if setores %}?setor={{ setor.id }}{% endif %}">Leitura de QR Code</a>
+    {% if pode_compras %}<button class="btn btn--secundario" hx-get="{% url 'web:almox_inventario' %}{% if setores %}?setor={{ setor.id }}{% endif %}" hx-target="#modal-erro">Inventário cíclico{% if inventario_aberto %} <i class="dot ativo" title="rodada em andamento"></i>{% endif %}</button>
+    <button class="btn btn--secundario" @click="modal = 'nota'">Entrada por nota fiscal</button>{% endif %}
+    {% if pode_escrever %}<button class="btn btn--secundario" @click="modal = 'transf'">Transferência</button>
+    <button class="btn btn--primario" @click="modal = 'solicitar'">{% include "web/partials/_icone.html" with nome="mais" %} Solicitar material</button>{% endif %}
+  </div>
+  {% if pode_escrever %}{% include "web/almox/_modal_solicitar.html" %}{% include "web/almox/_modal_transferencia.html" %}{% endif %}
+  {% if pode_compras %}{% include "web/almox/_modal_nota.html" %}{% endif %}
+</div>
+
+<div class="kpis">
+  <div class="card kpi"><div class="kpi__valor mono">{{ kpis.itens }}</div><div class="kpi__rotulo">Itens com estoque no setor</div></div>
+  <div class="card kpi {% if kpis.abaixo %}kpi--atencao{% endif %}"><div class="kpi__valor mono">{{ kpis.abaixo }}</div><div class="kpi__rotulo">Abaixo do mínimo</div></div>
+  <div class="card kpi {% if kpis.rupturas %}kpi--ruim{% endif %}"><div class="kpi__valor mono">{{ kpis.rupturas }}</div><div class="kpi__rotulo">Rupturas (saldo zero)</div></div>
+  <div class="card kpi"><div class="kpi__valor mono">{{ kpis.solicitacoes_abertas }}</div><div class="kpi__rotulo">Solicitações aguardando aprovação</div></div>
+</div>
+
+<div class="grid-cards" style="grid-template-columns:repeat(auto-fit,minmax(340px,1fr))">
+  <div class="card card--flush" style="grid-column:span 2;min-width:0">
+    <div class="card__head" style="padding:18px 22px 0"><h2>Estoque do setor</h2>{% if cc %}<span class="mono muted" style="margin-left:auto;font-size:12px">CC {{ cc.codigo }}</span>{% endif %}</div>
+    <div class="tabela-wrap"><div class="estoque" style="min-width:660px">
+      <div class="estoque__linha estoque__linha--head"><span>Código</span><span>Item</span><span>Saldo</span><span>Mínimo</span><span>Unitário</span><span>Situação</span></div>
+      {% for l in estoque %}
+      <div class="estoque__linha">
+        <span class="codigo"><a href="{% url 'web:almox_qr_codigo' l.e.item.codigo %}{% if setores %}?setor={{ setor.id }}{% endif %}">{{ l.e.item.codigo }}</a></span>
+        <span><div class="titulo-linha">{{ l.e.item.descricao }}</div><div class="sub-linha">{{ l.e.item.unidade }}{% if l.e.item.setor_dono_id != setor.id %} · dono {{ l.e.item.setor_dono.sigla }}{% endif %}</div></span>
+        <span class="mono" style="font-weight:600;color:var(--text-strong)">{{ l.e.saldo|floatformat:"-3" }}</span>
+        <span class="mono muted">{{ l.e.item.estoque_minimo|floatformat:"-3" }}</span>
+        <span class="mono muted">R$ {{ l.e.item.custo_unitario|floatformat:2 }}</span>
+        <span><i class="chip {{ l.cls }}">{{ l.rotulo }}</i></span>
+      </div>
+      {% empty %}<div class="vazio">Nenhum item com estoque neste setor. Registre uma entrada por nota fiscal ou receba uma transferência.</div>{% endfor %}
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card__head"><h2>Movimentos de hoje</h2><div class="acoes muted" style="font-size:12px">{{ hoje|date:"d/m" }}</div></div>
+    {% for m in movimentos %}
+    <div class="mov__linha"><span class="hist__hora">{{ m.criado_em|date:"H:i" }}</span><span>{{ m.get_tipo_display }} {{ m.quantidade|floatformat:"-3" }} {{ m.item.unidade }} {{ m.item.descricao }}{% if m.os_ref %} · OS {{ m.os_ref }}{% elif m.centro_custo %} · CC {{ m.centro_custo.codigo }}{% elif m.solicitacao %} · {{ m.solicitacao.numero }}{% endif %}<span class="sub-linha">{{ m.usuario.nome }}{% if m.consumo_geral %} · consumo geral{% endif %}</span></span><span class="mono {% if m.sinal > 0 %}mov--mais{% else %}mov--menos{% endif %}">{% if m.sinal > 0 %}+{% else %}−{% endif %}{{ m.quantidade|floatformat:"-3" }}</span></div>
+    {% empty %}<div class="vazio">Nenhum movimento hoje</div>{% endfor %}
+  </div>
+
+  <div class="card">
+    <div class="card__head"><h2>Solicitações do setor</h2></div>
+    {% for s in solicitacoes %}
+    <div class="sol">
+      <div class="sol__head"><span class="codigo">{{ s.numero }}</span><i class="chip {% if s.status == 'aberta' %}chip-info{% elif s.status == 'aprovada' %}chip-teal{% elif s.status == 'atendida' %}chip-ok{% else %}chip-neutral{% endif %}">{{ s.get_status_display }}</i>{% if s.urgente %}<i class="chip chip-danger">Urgente</i>{% endif %}<span class="muted" style="margin-left:auto;font-size:11.5px">{{ s.solicitante.nome }} · {{ s.criado_em|date:"d/m H:i" }}</span></div>
+      <div class="sol__itens">{% for li in s.itens.all %}<span>{{ li.quantidade|floatformat:"-3" }} {{ li.item.unidade }} {{ li.item.descricao }}{% if li.quantidade_atendida %} <span class="muted">({{ li.quantidade_atendida|floatformat:"-3" }} atendido)</span>{% endif %}</span>{% endfor %}</div>
+      {% if s.status == "negada" and s.motivo_negacao %}<div class="sub-linha">Negada: {{ s.motivo_negacao }}</div>{% endif %}
+      <div class="sol__acoes">
+        {% if s.status == "aberta" and pode_aprovar %}<button class="btn btn--sm btn--primario" hx-post="{% url 'web:almox_solicitacao_acao' s.pk 'aprovar' %}" hx-target="#modal-erro">Aprovar</button><button class="btn btn--sm btn--secundario" hx-post="{% url 'web:almox_solicitacao_acao' s.pk 'negar' %}" hx-prompt="Motivo da negativa" hx-target="#modal-erro">Negar</button>{% endif %}
+        {% if s.status == "aprovada" and pode_atender %}<button class="btn btn--sm btn--primario" hx-post="{% url 'web:almox_solicitacao_acao' s.pk 'atender' %}" hx-target="#modal-erro" hx-confirm="Dar baixa de tudo o que falta desta solicitação?">Atender</button>{% endif %}
+      </div>
+    </div>
+    {% empty %}<div class="vazio">Nenhuma solicitação recente</div>{% endfor %}
+  </div>
+</div>
+{% endblock %}

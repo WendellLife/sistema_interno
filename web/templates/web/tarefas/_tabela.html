@@ -1,0 +1,25 @@
+{% load ui %}
+<div class="card card--flush"><div class="tabela-wrap"><div class="tabela" role="table">
+  <div class="tabela__linha tabela__linha--head" role="row"><span>Chamado</span><span>Assunto</span><span>Solicitante</span><span>Prioridade</span><span>Responsável</span><span>Horas P/R</span><span>SLA</span><span>Status</span></div>
+  {% for c in pagina %}
+  <a class="tabela__linha" role="row" href="{% url 'web:tarefa' c.pk %}">
+    <span class="codigo">{{ c.numero }}</span>
+    <span><div class="titulo-linha">{{ c.titulo }}</div><div class="sub-linha">{{ c.categoria.nome }}{% if c.projeto %} · {{ c.projeto.nome }}{% endif %}</div></span>
+    <span><div>{{ c.solicitante.nome }}</div><div class="sub-linha">{{ c.setor_origem.sigla }}</div></span>
+    <span><i class="chip {{ c.prioridade|chip_prioridade }}">{{ c.get_prioridade_display }}</i></span>
+    <span>{% if c.responsavel %}{{ c.responsavel.nome }}{% else %}<span class="muted">—</span>{% endif %}</span>
+    <span class="horas-pr {% if c.minutos_realizados and c.minutos_realizados > c.horas_previstas_min %}estourou{% endif %}">{{ c.horas_previstas_min|horas_dec }} / {{ c.minutos_realizados|default:0|horas_dec }}</span>
+    <span class="sla"><i class="barra barra--fina {{ c|sla_classe }}"><i style="width:{{ c|sla_pct }}%"></i></i><span>{{ c|sla_texto }}</span></span>
+    <span><i class="chip {{ c.status|chip_status }}">{{ c.get_status_display }}</i></span>
+  </a>
+  {% empty %}
+  <div class="vazio">Nenhum chamado com esses filtros.{% if pode_abrir %} Abra um novo ou limpe os filtros.{% endif %}</div>
+  {% endfor %}
+  {% if pagina.has_other_pages %}
+  <div class="paginacao">
+    {% if pagina.has_previous %}<a href="?{% query_sem request 'pagina' %}&pagina={{ pagina.previous_page_number }}" hx-get="?{% query_sem request 'pagina' %}&pagina={{ pagina.previous_page_number }}" hx-target="#tabela">‹ Anterior</a>{% endif %}
+    <span class="muted">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+    {% if pagina.has_next %}<a href="?{% query_sem request 'pagina' %}&pagina={{ pagina.next_page_number }}" hx-get="?{% query_sem request 'pagina' %}&pagina={{ pagina.next_page_number }}" hx-target="#tabela">Próxima ›</a>{% endif %}
+  </div>
+  {% endif %}
+</div></div></div>

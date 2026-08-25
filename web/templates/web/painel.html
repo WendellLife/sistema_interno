@@ -1,0 +1,65 @@
+{% extends "web/base.html" %}{% load ui %}
+{% block titulo %}Painel de indicadores{% endblock %}{% block modulo %}Painel de indicadores{% endblock %}
+{% block header_extra %}
+<form method="get" style="display:flex;gap:8px;align-items:center">
+  {% if setores %}<select name="setor" onchange="this.form.submit()" aria-label="Setor" style="min-height:32px;padding:4px 8px;border:1px solid var(--border-default);border-radius:10px;font-size:12.5px"><option value="">Todos os setores</option>{% for s in setores %}<option value="{{ s.id }}" {% if setor and setor.id == s.id %}selected{% endif %}>{{ s.nome }}</option>{% endfor %}</select>{% endif %}
+  <input type="date" name="de" value="{{ d.periodo.de|date:'Y-m-d' }}" onchange="this.form.submit()" style="min-height:32px;padding:4px 8px;border:1px solid var(--border-default);border-radius:10px;font-size:12.5px">
+  <input type="date" name="ate" value="{{ d.periodo.ate|date:'Y-m-d' }}" onchange="this.form.submit()" style="min-height:32px;padding:4px 8px;border:1px solid var(--border-default);border-radius:10px;font-size:12.5px">
+</form>
+{% endblock %}
+{% block conteudo %}
+<div class="tela__head" x-data="{ exportar: false }">
+  <div><h1>Painel de indicadores</h1><p class="tela__sub">{{ d.periodo.de|date:"d/m" }} – {{ d.periodo.ate|date:"d/m/Y" }}{% if setor %} · {{ setor.nome }}{% else %} · todos os setores{% endif %}</p></div>
+  <div class="tela__acoes"><button class="btn btn--secundario" @click="exportar = true">Exportar</button></div>
+  {% include "web/partials/_modal_exportar.html" %}
+</div>
+
+<div class="kpis">
+  <div class="card kpi"><div class="kpi__valor mono">{{ k.horas_apontadas|floatformat:1 }}h</div><div class="kpi__rotulo">Horas apontadas no período · previsto {{ k.horas_previstas|floatformat:0 }}h</div></div>
+  <div class="card kpi {% if abaixo_meta_sla %}kpi--ruim{% endif %}"><div class="kpi__valor mono">{{ k.sla_percentual|floatformat:0 }}%</div><div class="kpi__rotulo">Cumprimento de SLA · meta {{ k.sla_meta }}%</div></div>
+  <div class="card kpi {% if acima_meta_retrabalho %}kpi--ruim{% endif %}"><div class="kpi__valor mono">{{ k.retrabalho_percentual|floatformat:0 }}%</div><div class="kpi__rotulo">Horas em retrabalho · meta ≤ {{ k.retrabalho_meta }}%</div></div>
+  <div class="card kpi"><div class="kpi__valor mono">{{ k.itens_abaixo_minimo }}</div><div class="kpi__rotulo">Itens abaixo do mínimo · {{ k.setores_com_item_abaixo }} setor{{ k.setores_com_item_abaixo|pluralize:"es" }}</div></div>
+</div>
+
+<div class="grid-cards grid-cards--2">
+  <div class="card">
+    <div class="card__head"><h2>Horas por tipo de trabalho</h2></div>
+    {% for l in d.horas_por_tipo %}
+    <div class="tipo__linha"><span class="tipo__nome">{{ l.tipo }}</span><div class="barra {% if l.tipo == 'Retrabalho' %}retrabalho{% else %}ok{% endif %}"><i style="width:{{ l.minutos|pct:maximo }}%"></i></div><span class="apont__total">{{ l.minutos|horas }}</span></div>
+    {% empty %}<div class="vazio">Nada apontado neste período</div>{% endfor %}
+    <div class="minis">
+      <div><div class="overline">Documentação</div><div class="mini__valor mono">{{ d.mini.cobertura_documentacao|floatformat:0 }}%</div><div class="muted" style="font-size:11.5px">cobertura nas entregas</div></div>
+      <div><div class="overline">Retrabalho</div><div class="mini__valor mono">{{ d.mini.retrabalho_horas|floatformat:1 }}h</div><div class="muted" style="font-size:11.5px">no período</div></div>
+      <div><div class="overline">Espera de terceiro</div><div class="mini__valor mono">{{ d.mini.espera_terceiro_horas|floatformat:1 }}h</div><div class="muted" style="font-size:11.5px">fora da capacidade</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card__head"><h2>Risco de SLA</h2><div class="acoes muted" style="font-size:12px">vencimento em menos de 8h úteis</div></div>
+    {% for c in risco %}
+    <a class="risco__linha" href="{% url 'web:tarefa' c.pk %}"><span class="codigo">{{ c.numero }}</span><span class="titulo-linha">{{ c.titulo }}</span><i class="chip {{ c.prioridade|chip_prioridade }}">{{ c.get_prioridade_display }}</i><span class="mono" style="font-size:12px;color:var(--text-muted);text-align:right">{{ c|sla_texto }}</span></a>
+    {% empty %}<div class="vazio">Nenhum chamado em risco</div>{% endfor %}
+  </div>
+</div>
+
+<div class="grid-cards grid-cards--3">
+  <div class="card">
+    <div class="card__head"><h2>Retrabalho por motivo</h2></div>
+    {% for m in d.retrabalho_por_motivo %}
+    <div class="tipo__linha tipo__linha--motivo"><span class="tipo__nome" title="{{ m.motivo }}">{{ m.motivo|default:"Sem motivo" }}</span><div class="barra retrabalho"><i style="width:{{ m.minutos|pct:max_motivo }}%"></i></div><span class="apont__total">{{ m.minutos|horas }}</span></div>
+    {% empty %}<div class="vazio">Nada apontado neste período</div>{% endfor %}
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Consumo por setor</h2><div class="acoes muted" style="font-size:12px">top 5</div></div>
+    {% for s in d.consumo_por_setor %}
+    <div class="tipo__linha tipo__linha--motivo"><span class="tipo__nome">{{ s.setor }}</span><div class="barra ok"><i style="width:{{ s.valor|pct:max_consumo }}%"></i></div><span class="apont__total">R$ {{ s.valor|floatformat:0 }}</span></div>
+    {% empty %}<div class="vazio">Nada consumido neste período</div>{% endfor %}
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Documentação pendente</h2><div class="acoes muted" style="font-size:12px">entregáveis travados</div></div>
+    {% for p in d.documentacao_pendente %}
+    <a class="risco__linha risco__linha--doc" href="{% url 'web:tarefa' p.id %}"><span class="codigo">{{ p.numero }}</span><span><div class="titulo-linha">{{ p.titulo }}</div><div class="sub-linha">{{ p.setor }} · {{ p.responsavel|default:"sem responsável" }} · falta {{ p.faltando|join:", " }}</div></span></a>
+    {% empty %}<div class="vazio">Nenhuma entrega travada</div>{% endfor %}
+  </div>
+</div>
+{% endblock %}

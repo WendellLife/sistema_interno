@@ -1,0 +1,43 @@
+# Blueprint do Render: web + Postgres (+ worker e Redis opcionais). Use "New → Blueprint" apontando para o repo.
+databases:
+  - name: sistema-interno-db
+    plan: free
+    databaseName: sistema_interno
+    user: sistema
+
+services:
+  - type: web
+    name: sistema-interno
+    runtime: python
+    plan: free
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application
+    healthCheckPath: /health/
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://*.onrender.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sistema-interno-db
+          property: connectionString
+      # Sem Redis: cache em memória e tarefas rodam na hora (ver settings). Para Celery real,
+      # crie um "Key Value" no Render, aponte REDIS_URL para ele e descomente o worker abaixo.
+      - key: REDIS_URL
+        value: ""
+
+  # - type: worker
+  #   name: sistema-interno-worker
+  #   runtime: python
+  #   buildCommand: pip install -r requirements.txt
+  #   startCommand: celery -A config worker -B -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+  #   envVars: (mesmas do web)

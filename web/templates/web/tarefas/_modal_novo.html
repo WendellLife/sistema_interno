@@ -1,0 +1,28 @@
+<div class="overlay" x-show="novo" x-cloak @click.self="novo = false" @keydown.escape.window="novo = false" style="display:none">
+  <form class="modal modal--largo" role="dialog" aria-labelledby="novo-titulo" hx-post="{% url 'web:abrir_chamado' %}" hx-encoding="multipart/form-data" hx-target="#novo-erros" x-data="{ cat: '', prio: 'media', exige: {{ categorias|length }} }">
+    {% csrf_token %}
+    <div class="modal__head"><h2 id="novo-titulo">Novo chamado</h2><button type="button" class="btn btn--fantasma btn--sm modal__fechar" @click="novo = false" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button></div>
+    <div id="novo-erros"></div>
+    <div class="form-grid">
+      <div class="campo campo--full"><label for="n-titulo">Título</label><input id="n-titulo" name="titulo" maxlength="180" required placeholder="O que precisa ser feito, em uma linha"></div>
+      <div class="campo campo--full"><label for="n-desc">Descrição</label><textarea id="n-desc" name="descricao" required placeholder="Contexto, o que acontece hoje e o resultado esperado"></textarea></div>
+      <div class="campo"><label for="n-cat">Categoria</label>
+        <select id="n-cat" name="categoria" required x-model="cat">
+          <option value="">Escolha…</option>
+          {% for c in categorias %}<option value="{{ c.id }}" data-exige="{{ c.exige_documentacao|yesno:'1,0' }}">{{ c.nome }}</option>{% endfor %}
+        </select>
+        <span class="ajuda" x-show="cat && $el.closest('form').querySelector('#n-cat option:checked')?.dataset.exige === '1'" style="color:var(--ll-warning-fg)">Esta categoria exige documentação para entrega.</span>
+      </div>
+      <div class="campo"><label>Setor de origem</label><input value="{{ me.setor.nome }}" disabled></div>
+      <div class="campo campo--full"><label>Prioridade</label>
+        <div class="prio-grid">
+          {% for valor, rotulo in prioridades %}
+          <label><input type="radio" name="prioridade" value="{{ valor }}" {% if valor == "media" %}checked{% endif %} x-model="prio"><b>{{ rotulo }}</b><small>resposta em {% if valor == "critica" %}{{ sla_exemplos.critica }}{% elif valor == "alta" %}{{ sla_exemplos.alta }}{% elif valor == "media" %}{{ sla_exemplos.media }}{% else %}{{ sla_exemplos.baixa }}{% endif %}h úteis</small></label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="campo campo--full"><label for="n-anexos">Anexos</label><input id="n-anexos" type="file" name="anexos" multiple><span class="ajuda">Até 20 MB por arquivo.</span></div>
+    </div>
+    <div class="modal__rodape"><span class="nota">O SLA será calculado em horas úteis a partir da abertura.</span><button type="button" class="btn btn--secundario" @click="novo = false">Cancelar</button><button type="submit" class="btn btn--primario">Abrir chamado</button></div>
+  </form>
+</div>

@@ -1,0 +1,12 @@
+<div class="overlay" x-data @click.self="$el.remove()" @keydown.escape.window="$el.remove()">
+  <div class="modal" role="dialog" aria-labelledby="bloq-titulo">
+    <div class="modal__head">{% include "web/partials/_icone.html" with nome="doc" %}<h2 id="bloq-titulo">Entrega bloqueada: falta documentação</h2><button class="btn btn--fantasma btn--sm modal__fechar" @click="$root.remove()" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button></div>
+    <p style="margin:0">A categoria <b>{{ c.categoria.nome }}</b> exige as seções abaixo publicadas antes de entregar. Rascunho não conta — publique cada uma.</p>
+    <div class="bloqueio-lista">
+      {% for d, st in documentos %}{% if d.get_secao_display in faltando %}
+      <a href="#" hx-get="{% url 'web:editor_documento' c.pk d.secao %}" hx-target="#modal-erro">{% include "web/partials/_icone.html" with nome="doc" %}{{ d.get_secao_display }}<i class="chip {% if st == 'rascunho' %}chip-warn{% else %}chip-neutral{% endif %}" style="margin-left:auto">{% if st == "rascunho" %}Rascunho — publicar{% else %}Falta{% endif %}</i></a>
+      {% endif %}{% endfor %}
+    </div>
+    <div class="modal__rodape"><button class="btn btn--secundario" @click="$root.remove()">Fechar</button></div>
+  </div>
+</div>

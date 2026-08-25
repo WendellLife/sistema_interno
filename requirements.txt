@@ -1,0 +1,23 @@
+# Espelho das dependências do pyproject.toml para plataformas que só leem requirements.txt (Render, Heroku).
+django==5.1.*
+djangorestframework==3.15.*
+djangorestframework-simplejwt==5.3.*
+django-filter==24.*
+psycopg[binary]==3.2.*
+celery[redis]==5.4.*
+django-celery-beat==2.7.*
+django-storages[s3]==1.14.*
+python-decouple==3.8
+structlog==24.*
+sentry-sdk==2.*
+django-prometheus==2.3.*
+openpyxl==3.1.*
+weasyprint==62.*
+workalendar==17.*
+requests==2.*
+django-cors-headers==4.*
+drf-spectacular==0.27.*
+gunicorn==23.*
+uvicorn[standard]==0.30.*
+whitenoise==6.*
+qrcode[pil]==8.*

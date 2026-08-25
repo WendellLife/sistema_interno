@@ -1,0 +1,24 @@
+{% extends "web/base.html" %}{% load ui %}
+{% block titulo %}Projetos encerrados{% endblock %}{% block modulo %}Projetos de TI / histórico{% endblock %}
+{% block conteudo %}
+<div class="tela__head" x-data="{ exportar: false }">
+  <div><h1>Projetos concluídos e cancelados</h1><p class="tela__sub">{% if ano == "todos" %}todos os anos{% else %}{{ ano }}{% endif %}</p></div>
+  <div class="tela__acoes"><a class="btn btn--secundario" href="{% url 'web:projetos' %}">Voltar ao kanban</a><a class="btn btn--secundario" href="/api/v1/projetos/?historico=true" target="_blank">Exportar</a></div>
+</div>
+<div class="kpis">
+  <div class="card kpi"><div class="kpi__valor mono">{{ kpis.concluidos }}</div><div class="kpi__rotulo">Concluídos{% if ano != "todos" %} em {{ ano }}{% endif %}</div></div>
+  <div class="card kpi {% if kpis.desvio_medio > 0 %}kpi--ruim{% endif %}"><div class="kpi__valor mono">{% if kpis.desvio_medio > 0 %}+{% endif %}{{ kpis.desvio_medio }}%</div><div class="kpi__rotulo">Desvio médio de horas</div></div>
+  <div class="card kpi"><div class="kpi__valor mono">{{ kpis.cancelados }}</div><div class="kpi__rotulo">Cancelados</div></div>
+</div>
+<form class="filtros" method="get">
+  <select name="ano" onchange="this.form.submit()"><option value="todos" {% if ano == "todos" %}selected{% endif %}>Todos os anos</option>{% for a in anos %}<option value="{{ a }}" {% if ano == a|stringformat:"s" %}selected{% endif %}>{{ a }}</option>{% endfor %}</select>
+  {% if setores %}<select name="setor" onchange="this.form.submit()"><option value="">Todos os setores</option>{% for s in setores %}<option value="{{ s.id }}" {% if request.GET.setor == s.id|stringformat:"s" %}selected{% endif %}>{{ s.nome }}</option>{% endfor %}</select>{% endif %}
+  <select name="situacao" onchange="this.form.submit()"><option value="">Concluídos e cancelados</option><option value="concluido" {% if request.GET.situacao == "concluido" %}selected{% endif %}>Só concluídos</option><option value="cancelado" {% if request.GET.situacao == "cancelado" %}selected{% endif %}>Só cancelados</option></select>
+</form>
+<div class="card card--flush"><div class="tabela-wrap"><div style="min-width:1040px">
+  <div class="hist-proj hist-proj--head"><span>Projeto</span><span>Setor</span><span>Encerrado em</span><span>Horas P/R</span><span>Desvio</span><span>Situação final</span></div>
+  {% for l in linhas %}
+  <div class="hist-proj"><span><div class="titulo-linha">{{ l.p.nome }}</div><div class="sub-linha">{{ l.p.get_fase_display }}</div></span><span>{{ l.p.setor_solicitante.sigla }}</span><span class="mono">{{ l.p.encerrado_em|date:"d/m/Y" }}</span><span class="mono">{{ l.p.horas_estimadas }} / {{ l.realizadas|floatformat:1 }}</span><span class="mono" style="font-weight:600;color:{% if l.desvio is None %}var(--text-muted){% elif l.desvio > 0 %}var(--ll-danger){% else %}var(--ll-success){% endif %}">{% if l.desvio is None %}—{% else %}{% if l.desvio > 0 %}+{% endif %}{{ l.desvio|floatformat:0 }}%{% endif %}</span><span>{{ l.p.situacao_final|default:"—" }}</span></div>
+  {% empty %}<div class="vazio">Nenhum projeto encerrado com esses filtros.</div>{% endfor %}
+</div></div></div>
+{% endblock %}

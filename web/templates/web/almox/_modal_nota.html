@@ -1,0 +1,32 @@
+<div class="overlay" x-show="modal === 'nota'" x-cloak @click.self="modal = null" style="display:none">
+  <form class="modal modal--largo" role="dialog" aria-labelledby="nf-titulo" hx-post="{% url 'web:almox_nota' %}{% if setores %}?setor={{ setor.id }}{% endif %}" hx-encoding="multipart/form-data" hx-target="#modal-erro"
+        x-data="{ linhas: [{id:'', codigo:'', desc:'', pedida:'', recebida:'', custo:'', div:''}], q:'', alvo:0, valor:'',
+                  escolher(id, codigo, desc, un, saldo, minimo, custo) { this.linhas[this.alvo] = {...this.linhas[this.alvo], id, codigo, desc, custo}; this.q=''; document.getElementById('nf-res').innerHTML=''; },
+                  total() { return this.linhas.reduce((s,l) => s + (parseFloat(l.recebida)||0)*(parseFloat(l.custo)||0), 0); } }">
+    {% csrf_token %}
+    <div class="modal__head"><h2 id="nf-titulo">Entrada por nota fiscal</h2><button type="button" class="btn btn--fantasma btn--sm modal__fechar" @click="modal = null" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button></div>
+    <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="campo"><label>Número</label><input name="numero" required></div>
+      <div class="campo"><label>Série</label><input name="serie"></div>
+      <div class="campo"><label>Emissão</label><input type="date" name="emissao" required value="{{ hoje|date:'Y-m-d' }}"></div>
+      <div class="campo"><label>Fornecedor</label><input name="fornecedor" required></div>
+      <div class="campo"><label>CNPJ</label><input name="cnpj" placeholder="00.000.000/0001-00"></div>
+      <div class="campo"><label>Valor total (NF)</label><input type="number" step="0.01" name="valor_total" required x-model="valor"></div>
+    </div>
+    <div class="campo" style="margin:14px 0 8px"><label>Adicionar item</label><input placeholder="Código ou descrição" x-model="q" name="q" hx-get="{% url 'web:almox_itens_busca' %}{% if setores %}?setor={{ setor.id }}{% endif %}" hx-trigger="keyup changed delay:200ms" hx-target="#nf-res" autocomplete="off"><div id="nf-res" class="item-res"></div></div>
+    <div class="nf__head"><span>Item</span><span>Pedido</span><span>Recebido</span><span>Custo unit.</span><span>Divergência</span><span></span></div>
+    <template x-for="(l, i) in linhas" :key="i">
+      <div class="nf__linha" :class="{ ativa: alvo === i }" @click="alvo = i">
+        <span><input type="hidden" name="item" :value="l.id"><span class="codigo" x-text="l.codigo || '—'"></span> <span x-text="l.desc || 'busque acima'"></span></span>
+        <input type="number" step="0.001" name="pedida" x-model="l.pedida" placeholder="0">
+        <input type="number" step="0.001" name="recebida" x-model="l.recebida" placeholder="0" :style="l.pedida && l.recebida && parseFloat(l.pedida) !== parseFloat(l.recebida) ? 'border-color:var(--ll-warning)' : ''">
+        <input type="number" step="0.01" name="custo" x-model="l.custo" placeholder="0,00">
+        <input name="divergencia" x-model="l.div" placeholder="se pedido ≠ recebido">
+        <button type="button" class="btn btn--sm btn--fantasma" @click.stop="linhas.splice(i,1); if(!linhas.length) linhas.push({id:'',codigo:'',desc:'',pedida:'',recebida:'',custo:'',div:''})" aria-label="Remover">{% include "web/partials/_icone.html" with nome="fechar" %}</button>
+      </div>
+    </template>
+    <button type="button" class="btn btn--sm btn--secundario" style="margin-top:8px" @click="linhas.push({id:'',codigo:'',desc:'',pedida:'',recebida:'',custo:'',div:''}); alvo = linhas.length-1">+ Outro item</button>
+    <div class="campo" style="margin-top:12px"><label>PDF da nota</label><input type="file" name="arquivo" accept="application/pdf"></div>
+    <div class="modal__rodape"><span class="nota">Total conferido: <b class="mono" x-text="'R$ ' + total().toFixed(2)"></b><span x-show="valor && Math.abs(total() - parseFloat(valor)) > 0.005" x-cloak style="color:var(--ll-warning-fg)"> · difere do valor da NF</span></span><button type="button" class="btn btn--secundario" @click="modal = null">Cancelar</button><button class="btn btn--primario">Confirmar entrada</button></div>
+  </form>
+</div>

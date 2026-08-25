@@ -1,0 +1,6 @@
+{% regroup resultados by tipo as grupos %}
+{% if q and not resultados %}<div class="vazio">Nada encontrado para “{{ q }}”.</div>{% endif %}
+{% for g in grupos %}
+  <div class="overline busca-res__tipo">{% if g.grouper == "chamado" %}Chamados{% elif g.grouper == "projeto" %}Projetos{% elif g.grouper == "item" %}Itens{% else %}Solicitações{% endif %}</div>
+  {% for r in g.list %}<a href="{{ r.url }}"><span>{{ r.titulo }}</span><small>{{ r.subtitulo }}</small></a>{% endfor %}
+{% endfor %}

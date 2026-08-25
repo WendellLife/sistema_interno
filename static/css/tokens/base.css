@@ -1,0 +1,43 @@
+/* Life Laboral — Base element defaults & a few utility helpers.
+ * Light-touch: sets the brand type stack and page colors without being a
+ * heavy reset. Safe to ship to consumers.
+ */
+:root {
+  color-scheme: light;
+}
+
+body.ll-body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text-body);
+  background: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings default to the display face */
+.ll-body h1, .ll-body h2, .ll-body h3, .ll-body h4 {
+  font-family: var(--font-display);
+  color: var(--text-strong);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+}
+
+.ll-body a { color: var(--text-link); text-decoration: none; }
+.ll-body a:hover { text-decoration: underline; }
+
+/* The brand's signature spaced-uppercase eyebrow */
+.ll-eyebrow {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+/* Text-selection in brand teal */
+::selection { background: var(--ll-teal-100); color: var(--ll-ink); }

@@ -1,0 +1,3 @@
+{% for k in comentarios %}
+<div class="coment {% if k.interno %}coment--interno{% endif %}"><div class="coment__meta"><b>{{ k.autor.nome }}</b><span class="mono">{{ k.criado_em|date:"d/m H:i" }}</span>{% if k.interno %}<i class="chip chip-warn">Interno</i>{% endif %}</div>{{ k.texto|linebreaksbr }}</div>
+{% empty %}<div class="muted" style="font-size:12.5px">Nenhum comentário ainda.</div>{% endfor %}
