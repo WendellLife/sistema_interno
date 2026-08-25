@@ -1,42 +1,51 @@
 services:
   db:
-    image: postgres:16
+    image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: sistema_interno
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports: ["5432:5432"]
-    volumes: ["pgdata:/var/lib/postgresql/data"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sistema_interno"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
   redis:
     image: redis:7-alpine
-    ports: ["6379:6379"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
   web:
     build: .
-    command: sh -c "uv run python manage.py migrate && uv run python manage.py runserver 0.0.0.0:8000"
-    volumes: [".:/app"]
-    ports: ["8000:8000"]
-    env_file: .env
+    restart: unless-stopped
+    command: >
+      sh -c "uv run python manage.py collectstatic --noinput &&
+             uv run python manage.py migrate --noinput &&
+             uv run python manage.py seed_demo &&
+             uv run python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
     environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      SECRET_KEY: desenvolvimento-local-troque-antes-de-publicar-123456789
+      DEBUG: "False"
       DATABASE_URL: postgres://postgres:postgres@db:5432/sistema_interno
       REDIS_URL: redis://redis:6379/0
-    depends_on: [db, redis]
-  worker:
-    build: .
-    command: uv run celery -A config worker -l info
-    volumes: [".:/app"]
-    env_file: .env
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/sistema_interno
-      REDIS_URL: redis://redis:6379/0
-    depends_on: [db, redis]
-  beat:
-    build: .
-    command: uv run celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    volumes: [".:/app"]
-    env_file: .env
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/sistema_interno
-      REDIS_URL: redis://redis:6379/0
-    depends_on: [db, redis]
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      CSRF_TRUSTED_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   pgdata:
