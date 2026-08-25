@@ -20,6 +20,9 @@ dependencies = [
   "weasyprint==62.*",
   "workalendar==17.*",
   "qrcode[pil]==8.*",
+  "gunicorn==23.*",
+  "uvicorn[standard]==0.30.*",
+  "whitenoise==6.*",
 ]
 
 [dependency-groups]
