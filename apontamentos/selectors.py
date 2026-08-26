@@ -28,27 +28,51 @@ def validos(de=None, ate=None, setor=None, usuario=None):
 
 
 def horas_por_tipo(qs):
-    return list(
-        qs.values(tipo_id=F("tipo__id"), tipo=F("tipo__nome"), ordem=F("tipo__ordem"))
+    # `tipo` e `tipo_id` são campos do próprio Apontamento: usar os dois como apelido de
+    # anotação faz o Django recusar a consulta. Agrega pelo caminho e renomeia depois.
+    linhas = (
+        qs.values("tipo_id", "tipo__nome", "tipo__ordem")
         .annotate(minutos=Sum("minutos"), apontamentos=Count("id"))
-        .order_by("ordem")
+        .order_by("tipo__ordem")
     )
+    return [
+        {
+            "tipo_id": linha["tipo_id"],
+            "tipo": linha["tipo__nome"],
+            "ordem": linha["tipo__ordem"],
+            "minutos": linha["minutos"],
+            "apontamentos": linha["apontamentos"],
+        }
+        for linha in linhas
+    ]
 
 
 def horas_por_pessoa(qs):
-    return list(
-        qs.values(usuario_id=F("usuario__id"), nome=F("usuario__first_name"),
-                  sobrenome=F("usuario__last_name"), setor=F("usuario__setor__sigla"))
-        .annotate(minutos=Sum("minutos"),
+    # O apelido da soma NÃO pode ser "minutos": ele passaria a sombrear a coluna, e o
+    # segundo Sum("minutos") somaria a própria soma em vez do campo.
+    linhas = (
+        qs.values("usuario_id", "usuario__first_name", "usuario__last_name", "usuario__setor__sigla")
+        .annotate(total_min=Sum("minutos"),
                   retrabalho_min=Sum("minutos", filter=Q(tipo__exige_causa=True)))
-        .order_by("-minutos")
+        .order_by("-total_min")
     )  # fmt: skip
+    return [
+        {
+            "usuario_id": linha["usuario_id"],
+            "nome": linha["usuario__first_name"],
+            "sobrenome": linha["usuario__last_name"],
+            "setor": linha["usuario__setor__sigla"],
+            "minutos": linha["total_min"],
+            "retrabalho_min": linha["retrabalho_min"] or 0,
+        }
+        for linha in linhas
+    ]
 
 
 def horas_por_chamado(qs):
     return list(
         qs.filter(chamado__isnull=False)
-        .values(chamado_id=F("chamado__id"), numero=F("chamado__numero"), titulo=F("chamado__titulo"),
+        .values("chamado_id", numero=F("chamado__numero"), titulo=F("chamado__titulo"),
                 previstas_min=F("chamado__horas_previstas_min"))
         .annotate(minutos=Sum("minutos"))
         .order_by("-minutos")

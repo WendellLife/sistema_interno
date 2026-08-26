@@ -48,13 +48,24 @@ def consumo(de=None, ate=None, setor=None, sem_os: bool | None = None):
 
 
 def consumo_por_setor(qs):
-    return list(
-        qs.values(setor_id=F("setor__id"), setor=F("setor__sigla"))
+    # `setor` e `setor_id` são campos do próprio Movimento: usá-los como apelido de anotação
+    # faz o Django recusar a consulta. Agrega pelo caminho e renomeia depois.
+    linhas = (
+        qs.values("setor_id", "setor__sigla")
         .annotate(valor=Sum(F("quantidade") * F("item__custo_unitario"),
                             output_field=DecimalField(max_digits=16, decimal_places=2)),
                   movimentos=Count("id"))  # fmt: skip
         .order_by("-valor")
     )
+    return [
+        {
+            "setor_id": linha["setor_id"],
+            "setor": linha["setor__sigla"],
+            "valor": linha["valor"],
+            "movimentos": linha["movimentos"],
+        }
+        for linha in linhas
+    ]
 
 
 def reconciliar() -> list[dict]:

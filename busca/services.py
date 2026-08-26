@@ -7,8 +7,6 @@ from django.db.models import F, Q, Value
 from django.db.models.functions import Greatest
 
 from almoxarifado.models import Item, Solicitacao
-from almoxarifado.permissions import COMPRAS_OU_ADMIN, tem_papel
-from almoxarifado.models import Item, Solicitacao
 from chamados.models import Chamado
 from core import papeis
 from core.permissions import papeis_de, ve_todos_setores
@@ -45,9 +43,12 @@ def _rankear(qs, q: str, campo_titulo: str, campo_texto: str, campo_codigo: str 
     if campo_codigo:
         similaridade = Greatest(similaridade, TrigramSimilarity(campo_codigo, q))
     return (
-        qs.annotate(rank=SearchRank(vetor, consulta), sim=similaridade)
+        qs.annotate(vetor=vetor, rank=SearchRank(vetor, consulta), sim=similaridade)
         .annotate(pontos=Greatest(F("rank"), F("sim"), Value(0.0)))
-        .filter(Q(rank__gt=0) | Q(sim__gte=SIMILARIDADE_MIN))
+        # `ts_rank` devolve 1e-20 — não zero — para documento que NÃO casa. Filtrar por
+        # `rank > 0` deixava passar a base inteira em qualquer busca. Quem decide o
+        # casamento é o operador `@@`; o rank só serve para ordenar.
+        .filter(Q(vetor=consulta) | Q(sim__gte=SIMILARIDADE_MIN))
         .order_by("-pontos")[:LIMITE_POR_TIPO]
     )
 
@@ -75,9 +76,10 @@ def buscar(*, user, q: str) -> list[dict]:
             "subtitulo": f"{i.unidade} · {i.setor_dono.sigla}", "url": f"/almoxarifado/itens/{i.id}",
         })  # fmt: skip
     sols = Solicitacao.objects.select_related("setor")
-    if not tem_papel(user, COMPRAS_OU_ADMIN):
+    if not ve_todos_setores(user):  # Gerente de TI, Compras e Admin leem todos os setores
         sols = sols.filter(setor=user.setor)
-    for s in _rankear(sols, q, "numero", "observacao", "os_ref"):
+    # Solicitacao não tem campo de observação: o texto pesquisável é a referência de OS.
+    for s in _rankear(sols, q, "numero", "os_ref"):
         resultados.append({
             "tipo": "solicitacao", "id": s.id, "titulo": s.numero,
             "subtitulo": f"{s.setor.sigla} · {s.get_status_display()}", "url": f"/almoxarifado/solicitacoes/{s.id}",

@@ -201,7 +201,9 @@ def atender_solicitacao(
     linhas = list(sol.itens.select_related("item").select_for_update())
     atendeu_algo = False
     for linha in linhas:
-        qtd = Decimal(quantidades.get(linha.item_id, linha.pendente)) if quantidades else linha.pendente
+        if quantidades is not None and linha.item_id not in quantidades:
+            continue  # atendimento parcial: item fora do mapa NÃO sai do estoque
+        qtd = Decimal(quantidades[linha.item_id]) if quantidades is not None else linha.pendente
         if qtd <= 0:
             continue
         if qtd > linha.pendente:
