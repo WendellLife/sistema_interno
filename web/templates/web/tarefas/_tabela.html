@@ -13,7 +13,11 @@
     <span><i class="chip {{ c.status|chip_status }}">{{ c.get_status_display }}</i></span>
   </a>
   {% empty %}
-  <div class="vazio">Nenhum chamado com esses filtros.{% if pode_abrir %} Abra um novo ou limpe os filtros.{% endif %}</div>
+  {# 05 §2: sem resultado, o caminho de saída é um BOTÃO, não uma instrução escrita. #}
+  <div class="vazio">
+    <p style="margin:0 0 12px">Nenhum chamado com esses filtros.</p>
+    <a class="btn btn--secundario" href="{% url 'web:tarefas' %}" hx-get="{% url 'web:tarefas' %}" hx-target="#tabela" hx-indicator="#tabela" hx-push-url="true">Limpar filtros</a>
+  </div>
   {% endfor %}
   {% if pagina.has_other_pages %}
   <div class="paginacao">

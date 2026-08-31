@@ -343,3 +343,18 @@ def test_historico_de_mudancas(web, chamado):
     html = r.content.decode()
     assert r.status_code == 200 and "chamado.abrir" in html and "chamado.atribuir" in html
     assert web("colab_prd").get("/historico/").status_code == 404
+
+def test_sem_dependencia_de_cdn_externo(web):
+    """A interface inteira depende de HTMX e Alpine: se vierem de CDN, uma rede que
+    bloqueie o domínio deixa tudo inerte sem nenhum erro visível ao usuário."""
+    html = web("colab_prd").get("/tarefas/").content.decode()
+    assert "unpkg.com" not in html and "cdn.jsdelivr" not in html and "cdnjs" not in html
+    assert "/static/js/vendor/htmx-" in html
+    assert "/static/js/vendor/alpine-" in html
+
+
+def test_troca_de_filtro_tem_estado_de_carregamento(web):
+    """05 §2: nenhuma troca de partial acontece em silêncio."""
+    html = web("colab_prd").get("/tarefas/").content.decode()
+    assert 'hx-indicator="#tabela"' in html
+    assert 'id="tabela" class="recarregavel"' in html

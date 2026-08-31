@@ -4,7 +4,7 @@
                   escolher(id, codigo, desc, un, saldo) { this.linhas[this.alvo] = {...this.linhas[this.alvo], id, codigo, desc, un, saldo: parseFloat(saldo)}; this.q=''; document.getElementById('sol-res').innerHTML=''; } }">
     {% csrf_token %}
     <div class="modal__head"><h2 id="sol-titulo">Solicitar material</h2><button type="button" class="btn btn--fantasma btn--sm modal__fechar" @click="modal = null" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button></div>
-    <div class="campo" style="margin-bottom:10px"><label>Buscar item</label><input placeholder="Código, descrição ou código Sankhya" x-model="q" hx-get="{% url 'web:almox_itens_busca' %}{% if setores %}?setor={{ setor.id }}{% endif %}" hx-trigger="keyup changed delay:200ms" hx-target="#sol-res" name="q" autocomplete="off"><div id="sol-res" class="item-res"></div></div>
+    <div class="campo" style="margin-bottom:10px"><label>Buscar item</label><input placeholder="Código, descrição ou código Sankhya" x-model="q" hx-get="{% url 'web:almox_itens_busca' %}{% if setores %}?setor={{ setor.id }}{% endif %}" hx-trigger="keyup changed delay:200ms" hx-target="#sol-res" hx-indicator="#sol-res-carregando" name="q" autocomplete="off"><div id="sol-res-carregando" class="htmx-indicator skeleton skeleton--lista" aria-hidden="true"><div class="skeleton__linha"></div><div class="skeleton__linha skeleton__linha--curta"></div></div><div id="sol-res" class="item-res"></div></div>
     <div class="linhas">
       <template x-for="(l, i) in linhas" :key="i">
         <div class="linha-item" :class="{ ativa: alvo === i }" @click="alvo = i">
