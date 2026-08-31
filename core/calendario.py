@@ -9,6 +9,10 @@ from datetime import date, datetime, time, timedelta
 from functools import lru_cache
 from zoneinfo import ZoneInfo
 
+from django.conf import settings
+from django.core.cache import cache
+from django.utils import timezone
+
 FUSO = ZoneInfo("America/Sao_Paulo")
 JORNADA: tuple[tuple[time, time], ...] = ((time(8, 0), time(12, 0)), (time(13, 0), time(17, 0)))
 MINUTOS_POR_DIA_UTIL = 480
@@ -24,11 +28,29 @@ def feriados_nacionais(ano: int) -> frozenset[date]:
 
 
 def feriados_do_sistema(ano: int) -> frozenset[date]:
-    """Nacionais (workalendar) + tabela editável `core.Feriado`."""
+    """Nacionais (workalendar) + tabela editável `core.Feriado`.
+
+    Em cache porque isto é chamado uma vez por LINHA de listagem: os três filtros de SLA
+    da Central de tarefas recalculam o tempo restante por chamado, e sem cache uma página
+    de 50 linhas fazia 150 consultas só nesta tabela. Invalidado ao salvar/apagar
+    `core.Feriado` (`core.signals`), então editar o calendário vale na hora.
+    """
     from .models import Feriado
 
-    municipais = Feriado.objects.filter(data__year=ano).values_list("data", flat=True)
-    return feriados_nacionais(ano) | frozenset(municipais)
+    chave = f"feriados:{ano}"
+    valor = cache.get(chave)
+    if valor is None:
+        municipais = Feriado.objects.filter(data__year=ano).values_list("data", flat=True)
+        valor = feriados_nacionais(ano) | frozenset(municipais)
+        cache.set(chave, valor, settings.FERIADOS_CACHE_SEGUNDOS)
+    return valor
+
+
+def invalidar_feriados(ano: int | None = None) -> None:
+    """Sem ano, limpa a janela que o sistema usa (ano anterior ao seguinte)."""
+    atual = timezone.localdate().year
+    anos = [ano] if ano else [atual - 1, atual, atual + 1]
+    cache.delete_many([f"feriados:{a}" for a in anos])
 
 
 def dia_util(dia: date, feriados: frozenset[date] | set[date] = frozenset()) -> bool:

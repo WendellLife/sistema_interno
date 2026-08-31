@@ -358,3 +358,38 @@ def test_troca_de_filtro_tem_estado_de_carregamento(web):
     html = web("colab_prd").get("/tarefas/").content.decode()
     assert 'hx-indicator="#tabela"' in html
     assert 'id="tabela" class="recarregavel"' in html
+
+def test_coluna_documento_na_central(web, usuarios, categorias, django_assert_max_num_queries):
+    """05 §2: a 8ª coluna é o chip de Documento — OK, Pendente (âmbar) ou N/A."""
+    from documentacao import services as doc
+
+    # categoria que NÃO exige documentação → N/A
+    suporte = cham.abrir_chamado(solicitante=usuarios["colab_prd"], titulo="Sem exigência",
+                                 descricao="d", categoria=categorias["suporte"], prioridade="baixa")  # fmt: skip
+    # categoria que exige, sem publicar nada → Pendente
+    pendente = cham.abrir_chamado(solicitante=usuarios["colab_prd"], titulo="Falta doc",
+                                  descricao="d", categoria=categorias["dev"], prioridade="alta")  # fmt: skip
+    # categoria que exige, com as 4 seções publicadas → OK
+    completo = cham.abrir_chamado(solicitante=usuarios["colab_prd"], titulo="Doc completa",
+                                  descricao="d", categoria=categorias["dev"], prioridade="alta")  # fmt: skip
+    for secao in ["contexto", "regra", "solucao", "teste"]:
+        doc.publicar_secao(chamado=completo, secao=secao, conteudo="texto da seção",
+                           autor=usuarios["colab_prd"])  # fmt: skip
+
+    cliente = web("ger_ti")
+    cliente.get("/tarefas/")  # aquece sessão e caches de papéis/feriados
+    # A coluna custa UMA consulta para a página toda; e o SLA não pode voltar a buscar
+    # feriados por linha (eram 3 consultas por chamado antes do cache do calendário).
+    with django_assert_max_num_queries(24):
+        html = cliente.get("/tarefas/").content.decode()
+
+    assert "<span>Documento</span>" in html and "<span>Status</span>" not in html
+    def celula_documento(numero: str) -> str:
+        """Último <span> da linha do chamado — a coluna Documento."""
+        linha = html.split(numero, 1)[1].split("</a>", 1)[0]
+        return linha.rsplit("<span>", 1)[-1]
+
+    linhas = {n: celula_documento(n) for n in (suporte.numero, pendente.numero, completo.numero)}
+    assert ">N/A<" in linhas[suporte.numero]
+    assert ">Pendente<" in linhas[pendente.numero]
+    assert ">OK<" in linhas[completo.numero]

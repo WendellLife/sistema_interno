@@ -1,6 +1,6 @@
 {% load ui %}
 <div class="card card--flush"><div class="tabela-wrap"><div class="tabela" role="table">
-  <div class="tabela__linha tabela__linha--head" role="row"><span>Chamado</span><span>Assunto</span><span>Solicitante</span><span>Prioridade</span><span>Responsável</span><span>Horas P/R</span><span>SLA</span><span>Status</span></div>
+  <div class="tabela__linha tabela__linha--head" role="row"><span>Chamado</span><span>Assunto</span><span>Solicitante</span><span>Prioridade</span><span>Responsável</span><span>Horas P/R</span><span>SLA</span><span>Documento</span></div>
   {% for c in pagina %}
   <a class="tabela__linha" role="row" href="{% url 'web:tarefa' c.pk %}">
     <span class="codigo">{{ c.numero }}</span>
@@ -10,7 +10,9 @@
     <span>{% if c.responsavel %}{{ c.responsavel.nome }}{% else %}<span class="muted">—</span>{% endif %}</span>
     <span class="horas-pr {% if c.minutos_realizados and c.minutos_realizados > c.horas_previstas_min %}estourou{% endif %}">{{ c.horas_previstas_min|horas_dec }} / {{ c.minutos_realizados|default:0|horas_dec }}</span>
     <span class="sla"><i class="barra barra--fina {{ c|sla_classe }}"><i style="width:{{ c|sla_pct }}%"></i></i><span>{{ c|sla_texto }}</span></span>
-    <span><i class="chip {{ c.status|chip_status }}">{{ c.get_status_display }}</i></span>
+    {# 05 §2: a coluna final diz se o chamado está travado por documentação — o status
+       já é a dimensão dos chips de filtro logo acima da tabela. #}
+    <span><i class="chip {{ c.situacao_documento|chip_documento }}">{{ c.situacao_documento|rotulo_documento }}</i></span>
   </a>
   {% empty %}
   {# 05 §2: sem resultado, o caminho de saída é um BOTÃO, não uma instrução escrita. #}

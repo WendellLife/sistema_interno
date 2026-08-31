@@ -82,3 +82,33 @@ def documentacao_pendente(qs=None):
         .order_by("sla_previsto")
     )
     return [(c, secoes_faltantes(c)) for c in candidatos]
+
+
+def situacao_por_chamado(chamados) -> dict[int, str]:
+    """'na' | 'ok' | 'pendente' por chamado — o chip da coluna Documento (05 §2).
+
+    Uma consulta para a página inteira. Fazer esta conta em `@property` do modelo daria
+    N+1 numa listagem de 50 linhas, que é o que o CLAUDE.md proíbe.
+    """
+    ids = [c.pk for c in chamados]
+    if not ids:
+        return {}
+    publicadas = dict(
+        Chamado.objects.filter(pk__in=ids)
+        .annotate(
+            n=Count(
+                "documentos",
+                filter=Q(documentos__secao__in=SECOES_OBRIGATORIAS,
+                         documentos__versao_atual__publicada_em__isnull=False),
+            )
+        )  # fmt: skip
+        .values_list("pk", "n")
+    )
+    return {
+        c.pk: (
+            "na"
+            if not c.categoria.exige_documentacao
+            else ("ok" if publicadas.get(c.pk, 0) >= len(SECOES_OBRIGATORIAS) else "pendente")
+        )
+        for c in chamados
+    }

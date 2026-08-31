@@ -82,6 +82,10 @@ def tarefas(request):
     f = ChamadoFilter(params, queryset=_chamados_escopo(request.user))
     qs = f.qs.order_by("sla_previsto", "-criado_em")
     pagina = Paginator(qs, 50).get_page(request.GET.get("pagina"))
+    # 05 §2: a 8ª coluna é o chip de Documento. Uma consulta para a página toda.
+    situacao_doc = doc_sel.situacao_por_chamado(pagina.object_list)
+    for chamado in pagina.object_list:
+        chamado.situacao_documento = situacao_doc.get(chamado.pk, "na")
     ctx = {
         "pagina": pagina,
         "filtros": params,

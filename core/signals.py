@@ -3,7 +3,8 @@
 from django.contrib.auth.models import Group
 
 from . import papeis
-from .models import PermissaoModulo
+from .calendario import invalidar_feriados
+from .models import Feriado, PermissaoModulo
 
 
 def garantir_papeis_e_matriz(**kwargs) -> None:
@@ -15,3 +16,8 @@ def garantir_papeis_e_matriz(**kwargs) -> None:
             for modulo, linha in papeis.MATRIZ_PADRAO.items()
             for papel, nivel in linha.items()
         )
+
+
+def limpar_cache_de_feriados(sender, instance: Feriado, **kwargs) -> None:
+    """Editar o calendário tem de valer na próxima requisição, não no fim do TTL."""
+    invalidar_feriados(instance.data.year)
