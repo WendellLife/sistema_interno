@@ -10,7 +10,12 @@ from core.models import Setor
 from core.permissions import AcessoModulo, papeis_de
 
 from . import selectors, services
-from .serializers import DocumentoCreateSerializer, DocumentoSerializer, RascunhoSerializer, VersaoSerializer
+from .serializers import (
+    DocumentoCreateSerializer,
+    DocumentoSerializer,
+    RascunhoSerializer,
+    VersaoSerializer,
+)
 
 
 class DocumentoViewSet(SetorScopedQuerysetMixin, viewsets.GenericViewSet):

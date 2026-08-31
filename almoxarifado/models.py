@@ -156,10 +156,12 @@ class ItemSolicitacao(models.Model):
             ),
         ]
 
+    def __str__(self) -> str:
+        return f"{self.solicitacao_id} · {self.item_id} × {self.quantidade}"
+
     @property
     def pendente(self) -> Decimal:
         return self.quantidade - self.quantidade_atendida
-
 
 class NotaFiscal(TimeStampedModel):
     numero = models.CharField(max_length=20)
@@ -192,6 +194,8 @@ class ItemNotaFiscal(models.Model):
     custo_unitario = models.DecimalField(max_digits=12, decimal_places=2)
     divergencia = models.CharField(max_length=140, blank=True)
 
+    def __str__(self) -> str:
+        return f"{self.nota_id} · {self.item_id}"
 
 class Transferencia(TimeStampedModel):
     item = models.ForeignKey(Item, on_delete=models.PROTECT)
@@ -250,12 +254,14 @@ class ContagemInventario(models.Model):
             ),
         ]
 
+    def __str__(self) -> str:
+        return f"{self.inventario_id} · {self.item_id}"
+
     @property
     def divergencia(self) -> Decimal | None:
         if self.saldo_contado is None:
             return None
         return self.saldo_contado - self.saldo_sistema
-
 
 class Cotacao(TimeStampedModel):
     class Status(models.TextChoices):
@@ -288,6 +294,8 @@ class PropostaCotacao(models.Model):
             )
         ]
 
+    def __str__(self) -> str:
+        return f"{self.fornecedor} — {self.valor_unitario}"
 
 class AlertaReposicao(models.Model):
     """Fila de reposição que Compras acompanha. Um alerta aberto por (item, setor)."""
@@ -311,3 +319,6 @@ class AlertaReposicao(models.Model):
                 fields=["item", "setor"], condition=Q(resolvido_em__isnull=True), name="uniq_alerta_aberto"
             )
         ]
+
+    def __str__(self) -> str:
+        return f"{self.item_id} em {self.setor_id}"

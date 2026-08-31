@@ -2,7 +2,6 @@
 
 from datetime import date
 
-
 from django.utils.dateparse import parse_date
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -52,7 +51,7 @@ class RelatorioHorasView(APIView):
         por_tipo = selectors.horas_por_tipo(qs)
         por_pessoa = selectors.horas_por_pessoa(qs)
         dados = {"por_tipo": por_tipo, "por_pessoa": por_pessoa, "por_chamado": selectors.horas_por_chamado(qs),
-                 "total_min": sum(l["minutos"] for l in por_tipo)}  # fmt: skip
+                 "total_min": sum(linha["minutos"] for linha in por_tipo)}  # fmt: skip
         return responder(request, dados_json=dados, nome="horas",
                          colunas=["nome", "sobrenome", "setor", "minutos", "retrabalho_min"], linhas=por_pessoa)  # fmt: skip
 

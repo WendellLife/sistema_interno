@@ -70,6 +70,8 @@ class ChaveIdempotencia(models.Model):
     class Meta:
         constraints = [models.UniqueConstraint(fields=["sistema", "chave"], name="uniq_idempotencia")]
 
+    def __str__(self) -> str:
+        return f"{self.sistema_id} · {self.chave}"
 
 class Webhook(TimeStampedModel):
     """Assinatura de eventos por um sistema externo. `eventos` usa os nomes de `Auditoria.acao`
@@ -109,3 +111,6 @@ class EventoIntegracao(models.Model):
 
     class Meta:
         ordering = ["id"]
+
+    def __str__(self) -> str:
+        return f"{self.tipo} → {self.webhook_id}"

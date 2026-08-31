@@ -13,7 +13,7 @@ from core.permissions import AcessoModulo, EhAdministrador, eh_ti, papeis_de
 
 from . import selectors, services
 from .filters import ChamadoFilter
-from .models import Categoria, Chamado, RegraSLA
+from .models import Categoria, RegraSLA
 from .serializers import (
     AnexoSerializer,
     CategoriaSerializer,

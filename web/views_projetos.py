@@ -79,8 +79,8 @@ def historico(request):
     anos = sorted({d.year for d in Projeto.objects.filter(encerrado_em__isnull=False).values_list("encerrado_em", flat=True)}, reverse=True)
     ctx = {
         "linhas": linhas, "ano": ano, "anos": anos, "setores": _setores(request.user),
-        "kpis": {"concluidos": sum(1 for l in linhas if l["p"].fase == "concluido"),
-                 "cancelados": sum(1 for l in linhas if l["p"].fase == "cancelado"),
+        "kpis": {"concluidos": sum(1 for linha in linhas if linha["p"].fase == "concluido"),
+                 "cancelados": sum(1 for linha in linhas if linha["p"].fase == "cancelado"),
                  "desvio_medio": round(sum(desvios) / len(desvios)) if desvios else 0},  # fmt: skip
     }
     return render(request, "web/projetos/historico.html", ctx)

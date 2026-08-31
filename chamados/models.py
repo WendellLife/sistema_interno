@@ -133,3 +133,6 @@ class HistoricoChamado(models.Model):
 
     class Meta:
         ordering = ["quando"]
+
+    def __str__(self) -> str:
+        return f"{self.chamado_id} · {self.texto[:40]}"

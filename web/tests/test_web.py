@@ -1,5 +1,6 @@
 import pytest
 from django.test import Client
+from django.utils.html import strip_tags
 
 from apontamentos.models import MOTIVOS_INICIAIS, TIPOS_INICIAIS, MotivoRetrabalho, TipoTrabalho
 from chamados import services as cham
@@ -245,7 +246,9 @@ def test_almox_nota_e_inventario(web, almox_dados, setores):
     r = cli.get(f"/almoxarifado/inventario/{q}")
     assert r.status_code == 200 and "rodada #" in r.content.decode() and Inventario.objects.filter(status="aberto").count() == 1
     r = cli.post(f"/almoxarifado/inventario/{q}", {"acao": "fechar", "item": [almox_dados["parafuso"].id, almox_dados["luva"].id], "contado": ["18", ""]})
-    assert r.status_code == 200 and "1 divergência" in r.content.decode() and "R$ 3,00".replace(",", ".") in r.content.decode().replace(",", ".")
+    # O número vem em <b>: comparar o HTML cru nunca casaria com "1 divergência".
+    texto = strip_tags(r.content.decode())
+    assert r.status_code == 200 and "1 divergência" in texto and "R$ 3,00" in texto
     assert selectors.saldo(almox_dados["parafuso"], setores["PRD"]) == 18
     assert selectors.saldo(almox_dados["luva"], setores["PRD"]) == 8  # sem contagem: ignorado
     # colaborador não abre inventário

@@ -155,15 +155,15 @@ def tarefa_atual(request):
 def _ctx_apontamento(request, chamado):
     tipos = list(TipoTrabalho.objects.all())
     validos = ap_sel.validos(usuario=request.user).filter(chamado=chamado)
-    por_tipo = {l["tipo_id"]: l["minutos"] for l in ap_sel.horas_por_tipo(validos)}
+    por_tipo = {linha["tipo_id"]: linha["minutos"] for linha in ap_sel.horas_por_tipo(validos)}
     ativo = ap_services.cronometro_aberto(request.user)
     linhas = []
     for t in tipos:
         minutos = por_tipo.get(t.id, 0)
         rodando = ativo is not None and ativo.tipo_id == t.id and ativo.chamado_id == chamado.id
         linhas.append({"tipo": t, "minutos": minutos, "ativo": rodando})
-    maximo = max([l["minutos"] for l in linhas] + [1])
-    total = sum(l["minutos"] for l in linhas)
+    maximo = max([linha["minutos"] for linha in linhas] + [1])
+    total = sum(linha["minutos"] for linha in linhas)
     return {"linhas": linhas, "maximo": maximo, "total_min": total, "ativo": ativo,
             "ativo_neste": ativo is not None and ativo.chamado_id == chamado.id,
             "motivos": MotivoRetrabalho.objects.all(),
@@ -381,8 +381,7 @@ def painel(request):
     from core.models import Setor
     from relatorios.selectors import painel as dados_painel
 
-    if nivel_no_modulo(request.user, "painel") == "-":
-        return HttpResponse("Sem permissão para acessar o painel.", status=403)
+    _exige_modulo(request, "painel")
 
     pode_ver_todos = ve_todos_setores(request.user)
     setores = Setor.objects.filter(ativo=True).order_by("nome") if pode_ver_todos else Setor.objects.none()

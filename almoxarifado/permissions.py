@@ -7,7 +7,8 @@ from core.permissions import papeis_de
 
 MOVIMENTA = {papeis.RESPONSAVEL, papeis.COMPRAS, papeis.ADMINISTRADOR}
 COMPRAS_OU_ADMIN = {papeis.COMPRAS, papeis.ADMINISTRADOR}
-APROVA_SOLICITACAO = {papeis.GERENTE_SETOR, papeis.COMPRAS, papeis.ADMINISTRADOR}
+# Espelha almoxarifado.services.PAPEIS_APROVAM_SOLICITACAO: Compras ATENDE, não aprova.
+APROVA_SOLICITACAO = {papeis.GERENTE_SETOR, papeis.ADMINISTRADOR}
 ABRE_INVENTARIO = {papeis.RESPONSAVEL, papeis.COMPRAS, papeis.ADMINISTRADOR}
 
 

@@ -15,10 +15,10 @@ from .serializers import (
     ApontamentoSerializer,
     CronometroRespostaSerializer,
     DecisaoLoteSerializer,
-    RecusaSerializer,
     IniciarCronometroSerializer,
     LancamentoManualSerializer,
     MotivoRetrabalhoSerializer,
+    RecusaSerializer,
     TipoTrabalhoSerializer,
 )
 

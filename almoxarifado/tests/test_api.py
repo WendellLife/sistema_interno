@@ -123,6 +123,20 @@ def test_relatorio_consumo_sem_os(api, usuarios, itens, setores, cc, estoque_ini
     assert r.data["por_setor"][0]["setor"] == "MAN"
 
 
+def test_gerente_aprova_solicitacao_do_proprio_setor(api, usuarios, itens, setores, cc):
+    """Regressão: a matriz dá "V" ao gerente em almoxarifado, e o gate de módulo barrava
+    todo POST dele — nenhum gerente aprovava solicitação por nenhum caminho da API."""
+    colab = api(usuarios["colab_prd"])
+    r = colab.post("/api/v1/almoxarifado/solicitacoes/", {
+        "centro_custo": cc["PRD"].id, "os_ref": "OS-7",
+        "itens": [{"item": itens["luva"].id, "quantidade": "2"}],
+    }, format="json")  # fmt: skip
+    assert r.status_code == 201
+    sid = r.data["id"]
+    r = api(usuarios["ger_prd"]).post(f"/api/v1/almoxarifado/solicitacoes/{sid}/aprovar/")
+    assert r.status_code == 200 and r.data["status"] == "aprovada"
+
+
 def test_busca_encontra_item_e_solicitacao(api, usuarios, itens, cc):
     sol = services.criar_solicitacao(solicitante=usuarios["colab_man"], centro_custo=cc["MAN"],
                                      itens=[{"item": itens["luva"], "quantidade": 1}])  # fmt: skip

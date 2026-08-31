@@ -8,7 +8,12 @@ from apontamentos import services as ap_services
 from apontamentos.models import TipoTrabalho
 from core.models import Auditoria
 from projetos import selectors, services
-from projetos.exceptions import AlocacaoExcedida, EncerramentoSemData, FaseInvalida, ProjetoEncerrado
+from projetos.exceptions import (
+    AlocacaoExcedida,
+    EncerramentoSemData,
+    FaseInvalida,
+    ProjetoEncerrado,
+)
 from projetos.models import Projeto
 
 pytestmark = pytest.mark.django_db

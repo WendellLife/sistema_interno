@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from core import papeis
 from core.mixins import SetorScopedQuerysetMixin
 from core.models import Setor
-from core.permissions import AcessoModulo, papeis_de, ve_todos_setores
+from core.permissions import AcessoModulo, AcessoModuloVisivel, papeis_de, ve_todos_setores
 
 from . import selectors, services
 from .models import (
@@ -22,6 +22,7 @@ from .models import (
     Solicitacao,
     Transferencia,
 )
+from .permissions import PodeAprovarSolicitacao
 from .serializers import (
     AtenderSerializer,
     ContagensEntradaSerializer,
@@ -142,12 +143,17 @@ class SolicitacaoViewSet(_Almox, SetorScopedQuerysetMixin, viewsets.GenericViewS
         sol = services.criar_solicitacao(solicitante=request.user, **s.validated_data)
         return Response(SolicitacaoSerializer(self.get_queryset().get(pk=sol.pk)).data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["post"])
+    # Aprovar/negar é direito do PAPEL (gerente do setor), não do nível de escrita do
+    # módulo — a matriz dá "V" ao gerente em almoxarifado, o que barrava todo POST dele.
+    # Solicitação de outro setor não está no queryset e vira 404, não 403.
+    @action(detail=True, methods=["post"],
+            permission_classes=[IsAuthenticated, AcessoModuloVisivel, PodeAprovarSolicitacao])
     def aprovar(self, request, pk=None):
         sol = services.aprovar_solicitacao(solicitacao=self.get_object(), aprovador=request.user)
         return Response(SolicitacaoSerializer(self.get_queryset().get(pk=sol.pk)).data)
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"],
+            permission_classes=[IsAuthenticated, AcessoModuloVisivel, PodeAprovarSolicitacao])
     def negar(self, request, pk=None):
         s = NegarSerializer(data=request.data)
         s.is_valid(raise_exception=True)

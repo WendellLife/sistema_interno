@@ -66,6 +66,22 @@ class AcessoModulo(BasePermission):
         return nivel == "E"
 
 
+class AcessoModuloVisivel(BasePermission):
+    """Exige apenas que o módulo seja VISÍVEL ('V' ou 'E'), mesmo em POST.
+
+    Para ação cujo direito vem do PAPEL, não do nível de escrita do módulo: aprovar
+    solicitação é do gerente do setor, que tem 'V' em almoxarifado. Continua havendo
+    duas camadas — esta (o módulo aparece para mim?) e a classe de papel (posso esta
+    ação?) —, mais o queryset escopado, que decide o que existe para mim.
+    """
+
+    def has_permission(self, request, view) -> bool:
+        modulo = getattr(view, "modulo", None)
+        if modulo is None:
+            return True
+        return nivel_no_modulo(request.user, modulo) in ("V", "E")
+
+
 class PodeAprovarHoras(BasePermission):
     def has_permission(self, request, view) -> bool:
         return bool(papeis_de(request.user) & papeis.APROVA_HORAS)

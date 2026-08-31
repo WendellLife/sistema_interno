@@ -85,7 +85,7 @@ def painel(*, user, de=None, ate=None, setor=None) -> dict:
     horas_qs = ap.validos(de, ate, setor=setor)
     por_tipo = ap.horas_por_tipo(horas_qs)
     retrab = ap.percentual_retrabalho(horas_qs)
-    espera = sum(l["minutos"] for l in por_tipo if l["tipo"] == "Espera de terceiro")
+    espera = sum(linha["minutos"] for linha in por_tipo if linha["tipo"] == "Espera de terceiro")
     sla_dados = sla(de, ate, setor=setor)
     abaixo = Estoque.objects.filter(saldo__lte=F("item__estoque_minimo"))
     if setor:

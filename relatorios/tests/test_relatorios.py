@@ -55,7 +55,7 @@ def test_painel_confere_com_consulta_bruta(api, usuarios, cenario):
     assert r.data["mini"]["cobertura_documentacao"] == 0.0  # suporte entregue sem doc
     assert r.data["retrabalho_por_motivo"][0]["motivo"] == "Requisito incompleto"
     assert r.data["consumo_por_setor"][0]["setor"] == "MAN"
-    assert {l["tipo"] for l in r.data["horas_por_tipo"]} == {"Desenvolvimento", "Espera de terceiro", "Retrabalho"}
+    assert {linha["tipo"] for linha in r.data["horas_por_tipo"]} == {"Desenvolvimento", "Espera de terceiro", "Retrabalho"}
     # Colaborador não tem painel na matriz
     assert api(usuarios["colab_prd"]).get("/api/v1/relatorios/painel/").status_code == 403
 
@@ -96,7 +96,9 @@ def test_export_csv_e_xlsx(api, usuarios, cenario):
     assert api(usuarios["ger_ti"]).get("/api/v1/relatorios/sla/?formato=doc").status_code == 400
 
 
-def test_export_grande_vira_job_e_email(api, usuarios, monkeypatch):
+def test_export_grande_vira_job_e_email(api, usuarios, cenario, monkeypatch):
+    # `cenario` é o que gera auditoria: sem ele o relatório sai com zero linhas e
+    # `len(linhas) > LIMITE_SINCRONO` nunca é verdade, mesmo com o limite em 0.
     monkeypatch.setattr(export, "LIMITE_SINCRONO", 0)
     r = api(usuarios["ger_ti"]).get("/api/v1/relatorios/auditoria/?formato=csv")
     assert r.status_code == 202 and "job_id" in r.data

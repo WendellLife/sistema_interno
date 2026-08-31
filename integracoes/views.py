@@ -10,7 +10,12 @@ from rest_framework.views import APIView
 
 from almoxarifado import services as almox
 from almoxarifado.models import Item, Solicitacao
-from almoxarifado.serializers import ItemSerializer, NotaFiscalCreateSerializer, NotaFiscalSerializer, SolicitacaoSerializer
+from almoxarifado.serializers import (
+    ItemSerializer,
+    NotaFiscalCreateSerializer,
+    NotaFiscalSerializer,
+    SolicitacaoSerializer,
+)
 from chamados import services as cham
 from chamados.models import Categoria
 from chamados.serializers import ChamadoDetailSerializer
