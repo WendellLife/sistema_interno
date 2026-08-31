@@ -1,7 +1,14 @@
+from collections.abc import Sequence
+
 from django.db.models import Q
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    BasePermission,
+    IsAuthenticated,
+    OperandHolder,
+    SingleOperandHolder,
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -44,10 +51,17 @@ from .serializers import (
     TransferenciaSerializer,
 )
 
+# Mesmo tipo que `APIView.permission_classes` declara; sem isto o mypy vê dois tipos
+# diferentes para o atributo e recusa a herança múltipla.
+_Permissao = type[BasePermission] | OperandHolder | SingleOperandHolder
+
 
 class _Almox:
+    """Mixin de módulo. Fora da hierarquia da APIView, então `permission_classes` precisa
+    da anotação explícita — senão o mypy vê dois tipos diferentes para o mesmo atributo."""
+
     modulo = "almoxarifado"
-    permission_classes = [IsAuthenticated, AcessoModulo]
+    permission_classes: Sequence[_Permissao] = [IsAuthenticated, AcessoModulo]
 
 
 def _setor_param(request):

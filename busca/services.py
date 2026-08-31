@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector, TrigramSimilarity
-from django.db.models import F, Q, Value
+from django.db.models import F, Func, Q, Value
 from django.db.models.functions import Greatest
 
 from almoxarifado.models import Item, Solicitacao
@@ -39,7 +39,7 @@ def _rankear(qs, q: str, campo_titulo: str, campo_texto: str, campo_codigo: str 
         campo_texto, weight="B", config="portuguese"
     )
     consulta = SearchQuery(q, config="portuguese", search_type="websearch")
-    similaridade = TrigramSimilarity(campo_titulo, q)
+    similaridade: Func = TrigramSimilarity(campo_titulo, q)
     if campo_codigo:
         similaridade = Greatest(similaridade, TrigramSimilarity(campo_codigo, q))
     return (

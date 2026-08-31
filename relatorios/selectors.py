@@ -77,7 +77,6 @@ def painel(*, user, de=None, ate=None, setor=None) -> dict:
     from apontamentos import selectors as ap
     from chamados import selectors as cham
     from chamados.serializers import ChamadoListSerializer
-    from chamados.viewsets import ChamadoViewSet
     from documentacao import selectors as doc
 
     if not de or not ate:
@@ -91,14 +90,7 @@ def painel(*, user, de=None, ate=None, setor=None) -> dict:
     if setor:
         abaixo = abaixo.filter(setor=setor)
 
-    class _Req:  # escopo da central sem depender de um request DRF
-        pass
-
-    vs = ChamadoViewSet()
-    req = _Req()
-    req.user = user
-    vs.request = req
-    escopo_chamados = vs.get_queryset()
+    escopo_chamados = cham.escopo_do_usuario(user)
     ids_escopo = set(escopo_chamados.values_list("pk", flat=True))
     risco = [c for c in cham.em_risco_de_sla() if c.pk in ids_escopo]
     return {

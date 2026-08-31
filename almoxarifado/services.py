@@ -304,7 +304,10 @@ def fechar_inventario(*, inventario: Inventario, usuario) -> Inventario:
     for c in inv.contagens.select_related("item").filter(saldo_contado__isnull=False):
         # Compara com o saldo ATUAL (pode ter havido movimento após o snapshot)
         atual = Estoque.objects.filter(item=c.item, setor=inv.setor).values_list("saldo", flat=True).first() or D0
-        diff = c.saldo_contado - atual
+        contado = c.saldo_contado
+        if contado is None:  # o filtro já exclui, mas o campo é opcional no modelo
+            continue
+        diff = contado - atual
         if diff == 0:
             continue
         registrar_movimento(

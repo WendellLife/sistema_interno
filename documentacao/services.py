@@ -73,7 +73,8 @@ def publicar_versao(*, versao: VersaoDocumento, usuario) -> VersaoDocumento:
     if versao.publicada_em:
         raise VersaoJaPublicada(versao.numero)
     doc = versao.documento
-    anterior = doc.versao_atual.numero if doc.versao_atual_id else None
+    atual = doc.versao_atual
+    anterior = atual.numero if atual is not None else None
     versao.publicada_em = timezone.now()
     versao.save(update_fields=["publicada_em", "atualizado_em"])
     doc.versao_atual = versao

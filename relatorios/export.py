@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import io
 import uuid
+from collections.abc import Callable
 from decimal import Decimal
 from typing import Any
 
@@ -75,7 +76,7 @@ def pdf_bytes(colunas: list[str], linhas: list[dict], titulo: str = "Relatório"
     return HTML(string=html).write_pdf()
 
 
-GERADORES = {"csv": (csv_bytes, "text/csv"),
+GERADORES: dict[str, tuple[Callable[..., bytes], str]] = {"csv": (csv_bytes, "text/csv"),
              "xlsx": (xlsx_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
              "pdf": (pdf_bytes, "application/pdf")}  # fmt: skip
 

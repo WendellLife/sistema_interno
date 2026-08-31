@@ -15,7 +15,7 @@ class ChamadoFilter(df.FilterSet):
 
     class Meta:
         model = Chamado
-        fields = []
+        fields: list[str] = []
 
     def filtrar_status(self, qs, name, value):
         if value == "abertos":

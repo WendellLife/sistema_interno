@@ -31,7 +31,8 @@ def secoes_faltantes(chamado) -> list[str]:
 
 def status_documento(doc: Documento) -> str:
     """'publicado' | 'rascunho' | 'falta' — o chip do card."""
-    if doc.versao_atual_id and doc.versao_atual.publicada_em:
+    atual = doc.versao_atual
+    if atual is not None and atual.publicada_em:
         return "publicado"
     if any(v.publicada_em is None for v in doc.versoes.all()):
         return "rascunho"

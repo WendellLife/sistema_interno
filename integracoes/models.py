@@ -113,4 +113,4 @@ class EventoIntegracao(models.Model):
         ordering = ["id"]
 
     def __str__(self) -> str:
-        return f"{self.tipo} → {self.webhook_id}"
+        return f"{self.acao} → {self.webhook_id}"

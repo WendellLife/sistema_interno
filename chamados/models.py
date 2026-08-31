@@ -95,7 +95,7 @@ class RegraSLA(models.Model):
 
 
 # Padrão do protótipo quando não há RegraSLA para (categoria, prioridade)
-SLA_PADRAO_HORAS = {
+SLA_PADRAO_HORAS: dict[str, int] = {
     Chamado.Prioridade.CRITICA: 4,
     Chamado.Prioridade.ALTA: 24,
     Chamado.Prioridade.MEDIA: 48,

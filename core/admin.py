@@ -7,7 +7,7 @@ from .models import Auditoria, CentroCusto, Feriado, PermissaoModulo, Setor, Use
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     fieldsets = (
-        *BaseUserAdmin.fieldsets,
+        *(BaseUserAdmin.fieldsets or ()),
         ("Life Laboral", {"fields": ("setor", "matricula", "capacidade_diaria_min", "ativo_para_apontamento")}),
     )
     add_fieldsets = (
