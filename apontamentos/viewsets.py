@@ -1,4 +1,3 @@
-from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -79,11 +78,7 @@ class ApontamentoViewSet(SetorScopedQuerysetMixin, viewsets.GenericViewSet):
 
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated, PodeAprovarHoras])
     def pendentes(self, request):
-        qs = self.get_queryset().filter(pendente_aprovacao=True).order_by("inicio")
-        if papeis.GERENTE_SETOR in papeis_de(request.user) and not (
-            papeis_de(request.user) & {papeis.GERENTE_TI, papeis.ADMINISTRADOR}
-        ):
-            qs = qs.filter(Q(usuario__setor=request.user.setor))
+        qs = selectors.pendentes_para(request.user, self.get_queryset())
         return Response(ApontamentoSerializer(qs, many=True).data)
 
 

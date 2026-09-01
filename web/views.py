@@ -171,7 +171,8 @@ def _ctx_apontamento(request, chamado):
     return {"linhas": linhas, "maximo": maximo, "total_min": total, "ativo": ativo,
             "ativo_neste": ativo is not None and ativo.chamado_id == chamado.id,
             "motivos": MotivoRetrabalho.objects.all(),
-            "pendentes": Apontamento.objects.filter(usuario=request.user, chamado=chamado, pendente_aprovacao=True).count()}  # fmt: skip
+            "pendentes": Apontamento.objects.filter(usuario=request.user, chamado=chamado, pendente_aprovacao=True).count(),
+            "fila_aprovacao": ap_sel.pendentes_para(request.user).count() if _pode_aprovar_horas(request.user) else 0}  # fmt: skip
 
 
 def _ctx_documentacao(chamado):
@@ -216,6 +217,59 @@ def _partial_apontamento(request, chamado, extra=None, status=200):
 def _modal_erro(request, exc: RegraDeNegocio, chamado=None, status=409):
     """Erros de regra viram modal com causa e caminho de correção — nunca toast genérico."""
     return render(request, "web/partials/_modal_erro.html", {"erro": exc.como_dict(), "c": chamado}, status=status)
+
+
+# ---------------------------------------------------------------- aprovação de horas
+
+
+def _pode_aprovar_horas(user) -> bool:
+    return bool(papeis_de(user) & papeis.APROVA_HORAS)
+
+
+@login_required
+def aprovacoes(request):
+    """Modal de aprovação de horas (05 §3).
+
+    A regra §4 manda o lançamento acima da capacidade ficar pendente e fora dos
+    indicadores; sem esta tela não havia como tirá-lo desse estado pela interface.
+    """
+    if not _pode_aprovar_horas(request.user):
+        raise Http404
+    return render(request, "web/tarefas/_modal_aprovacao.html",
+                  {"pendentes": ap_sel.pendentes_para(request.user)})  # fmt: skip
+
+
+@login_required
+@require_POST
+def decidir_aprovacoes(request):
+    if not _pode_aprovar_horas(request.user):
+        raise Http404
+    ids = [int(i) for i in request.POST.getlist("ids") if i.isdigit()]
+    aprovar = request.POST.get("acao") == "aprovar"
+    motivo = request.POST.get("motivo", "").strip()
+    contexto = {"pendentes": ap_sel.pendentes_para(request.user)}
+    if not ids:
+        contexto["erro"] = {"mensagem": "Selecione ao menos um lançamento."}
+        return render(request, "web/tarefas/_modal_aprovacao.html", contexto, status=400)
+    # O escopo decide o que existe: id fora da fila do aprovador não é erro de permissão,
+    # é registro que não está lá.
+    visiveis = set(ap_sel.pendentes_para(request.user).values_list("pk", flat=True))
+    if not set(ids) <= visiveis:
+        raise Http404
+    try:
+        resultado = ap_services.decidir_em_lote(
+            ids=ids, aprovador=request.user, aprovar=aprovar, motivo=motivo
+        )  # fmt: skip
+    except RegraDeNegocio as e:
+        contexto["erro"] = e.como_dict()
+        contexto["pendentes"] = ap_sel.pendentes_para(request.user)
+        return render(request, "web/tarefas/_modal_aprovacao.html", contexto, status=409)
+    n = len(resultado["decididos"])
+    contexto = {
+        "pendentes": ap_sel.pendentes_para(request.user),
+        "aviso": f"{n} lançamento{'s' if n > 1 else ''} {'aprovado' if aprovar else 'recusado'}{'s' if n > 1 else ''}.",
+    }
+    return render(request, "web/tarefas/_modal_aprovacao.html", contexto)
 
 
 @login_required

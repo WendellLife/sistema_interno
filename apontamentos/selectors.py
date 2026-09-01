@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from django.db.models import Count, F, Q, Sum
 
+from core import papeis
+from core.permissions import papeis_de
+
 from .models import Apontamento
 
 
@@ -108,3 +111,19 @@ def percentual_retrabalho(qs) -> dict:
         "retrabalho_min": retrabalho,
         "percentual": round(100 * retrabalho / total, 1) if total else 0.0,
     }
+
+
+def pendentes_para(aprovador, qs=None):
+    """Fila de aprovação que `aprovador` enxerga — a MESMA regra do serviço `pode_aprovar`.
+
+    Gerente de setor vê o próprio setor; Gerente de TI e Administrador veem tudo. Existe
+    como selector para a tela e a API não terem duas implementações do mesmo escopo.
+    """
+    qs = base_listagem() if qs is None else qs
+    qs = qs.filter(pendente_aprovacao=True, recusado_em__isnull=True).order_by("inicio")
+    meus = papeis_de(aprovador)
+    if meus & {papeis.GERENTE_TI, papeis.ADMINISTRADOR}:
+        return qs
+    if papeis.GERENTE_SETOR in meus:
+        return qs.filter(usuario__setor=aprovador.setor)
+    return qs.none()

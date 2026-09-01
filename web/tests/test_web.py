@@ -393,3 +393,56 @@ def test_coluna_documento_na_central(web, usuarios, categorias, django_assert_ma
     assert ">N/A<" in linhas[suporte.numero]
     assert ">Pendente<" in linhas[pendente.numero]
     assert ">OK<" in linhas[completo.numero]
+
+@pytest.fixture
+def pendente(usuarios, chamado, tipos):
+    """Lançamento manual retroativo: a regra §4 manda ficar pendente de aprovação."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apontamentos import services as ap_services
+
+    inicio = timezone.localtime(timezone.now()).replace(hour=8, minute=0, second=0, microsecond=0) - timedelta(days=10)
+    ap = ap_services.criar_apontamento(usuario=usuarios["colab_prd"], tipo=tipos["analise"], chamado=chamado,
+                                       inicio=inicio, fim=inicio + timedelta(hours=2), observacao="Ajuste na etiqueta")  # fmt: skip
+    assert ap.pendente_aprovacao
+    return ap
+
+
+def test_aprovacao_de_horas_pela_tela(web, usuarios, pendente):
+    """05 §3: sem esta tela, o lançamento pendente não sai desse estado pela interface."""
+    ger = web("ger_prd")
+    html = ger.get("/aprovacoes/").content.decode()
+    assert "Aprovação de horas" in html
+    assert usuarios["colab_prd"].nome in html and "Ajuste na etiqueta" in html
+
+    r = ger.post("/aprovacoes/decidir/", {"ids": [pendente.pk], "acao": "aprovar"})
+    assert r.status_code == 200 and "1 lançamento aprovado" in r.content.decode()
+    pendente.refresh_from_db()
+    assert not pendente.pendente_aprovacao and pendente.aprovado_por == usuarios["ger_prd"]
+
+
+def test_recusa_exige_motivo_e_tira_dos_indicadores(web, usuarios, pendente):
+    ger = web("ger_prd")
+    r = ger.post("/aprovacoes/decidir/", {"ids": [pendente.pk], "acao": "recusar", "motivo": "Sem evidência"})
+    assert r.status_code == 200
+    pendente.refresh_from_db()
+    assert pendente.recusado_em and pendente.motivo_recusa == "Sem evidência"
+    # recusado sai da fila
+    assert "Nada aguardando aprovação" in ger.get("/aprovacoes/").content.decode()
+
+
+def test_escopo_da_fila_de_aprovacao(web, usuarios, pendente):
+    """Duas camadas: quem não aprova não entra (404); quem aprova outro setor não vê."""
+    assert web("colab_prd").get("/aprovacoes/").status_code == 404
+    assert web("resp_prd").get("/aprovacoes/").status_code == 404
+    # o lançamento é de PRD; o gerente de TI vê tudo, mas um id fora da fila dá 404
+    assert str(pendente.pk) in web("ger_ti").get("/aprovacoes/").content.decode()
+    r = web("ger_ti").post("/aprovacoes/decidir/", {"ids": [pendente.pk + 999], "acao": "aprovar"})
+    assert r.status_code == 404
+
+
+def test_decidir_sem_selecionar_recusa_com_causa(web, pendente):
+    r = web("ger_prd").post("/aprovacoes/decidir/", {"acao": "aprovar"})
+    assert r.status_code == 400 and "Selecione ao menos um" in r.content.decode()
