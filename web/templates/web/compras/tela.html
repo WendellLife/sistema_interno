@@ -2,7 +2,11 @@
 {% block titulo %}Compras{% endblock %}{% block modulo %}Compras{% endblock %}{% block conteudo_classe %}conteudo--largo{% endblock %}
 {% block conteudo %}
 <div class="tela__head" x-data="{ cotar: false, exportar: false }">
-  <div><h1>Compras</h1><p class="tela__sub">visão dos setores · consumo de {{ periodo.0|date:"d/m" }} a {{ periodo.1|date:"d/m" }}</p></div>
+  <div>
+    <div class="tela__sobre">Compras · {{ linhas|length }} setores</div>
+    <h1>Consumo e reposição</h1>
+    <p class="tela__sub">Visão consolidada de todos os setores: consumo, rupturas e fila de compra. Período de {{ periodo.0|date:"d/m" }} a {{ periodo.1|date:"d/m" }}.</p>
+  </div>
   <div class="tela__acoes"><button class="btn btn--secundario" @click="exportar = true">Exportar</button>{% if pode_editar %}<button class="btn btn--primario" @click="cotar = true">{% include "web/partials/_icone.html" with nome="mais" %} Abrir cotação</button>{% endif %}</div>
   {% with relatorio_export="consumo" %}{% include "web/partials/_modal_exportar.html" %}{% endwith %}
   {% if pode_editar %}

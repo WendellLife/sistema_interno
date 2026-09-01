@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from functools import partial
+
 from django.db import transaction
 
 from .models import EventoIntegracao, Webhook
@@ -31,5 +33,7 @@ def publicar(auditoria) -> int:
     from .tasks import entregar_evento
 
     for ev in eventos:
-        transaction.on_commit(lambda pk=ev.pk: entregar_evento.delay(pk))
+        # `partial` no lugar do lambda com argumento padrão: captura o pk do mesmo jeito
+        # e é tipável.
+        transaction.on_commit(partial(entregar_evento.delay, ev.pk))
     return len(eventos)

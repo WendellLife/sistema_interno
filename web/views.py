@@ -82,6 +82,10 @@ def tarefas(request):
     f = ChamadoFilter(params, queryset=_chamados_escopo(request.user))
     qs = f.qs.order_by("sla_previsto", "-criado_em")
     pagina = Paginator(qs, 50).get_page(request.GET.get("pagina"))
+    # 05 §2: a 8ª coluna é o chip de Documento. Uma consulta para a página toda.
+    situacao_doc = doc_sel.situacao_por_chamado(pagina.object_list)
+    for chamado in pagina.object_list:
+        chamado.situacao_documento = situacao_doc.get(chamado.pk, "na")
     ctx = {
         "pagina": pagina,
         "filtros": params,
@@ -155,19 +159,20 @@ def tarefa_atual(request):
 def _ctx_apontamento(request, chamado):
     tipos = list(TipoTrabalho.objects.all())
     validos = ap_sel.validos(usuario=request.user).filter(chamado=chamado)
-    por_tipo = {l["tipo_id"]: l["minutos"] for l in ap_sel.horas_por_tipo(validos)}
+    por_tipo = {linha["tipo_id"]: linha["minutos"] for linha in ap_sel.horas_por_tipo(validos)}
     ativo = ap_services.cronometro_aberto(request.user)
     linhas = []
     for t in tipos:
         minutos = por_tipo.get(t.id, 0)
         rodando = ativo is not None and ativo.tipo_id == t.id and ativo.chamado_id == chamado.id
         linhas.append({"tipo": t, "minutos": minutos, "ativo": rodando})
-    maximo = max([l["minutos"] for l in linhas] + [1])
-    total = sum(l["minutos"] for l in linhas)
+    maximo = max([linha["minutos"] for linha in linhas] + [1])
+    total = sum(linha["minutos"] for linha in linhas)
     return {"linhas": linhas, "maximo": maximo, "total_min": total, "ativo": ativo,
             "ativo_neste": ativo is not None and ativo.chamado_id == chamado.id,
             "motivos": MotivoRetrabalho.objects.all(),
-            "pendentes": Apontamento.objects.filter(usuario=request.user, chamado=chamado, pendente_aprovacao=True).count()}  # fmt: skip
+            "pendentes": Apontamento.objects.filter(usuario=request.user, chamado=chamado, pendente_aprovacao=True).count(),
+            "fila_aprovacao": ap_sel.pendentes_para(request.user).count() if _pode_aprovar_horas(request.user) else 0}  # fmt: skip
 
 
 def _ctx_documentacao(chamado):
@@ -212,6 +217,59 @@ def _partial_apontamento(request, chamado, extra=None, status=200):
 def _modal_erro(request, exc: RegraDeNegocio, chamado=None, status=409):
     """Erros de regra viram modal com causa e caminho de correção — nunca toast genérico."""
     return render(request, "web/partials/_modal_erro.html", {"erro": exc.como_dict(), "c": chamado}, status=status)
+
+
+# ---------------------------------------------------------------- aprovação de horas
+
+
+def _pode_aprovar_horas(user) -> bool:
+    return bool(papeis_de(user) & papeis.APROVA_HORAS)
+
+
+@login_required
+def aprovacoes(request):
+    """Modal de aprovação de horas (05 §3).
+
+    A regra §4 manda o lançamento acima da capacidade ficar pendente e fora dos
+    indicadores; sem esta tela não havia como tirá-lo desse estado pela interface.
+    """
+    if not _pode_aprovar_horas(request.user):
+        raise Http404
+    return render(request, "web/tarefas/_modal_aprovacao.html",
+                  {"pendentes": ap_sel.pendentes_para(request.user)})  # fmt: skip
+
+
+@login_required
+@require_POST
+def decidir_aprovacoes(request):
+    if not _pode_aprovar_horas(request.user):
+        raise Http404
+    ids = [int(i) for i in request.POST.getlist("ids") if i.isdigit()]
+    aprovar = request.POST.get("acao") == "aprovar"
+    motivo = request.POST.get("motivo", "").strip()
+    contexto = {"pendentes": ap_sel.pendentes_para(request.user)}
+    if not ids:
+        contexto["erro"] = {"mensagem": "Selecione ao menos um lançamento."}
+        return render(request, "web/tarefas/_modal_aprovacao.html", contexto, status=400)
+    # O escopo decide o que existe: id fora da fila do aprovador não é erro de permissão,
+    # é registro que não está lá.
+    visiveis = set(ap_sel.pendentes_para(request.user).values_list("pk", flat=True))
+    if not set(ids) <= visiveis:
+        raise Http404
+    try:
+        resultado = ap_services.decidir_em_lote(
+            ids=ids, aprovador=request.user, aprovar=aprovar, motivo=motivo
+        )  # fmt: skip
+    except RegraDeNegocio as e:
+        contexto["erro"] = e.como_dict()
+        contexto["pendentes"] = ap_sel.pendentes_para(request.user)
+        return render(request, "web/tarefas/_modal_aprovacao.html", contexto, status=409)
+    n = len(resultado["decididos"])
+    contexto = {
+        "pendentes": ap_sel.pendentes_para(request.user),
+        "aviso": f"{n} lançamento{'s' if n > 1 else ''} {'aprovado' if aprovar else 'recusado'}{'s' if n > 1 else ''}.",
+    }
+    return render(request, "web/tarefas/_modal_aprovacao.html", contexto)
 
 
 @login_required
@@ -381,8 +439,7 @@ def painel(request):
     from core.models import Setor
     from relatorios.selectors import painel as dados_painel
 
-    if nivel_no_modulo(request.user, "painel") == "-":
-        return HttpResponse("Sem permissão para acessar o painel.", status=403)
+    _exige_modulo(request, "painel")
 
     pode_ver_todos = ve_todos_setores(request.user)
     setores = Setor.objects.filter(ativo=True).order_by("nome") if pode_ver_todos else Setor.objects.none()

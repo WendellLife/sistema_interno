@@ -181,7 +181,7 @@ Prefixo `/api/v1/`, JWT em `Authorization: Bearer`. Erros de regra retornam `409
 - Busca cobre chamados e projetos; itens e solicitações entram na F4 (`busca/services.py` já deixa o lugar).
 - `Movimento.sinal` (±1) foi adicionado ao modelo do handoff: `quantidade` é sempre positiva (constraint) e AJUSTE precisa de direção. Entradas/saídas têm o sinal travado por `CheckConstraint`.
 - `fechar_inventario` mede a divergência contra o saldo **atual**, não o do snapshot: movimentos feitos entre abertura e fechamento não viram ajuste fantasma.
-- Cadastro de item é global (não escopado); o que é escopado é o saldo. Colaborador solicita; Responsável/Compras/Admin movimentam; Gerentes leem e aprovam solicitações do setor.
+- Cadastro de item é global (não escopado); o que é escopado é o saldo. Colaborador solicita; Responsável/Compras/Admin movimentam; Gerentes leem e aprovam solicitações do setor. **Isso é imposto**, não só documentado: `PodeMovimentar` nas rotas que geram movimento (saída/ajuste, transferência, atender solicitação) e os botões escondidos na tela para quem não movimenta.
 - `Movimento` ganhou `sinal` (±1) separado de `quantidade` (> 0): ajuste de inventário para menos continua respeitando `mov_qtd_positiva` e a reconciliação vira `Σ quantidade × sinal`.
 - `fechar_inventario` compara o contado com o saldo **atual**, não com o snapshot — se houve movimento entre abertura e fechamento, o ajuste não desfaz esse movimento.
 - Alerta de mínimo vai por `transaction.on_commit` → task idempotente (um `AlertaReposicao` aberto por item/setor); task diária resolve os que voltaram acima do mínimo.
@@ -190,5 +190,6 @@ Prefixo `/api/v1/`, JWT em `Authorization: Bearer`. Erros de regra retornam `409
 - Apontamento recusado (`recusado_em` + `motivo_recusa`) sai dos indicadores e permanece visível ao autor.
 - Eventos de integração são **derivados da auditoria** (`core.auditoria.registrar` → `integracoes.eventos.publicar`): nenhum serviço precisa saber que existe webhook, e o catálogo de eventos é exatamente o catálogo de ações auditadas.
 - Status de chamado é `readonly` no Django admin — transição só pelo serviço, para que o bloqueio por documentação valha "por nenhuma via".
-#   s i s t e m a _ i n t e r n o  
+#   s i s t e m a _ i n t e r n o 
+ 
  

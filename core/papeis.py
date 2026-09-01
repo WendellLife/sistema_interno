@@ -23,6 +23,8 @@ MATRIZ_PADRAO: dict[str, dict[str, str]] = {
     "tarefas":      {COLABORADOR: "E", RESPONSAVEL: "E", GERENTE_SETOR: "V", GERENTE_TI: "E", COMPRAS: "V", ADMINISTRADOR: "E"},
     "tarefa":       {COLABORADOR: "E", RESPONSAVEL: "V", GERENTE_SETOR: "V", GERENTE_TI: "E", COMPRAS: "-", ADMINISTRADOR: "E"},
     "documentacao": {COLABORADOR: "E", RESPONSAVEL: "E", GERENTE_SETOR: "V", GERENTE_TI: "E", COMPRAS: "-", ADMINISTRADOR: "E"},
+    # Colaborador tem "E" porque SOLICITA. Dar baixa no estoque é outra coisa e depende do
+    # papel: ver `almoxarifado.permissions.MOVIMENTA` (Responsável, Compras, Administrador).
     "almoxarifado": {COLABORADOR: "E", RESPONSAVEL: "E", GERENTE_SETOR: "V", GERENTE_TI: "V", COMPRAS: "E", ADMINISTRADOR: "E"},
     "compras":      {COLABORADOR: "-", RESPONSAVEL: "-", GERENTE_SETOR: "V", GERENTE_TI: "V", COMPRAS: "E", ADMINISTRADOR: "E"},
     "projetos":     {COLABORADOR: "-", RESPONSAVEL: "V", GERENTE_SETOR: "V", GERENTE_TI: "E", COMPRAS: "V", ADMINISTRADOR: "E"},

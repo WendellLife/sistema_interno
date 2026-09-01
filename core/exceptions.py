@@ -12,8 +12,10 @@ from rest_framework.views import exception_handler
 class RegraDeNegocio(Exception):
     """Base. `codigo` vira `erro` no JSON; `status_http` padrão 409."""
 
-    codigo = "regra_de_negocio"
-    status_http = status.HTTP_409_CONFLICT
+    # Anotados: sem o tipo explícito o mypy infere Literal[409] / Literal["..."] da base
+    # e recusa toda subclasse que usa outro código — que é o caso normal aqui.
+    codigo: str = "regra_de_negocio"
+    status_http: int = status.HTTP_409_CONFLICT
 
     def __init__(self, mensagem: str, **extras: Any):
         super().__init__(mensagem)

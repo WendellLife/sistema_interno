@@ -12,7 +12,14 @@ from django.views.decorators.http import require_POST
 
 from almoxarifado import selectors as almox_sel
 from almoxarifado import services as almox
-from almoxarifado.models import AlertaReposicao, Cotacao, Estoque, Item, PropostaCotacao, Solicitacao
+from almoxarifado.models import (
+    AlertaReposicao,
+    Cotacao,
+    Estoque,
+    Item,
+    PropostaCotacao,
+    Solicitacao,
+)
 from core.exceptions import RegraDeNegocio
 from core.models import CentroCusto, Setor
 from relatorios.selectors import mes_corrente
@@ -31,7 +38,7 @@ def compras(request):
     _exige_modulo(request, "compras")
     de, ate = mes_corrente()
     consumo = almox_sel.consumo(de, ate)
-    por_setor = {l["setor_id"]: l for l in almox_sel.consumo_por_setor(consumo)}
+    por_setor = {linha["setor_id"]: linha for linha in almox_sel.consumo_por_setor(consumo)}
     mais_consumido = {}
     for r in consumo.values("setor_id", "item__descricao").annotate(n=Count("id")).order_by("setor_id", "-n"):
         mais_consumido.setdefault(r["setor_id"], r["item__descricao"])
@@ -49,7 +56,7 @@ def compras(request):
         "kpis": {
             "rupturas": Estoque.objects.filter(saldo__lte=0).count(),
             "solicitacoes": Solicitacao.objects.filter(status="aberta").count(),
-            "consumo_mes": sum(float(l["consumo"]) for l in linhas),
+            "consumo_mes": sum(float(linha["consumo"]) for linha in linhas),
             "cotacoes": Cotacao.objects.exclude(status="fechada").count(),
         },
         "fila": AlertaReposicao.objects.filter(resolvido_em__isnull=True).select_related("item", "setor").order_by("criado_em")[:30],

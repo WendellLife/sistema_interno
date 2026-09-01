@@ -9,10 +9,11 @@
   </div>
   {% if pode_escrever %}
   <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
-    <button class="btn btn--primario" style="min-height:44px" @click="acao = 'saida'">Saída rápida</button>
-    <button class="btn btn--secundario" style="min-height:44px" @click="acao = 'solicitar'">Solicitar reposição</button>
+    {# Colaborador solicita, não movimenta: a saída rápida exige o papel que dá baixa. #}
+    {% if pode_movimentar %}<button class="btn btn--primario" style="min-height:44px" @click="acao = 'saida'">Saída rápida</button>{% endif %}
+    <button class="btn {% if pode_movimentar %}btn--secundario{% else %}btn--primario{% endif %}" style="min-height:44px" @click="acao = 'solicitar'">Solicitar reposição</button>
   </div>
-  <form x-show="acao === 'saida'" x-cloak style="display:grid;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-subtle)" hx-post="{% url 'web:almox_saida' %}{% if request.GET.setor %}?setor={{ request.GET.setor }}{% endif %}" hx-target="#modal-erro">
+  {% if pode_movimentar %}<form x-show="acao === 'saida'" x-cloak style="display:grid;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-subtle)" hx-post="{% url 'web:almox_saida' %}{% if request.GET.setor %}?setor={{ request.GET.setor }}{% endif %}" hx-target="#modal-erro">
     {% csrf_token %}<input type="hidden" name="item" value="{{ item.id }}">
     <div class="form-grid">
       <div class="campo"><label>Quantidade</label><input type="number" step="0.001" min="0.001" max="{{ saldo }}" name="quantidade" required inputmode="decimal" style="min-height:44px"></div>
@@ -20,7 +21,7 @@
       <div class="campo campo--full"><label>OS / chamado / projeto</label><input name="os_ref" maxlength="30" placeholder="OS 88213" style="min-height:44px"><span class="ajuda">Saída sem centro de custo nem OS é recusada — evita o "consumo geral".</span></div>
     </div>
     <button class="btn btn--primario" style="min-height:44px">Registrar saída</button>
-  </form>
+  </form>{% endif %}
   <form x-show="acao === 'solicitar'" x-cloak style="display:grid;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-subtle)" hx-post="{% url 'web:almox_solicitar' %}{% if request.GET.setor %}?setor={{ request.GET.setor }}{% endif %}" hx-target="#modal-erro">
     {% csrf_token %}<input type="hidden" name="item" value="{{ item.id }}">
     <div class="form-grid">

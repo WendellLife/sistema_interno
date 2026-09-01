@@ -16,8 +16,8 @@ from .exceptions import (
     CotacaoFechada,
     ForaDoEscopo,
     InventarioFechado,
-    JustificativaObrigatoria,
     ItemForaDoInventario,
+    JustificativaObrigatoria,
     QuantidadeInvalida,
     SaidaSemReferencia,
     SaldoInsuficiente,
@@ -201,7 +201,9 @@ def atender_solicitacao(
     linhas = list(sol.itens.select_related("item").select_for_update())
     atendeu_algo = False
     for linha in linhas:
-        qtd = Decimal(quantidades.get(linha.item_id, linha.pendente)) if quantidades else linha.pendente
+        if quantidades is not None and linha.item_id not in quantidades:
+            continue  # atendimento parcial: item fora do mapa NÃO sai do estoque
+        qtd = Decimal(quantidades[linha.item_id]) if quantidades is not None else linha.pendente
         if qtd <= 0:
             continue
         if qtd > linha.pendente:
@@ -302,7 +304,10 @@ def fechar_inventario(*, inventario: Inventario, usuario) -> Inventario:
     for c in inv.contagens.select_related("item").filter(saldo_contado__isnull=False):
         # Compara com o saldo ATUAL (pode ter havido movimento após o snapshot)
         atual = Estoque.objects.filter(item=c.item, setor=inv.setor).values_list("saldo", flat=True).first() or D0
-        diff = c.saldo_contado - atual
+        contado = c.saldo_contado
+        if contado is None:  # o filtro já exclui, mas o campo é opcional no modelo
+            continue
+        diff = contado - atual
         if diff == 0:
             continue
         registrar_movimento(

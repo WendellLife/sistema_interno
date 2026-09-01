@@ -77,7 +77,6 @@ def painel(*, user, de=None, ate=None, setor=None) -> dict:
     from apontamentos import selectors as ap
     from chamados import selectors as cham
     from chamados.serializers import ChamadoListSerializer
-    from chamados.viewsets import ChamadoViewSet
     from documentacao import selectors as doc
 
     if not de or not ate:
@@ -85,20 +84,13 @@ def painel(*, user, de=None, ate=None, setor=None) -> dict:
     horas_qs = ap.validos(de, ate, setor=setor)
     por_tipo = ap.horas_por_tipo(horas_qs)
     retrab = ap.percentual_retrabalho(horas_qs)
-    espera = sum(l["minutos"] for l in por_tipo if l["tipo"] == "Espera de terceiro")
+    espera = sum(linha["minutos"] for linha in por_tipo if linha["tipo"] == "Espera de terceiro")
     sla_dados = sla(de, ate, setor=setor)
     abaixo = Estoque.objects.filter(saldo__lte=F("item__estoque_minimo"))
     if setor:
         abaixo = abaixo.filter(setor=setor)
 
-    class _Req:  # escopo da central sem depender de um request DRF
-        pass
-
-    vs = ChamadoViewSet()
-    req = _Req()
-    req.user = user
-    vs.request = req
-    escopo_chamados = vs.get_queryset()
+    escopo_chamados = cham.escopo_do_usuario(user)
     ids_escopo = set(escopo_chamados.values_list("pk", flat=True))
     risco = [c for c in cham.em_risco_de_sla() if c.pk in ids_escopo]
     return {

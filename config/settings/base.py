@@ -177,6 +177,8 @@ CACHES = {
 
 # Cache da matriz de permissões (segundos)
 PERMISSOES_CACHE_SEGUNDOS = 60
+# Feriado muda uma vez por ano; a invalidação é por signal, então o TTL é só rede de segurança.
+FERIADOS_CACHE_SEGUNDOS = 60 * 60 * 24
 
 EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = config("EMAIL_HOST", default="")

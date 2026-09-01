@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import io
 import uuid
+from collections.abc import Callable
 from decimal import Decimal
 from typing import Any
 
@@ -28,8 +29,8 @@ def csv_bytes(colunas: list[str], linhas: list[dict]) -> bytes:
     buf = io.StringIO()
     w = csv.DictWriter(buf, fieldnames=colunas, delimiter=";", extrasaction="ignore")
     w.writeheader()
-    for l in linhas:
-        w.writerow({c: _texto(l.get(c)) for c in colunas})
+    for linha in linhas:
+        w.writerow({c: _texto(linha.get(c)) for c in colunas})
     return ("\ufeff" + buf.getvalue()).encode("utf-8")
 
 
@@ -43,8 +44,8 @@ def xlsx_bytes(colunas: list[str], linhas: list[dict], titulo: str = "Relatório
     ws.append(colunas)
     for c in ws[1]:
         c.font = Font(bold=True)
-    for l in linhas:
-        ws.append([_texto(l.get(c)) for c in colunas])
+    for linha in linhas:
+        ws.append([_texto(linha.get(c)) for c in colunas])
     for col in ws.columns:
         ws.column_dimensions[col[0].column_letter].width = max(12, min(48, max(len(str(c.value or "")) for c in col) + 2))
     ws.freeze_panes = "A2"
@@ -57,8 +58,8 @@ def pdf_bytes(colunas: list[str], linhas: list[dict], titulo: str = "Relatório"
     from django.utils.html import escape
 
     linhas_html = "".join(
-        "<tr>" + "".join(f"<td>{escape(str(_texto(l.get(c)) if l.get(c) is not None else ''))}</td>" for c in colunas) + "</tr>"
-        for l in linhas
+        "<tr>" + "".join(f"<td>{escape(str(_texto(linha.get(c)) if linha.get(c) is not None else ''))}</td>" for c in colunas) + "</tr>"
+        for linha in linhas
     )
     html = f"""<html><head><meta charset="utf-8"><style>
       @page {{ size: A4 landscape; margin: 14mm; }}
@@ -75,7 +76,7 @@ def pdf_bytes(colunas: list[str], linhas: list[dict], titulo: str = "Relatório"
     return HTML(string=html).write_pdf()
 
 
-GERADORES = {"csv": (csv_bytes, "text/csv"),
+GERADORES: dict[str, tuple[Callable[..., bytes], str]] = {"csv": (csv_bytes, "text/csv"),
              "xlsx": (xlsx_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
              "pdf": (pdf_bytes, "application/pdf")}  # fmt: skip
 
@@ -97,7 +98,7 @@ def responder(request, *, dados_json: dict, colunas: list[str], linhas: list[dic
         from .tasks import gerar_export
 
         job_id = str(uuid.uuid4())
-        gerar_export.delay(job_id, request.user.pk, formato, colunas, [{c: _texto(l.get(c)) for c in colunas} for l in linhas], nome)
+        gerar_export.delay(job_id, request.user.pk, formato, colunas, [{c: _texto(linha.get(c)) for c in colunas} for linha in linhas], nome)
         return Response({"job_id": job_id, "linhas": len(linhas), "mensagem": "O arquivo será enviado por e-mail."},
                         status=status.HTTP_202_ACCEPTED)  # fmt: skip
     conteudo, mime = gerar(formato, colunas, linhas, nome)

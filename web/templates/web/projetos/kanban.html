@@ -3,7 +3,11 @@
 {% block header_extra %}{% if setores %}<form method="get"><select name="setor" onchange="this.form.submit()" aria-label="Setor" style="min-height:32px;padding:4px 8px;border:1px solid var(--border-default);border-radius:10px;font-size:12.5px"><option value="">Todos os setores</option>{% for s in setores %}<option value="{{ s.id }}" {% if request.GET.setor == s.id|stringformat:"s" %}selected{% endif %}>{{ s.nome }}</option>{% endfor %}</select></form>{% endif %}{% endblock %}
 {% block conteudo %}
 <div class="tela__head" x-data="{ novo: false }">
-  <div><h1>Projetos de TI</h1><p class="tela__sub">portfólio e capacidade · {{ kpis.abertos }} projeto{{ kpis.abertos|pluralize }} aberto{{ kpis.abertos|pluralize }}</p></div>
+  <div>
+    <div class="tela__sobre">Portfólio de TI · {{ kpis.abertos }} projeto{{ kpis.abertos|pluralize }} aberto{{ kpis.abertos|pluralize }}</div>
+    <h1>Projetos de desenvolvimento</h1>
+    <p class="tela__sub">Cada projeto na sua etapa, com percentual de conclusão, horas, risco e próxima entrega.</p>
+  </div>
   <div class="tela__acoes"><a class="btn btn--secundario" href="{% url 'web:projetos_historico' %}">Projetos concluídos/cancelados</a>{% if pode_editar %}<button class="btn btn--primario" @click="novo = true">{% include "web/partials/_icone.html" with nome="mais" %} Novo projeto</button>{% endif %}</div>
   {% if pode_editar %}
   <div class="overlay" x-show="novo" x-cloak @click.self="novo = false" @keydown.escape.window="novo = false" style="display:none">

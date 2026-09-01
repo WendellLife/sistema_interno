@@ -7,7 +7,9 @@ from datetime import timedelta
 from django.db.models import Count, Q
 from django.utils import timezone
 
+from core import papeis
 from core.calendario import feriados_do_sistema, minutos_uteis_entre
+from core.permissions import papeis_de, ve_todos_setores
 
 from .models import STATUS_ABERTOS, Chamado
 
@@ -55,3 +57,17 @@ def contagem_por_status(qs) -> dict[str, int]:
 
 def filtro_busca(texto: str) -> Q:
     return Q(titulo__icontains=texto) | Q(descricao__icontains=texto) | Q(numero__icontains=texto)
+
+
+def escopo_do_usuario(user, qs=None):
+    """Chamados que `user` enxerga — a MESMA regra que o ChamadoViewSet aplica.
+
+    Existe como selector para que o painel possa reusá-la sem fabricar um request falso
+    em volta do viewset. O viewset delega para cá: uma implementação, não duas.
+    """
+    qs = base_listagem() if qs is None else qs
+    if ve_todos_setores(user):
+        return qs
+    if papeis_de(user) & {papeis.RESPONSAVEL, papeis.GERENTE_SETOR}:
+        return qs.filter(setor_origem=user.setor)
+    return qs.filter(Q(solicitante=user) | Q(responsavel=user))

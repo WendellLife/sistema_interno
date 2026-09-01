@@ -6,8 +6,12 @@
   <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{% block titulo %}Sistema interno{% endblock %} · Life Laboral</title>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
-  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
-  <script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
+  {% comment %}
+    Servidas pelo próprio sistema: a interface inteira depende das duas, e rede que
+    bloqueie CDN externo deixava tudo inerte, sem erro visível. Ver static/js/vendor/.
+  {% endcomment %}
+  <script src="{% static 'js/vendor/htmx-1.9.12.min.js' %}" defer></script>
+  <script src="{% static 'js/vendor/alpine-3.14.1.min.js' %}" defer></script>
   <script src="{% static 'js/app.js' %}"></script>
 </head>
 <body class="ll-body" x-data="{ buscaAberta: false }" @abrir-busca.window="buscaAberta = true; $nextTick(() => $refs.q.focus())" @keydown.escape.window="buscaAberta = false">
@@ -47,8 +51,8 @@
 <div class="overlay" x-show="buscaAberta" x-cloak @click.self="buscaAberta = false" style="display:none; align-items:start; padding-top:80px">
   <div class="modal" role="dialog" aria-label="Busca global">
     <div class="campo"><input x-ref="q" type="search" name="q" placeholder="Buscar chamado, projeto, item ou solicitação" autocomplete="off"
-      hx-get="{% url 'web:busca' %}" hx-trigger="keyup changed delay:250ms" hx-target="#busca-resultados"></div>
-    <div id="busca-resultados" class="busca-res"></div>
+      hx-get="{% url 'web:busca' %}" hx-trigger="keyup changed delay:250ms" hx-target="#busca-resultados" hx-indicator="#busca-resultados-carregando"></div>
+    <div id="busca-resultados-carregando" class="htmx-indicator skeleton skeleton--lista" aria-hidden="true"><div class="skeleton__linha"></div><div class="skeleton__linha skeleton__linha--curta"></div></div><div id="busca-resultados" class="busca-res"></div>
   </div>
 </div>
 <div id="modal-erro"></div>

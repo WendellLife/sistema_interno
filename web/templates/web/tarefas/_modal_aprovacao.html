@@ -1,0 +1,59 @@
+{% load ui %}
+<div class="overlay" x-data="{ marcados: [], motivo: '' }" @click.self="$el.remove()" @keydown.escape.window="$el.remove()">
+  <div class="modal modal--largo" role="dialog" aria-labelledby="aprov-titulo">
+    <div class="modal__head">
+      {% include "web/partials/_icone.html" with nome="timer" %}
+      <h2 id="aprov-titulo">Aprovação de horas</h2>
+      <button class="btn btn--fantasma btn--sm modal__fechar" @click="$root.remove()" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button>
+    </div>
+
+    {% if erro %}<div class="aviso aviso--erro">{{ erro.mensagem }}</div>{% endif %}
+    {% if aviso %}<div class="aviso aviso--ok">{{ aviso }}</div>{% endif %}
+
+    {% if pendentes %}
+    <p style="margin:0 0 4px">
+      Lançamento acima da capacidade do dia ou com mais de 7 dias de atraso fica aqui até
+      alguém decidir — e <b>não entra nos indicadores</b> enquanto espera.
+    </p>
+
+    <form hx-post="{% url 'web:decidir_aprovacoes' %}" hx-target="#modal-erro" hx-swap="innerHTML">
+      {% csrf_token %}
+      <div class="aprov">
+        <div class="aprov__linha aprov__linha--head">
+          <span><input type="checkbox" aria-label="Marcar todos"
+                       @change="marcados = $event.target.checked ? [...$root.querySelectorAll('input[name=ids]')].map(i => i.value) : []"></span>
+          <span>Pessoa</span><span>Dia</span><span>Tipo</span><span>Total</span><span>Justificativa</span>
+        </div>
+        {% for ap in pendentes %}
+        <label class="aprov__linha">
+          <span><input type="checkbox" name="ids" value="{{ ap.pk }}" x-model="marcados"></span>
+          <span><b>{{ ap.usuario.nome }}</b><div class="sub-linha">{{ ap.usuario.setor.sigla }}</div></span>
+          <span class="mono">{{ ap.inicio|date:"d/m" }}</span>
+          <span>{{ ap.tipo.nome }}</span>
+          <span class="mono">{{ ap.minutos|horas }}</span>
+          <span class="sub-linha">{{ ap.observacao|default:"—" }}{% if ap.chamado %} · {{ ap.chamado.numero }}{% endif %}</span>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="campo" style="margin-top:12px" x-show="marcados.length">
+        <label for="motivo-recusa">Motivo da recusa <span class="muted">(obrigatório para recusar)</span></label>
+        <input id="motivo-recusa" name="motivo" x-model="motivo" maxlength="240"
+               placeholder="Ex.: sem evidência do que foi feito nessas horas">
+      </div>
+
+      <div class="modal__rodape">
+        <span class="muted" style="margin-right:auto" x-text="marcados.length ? marcados.length + ' selecionado(s)' : 'Selecione ao menos um'"></span>
+        <button class="btn btn--secundario" type="button" @click="$root.remove()">Fechar</button>
+        <button class="btn btn--perigo" type="submit" name="acao" value="recusar"
+                :disabled="!marcados.length || !motivo.trim()">Recusar</button>
+        <button class="btn btn--primario" type="submit" name="acao" value="aprovar"
+                :disabled="!marcados.length">Aprovar</button>
+      </div>
+    </form>
+    {% else %}
+    <div class="vazio">Nada aguardando aprovação no seu escopo.</div>
+    <div class="modal__rodape"><button class="btn btn--secundario" @click="$root.remove()">Fechar</button></div>
+    {% endif %}
+  </div>
+</div>

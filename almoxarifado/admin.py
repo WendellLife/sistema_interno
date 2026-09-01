@@ -1,7 +1,15 @@
 from django.contrib import admin
 
 from .models import (
-    AlertaReposicao, Cotacao, Estoque, Inventario, Item, Movimento, NotaFiscal, Solicitacao, Transferencia,
+    AlertaReposicao,
+    Cotacao,
+    Estoque,
+    Inventario,
+    Item,
+    Movimento,
+    NotaFiscal,
+    Solicitacao,
+    Transferencia,
 )  # fmt: skip
 
 

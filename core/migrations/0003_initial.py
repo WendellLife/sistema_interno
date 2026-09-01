@@ -17,6 +17,13 @@ class Migration(migrations.Migration):
         ('core', '0002_funcao_proximo_numero'),
     ]
 
+    # `admin.0001_initial` depende de `core.__first__`, que é a migração de extensões —
+    # não a que cria `core.User`. Sem isto o `LogEntry.user` aponta para uma tabela que
+    # ainda não existe e o `migrate` quebra em banco limpo.
+    run_before = [
+        ('admin', '0001_initial'),
+    ]
+
     operations = [
         migrations.CreateModel(
             name='Feriado',

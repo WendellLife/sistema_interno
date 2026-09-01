@@ -1,13 +1,9 @@
 /* Sistema interno — folha do produto. Só aliases semânticos; medidas de 06-DESIGN-TOKENS.md. */
-@import url("tokens/fonts.css");
-@import url("tokens/colors.css");
-@import url("tokens/typography.css");
-@import url("tokens/spacing.css");
-@import url("tokens/effects.css");
-@import url("tokens/base.css");
+/* Ponto de entrada único do design system — acrescentar arquivo de token lá dentro
+   passa a valer aqui sem editar esta folha (06: "consumers link THIS file only"). */
+@import url("ds-styles.css");
 
 :root {
-  --ll-warning-fg: #8a5a14;          /* texto sobre fundo âmbar (06 §1) */
   --sidebar-w: 250px;
   --header-h: 58px;
   --content-pad: 28px;
@@ -63,9 +59,18 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* ---------- cabeçalho de tela ---------- */
 .tela__head { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-.tela__head h1 { margin: 0; font: 800 27px/1.2 var(--font-display); letter-spacing: -.02em; color: var(--text-strong); max-width: 720px; }
-.tela__sub { margin: 4px 0 0; font-size: 12.5px; color: var(--text-muted); }
+/* Cabeçalho de tela do protótipo: sobretítulo (módulo) → H1 (o que a tela responde)
+   → subtítulo explicativo. Valores conferidos em `referencias/Sistema Interno TI.dc.html`. */
+.tela__sobre { font: 700 11px/1 var(--font-display); letter-spacing: .14em; text-transform: uppercase; color: var(--color-primary); margin-bottom: 8px; }
+.tela__head h1 { margin: 0; font: 800 30px/1.15 var(--font-display); letter-spacing: -.02em; color: var(--text-strong); }
+/* A tela de tarefa carrega o título do chamado: menor e com medida de leitura (06 §2). */
+.tela__head--titulo-longo h1 { font-size: 27px; line-height: 1.2; max-width: 720px; }
+.tela__sub { margin: 8px 0 0; font-size: 14px; color: var(--text-muted); max-width: 620px; }
 .tela__acoes { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.filtros__chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+/* A contagem acompanha os chips de filtro, não o subtítulo: ela responde "quantos, deste
+   recorte", e muda quando o filtro muda (protótipo, tela de tarefas). */
+.filtros__contagem { font-size: 12.5px; color: var(--text-muted); margin-left: 4px; }
 .tela__chips { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
 
 /* ---------- botões ---------- */
@@ -151,11 +156,11 @@ a.tabela__linha:hover { background: var(--ll-slate-050); color: var(--text-body)
 .apont__rodape { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle); font-size: 12.5px; }
 .apont__relogio { font: 600 13px var(--font-mono); color: var(--ll-teal-700); }
 .aviso { padding: 10px 12px; border-radius: 12px; font-size: 12.5px; margin-bottom: 12px; border: 1px solid transparent; }
-.aviso--warn { background: var(--ll-warning-bg); color: var(--ll-warning-fg); border-color: #f2dcb2; }
+.aviso--warn { background: var(--ll-warning-bg); color: var(--ll-warning-fg); border-color: var(--ll-warning-border); }
 .aviso--danger { background: var(--ll-danger-bg); color: var(--ll-danger); }
 .aviso--ok { background: var(--ll-success-bg); color: var(--ll-success); }
 .aviso--muted { background: var(--surface-sunken); color: var(--text-muted); }
-.retrab { margin: 8px 0 4px; padding: 12px 14px; border-radius: 12px; background: var(--ll-warning-bg); border: 1px solid #f2dcb2; display: grid; gap: 10px; }
+.retrab { margin: 8px 0 4px; padding: 12px 14px; border-radius: 12px; background: var(--ll-warning-bg); border: 1px solid var(--ll-warning-border); display: grid; gap: 10px; }
 .retrab p { margin: 0; font-size: 12.5px; color: var(--ll-warning-fg); }
 
 /* ---------- documentação (grid 180px 1fr 96px) ---------- */
@@ -178,6 +183,14 @@ a.tabela__linha:hover { background: var(--ll-slate-050); color: var(--text-body)
 .overlay { position: fixed; inset: 0; z-index: 50; background: rgba(18,35,46,.45); display: grid; place-items: center; padding: 20px; }
 .modal { width: min(640px, 100%); max-height: calc(100vh - 40px); overflow: auto; background: var(--surface-card); border-radius: 16px; box-shadow: var(--shadow-lg); padding: 22px 24px; animation: modalIn var(--dur-modal) ease; }
 .modal--largo { width: min(860px, 100%); }
+.modal--largo { width: min(880px, 100%); }
+.aviso--erro { background: var(--ll-danger-bg); color: var(--ll-danger); border-color: var(--ll-danger); }
+/* Fila de aprovação de horas (05 §3): pessoa, dia, tipo, total e justificativa. */
+.aprov { display: grid; gap: 2px; margin-top: 10px; }
+.aprov__linha { display: grid; grid-template-columns: 32px 1.4fr 64px 1fr 72px 2fr; gap: 10px; align-items: center; padding: 10px 8px; border-top: 1px solid var(--ll-slate-100); font-size: 13px; cursor: pointer; }
+.aprov__linha:hover { background: var(--ll-slate-050); }
+.aprov__linha--head { border-top: 0; cursor: default; font: 600 10.5px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+.aprov__linha--head:hover { background: transparent; }
 .modal__head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .modal__head h2 { margin: 0; font: 700 18px/1.2 var(--font-display); letter-spacing: -.01em; color: var(--text-strong); }
 .modal__fechar { margin-left: auto; }
@@ -209,7 +222,45 @@ a.tabela__linha:hover { background: var(--ll-slate-050); color: var(--text-body)
 .login__form { padding: 24px 28px 28px; display: grid; gap: 14px; }
 
 /* ---------- toast ---------- */
-.toast { position: fixed; right: 24px; bottom: 24px; z-index: 60; background: var(--text-strong); color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 13px; box-shadow: var(--shadow-lg); animation: modalIn var(--dur-modal) ease; }
+.toast { position: fixed; right: 24px; bottom: 24px; z-index: 60; background: var(--text-strong); color: var(--ll-white); padding: 12px 16px; border-radius: 12px; font-size: 13px; box-shadow: var(--shadow-lg); animation: modalIn var(--dur-modal) ease; }
+
+/* ---------------------------------------------- estados de carregamento (05 §1)
+   Nenhuma troca de HTMX deve acontecer em silêncio. O HTMX marca com `.htmx-request`
+   o elemento que disparou E o alvo apontado por `hx-indicator`; as regras abaixo
+   cobrem os dois casos, então botão nenhum precisa de marcação extra no template. */
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator { display: grid; }
+
+/* Região que já tem conteúdo: atenua em vez de trocar por esqueleto — o usuário
+   continua vendo o resultado anterior e a página não pula de altura. */
+.recarregavel { transition: opacity var(--dur-hover) ease; }
+.recarregavel.htmx-request { opacity: .45; pointer-events: none; }
+
+.btn.htmx-request { pointer-events: none; opacity: .7; }
+.btn.htmx-request::after {
+  content: ""; flex: none; width: 13px; height: 13px; border-radius: 999px;
+  border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-top-color: currentColor; animation: girar .6s linear infinite;
+}
+
+/* Esqueleto com a MESMA altura do conteúdo que substitui — a página não pula. */
+.skeleton { display: grid; gap: 10px; padding: 14px 22px; }
+.skeleton__linha { height: 15px; border-radius: 8px; background: var(--surface-sunken); }
+.skeleton__linha--curta { width: 45%; }
+.skeleton--tabela .skeleton__linha { height: 40px; border-radius: 10px; }
+.skeleton--lista .skeleton__linha { height: 26px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton__linha {
+    background: linear-gradient(90deg, var(--surface-sunken) 25%, var(--surface-page) 37%, var(--surface-sunken) 63%);
+    background-size: 400% 100%;
+    animation: brilho 1.2s ease infinite;
+  }
+}
+
+@keyframes girar { to { transform: rotate(360deg); } }
+@keyframes brilho { from { background-position: 100% 0; } to { background-position: 0 0; } }
 
 @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
 @keyframes modalIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

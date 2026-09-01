@@ -2,7 +2,11 @@
 {% block titulo %}Central de tarefas{% endblock %}{% block modulo %}Central de tarefas{% endblock %}
 {% block conteudo %}
 <div class="tela__head" x-data="{ novo: false }">
-  <div><h1>Central de tarefas</h1><p class="tela__sub">{{ resumo.abertos }} chamado{{ resumo.abertos|pluralize }} aberto{{ resumo.abertos|pluralize }} · {{ em_risco }} em risco de SLA{% if resumo.sla_vencido %} · {{ resumo.sla_vencido }} com SLA vencido{% endif %}</p></div>
+  <div>
+    <div class="tela__sobre">Central de tarefas</div>
+    <h1>Chamados e horas</h1>
+    <p class="tela__sub">SLA, horas previstas contra realizadas e cobertura de documentação por chamado.</p>
+  </div>
   <div class="tela__acoes">
     <a class="btn btn--secundario" href="/api/v1/relatorios/sla/?formato=xlsx" title="Exporta o relatório de SLA">Exportar</a>
     {% if pode_abrir %}<button class="btn btn--primario" @click="novo = true">{% include "web/partials/_icone.html" with nome="mais" %} Novo chamado</button>{% endif %}
@@ -10,11 +14,12 @@
   {% if pode_abrir %}{% include "web/tarefas/_modal_novo.html" %}{% endif %}
 </div>
 
-<form class="filtros" hx-get="{% url 'web:tarefas' %}" hx-target="#tabela" hx-trigger="change, submit, keyup changed delay:300ms from:[name=busca]" hx-push-url="true">
-  <div style="display:flex;gap:6px;flex-wrap:wrap">
+<form class="filtros" hx-get="{% url 'web:tarefas' %}" hx-target="#tabela" hx-indicator="#tabela" hx-trigger="change, submit, keyup changed delay:300ms from:[name=busca]" hx-push-url="true">
+  <div class="filtros__chips">
     {% for valor, rotulo in status_chips %}
       <label class="chip chip--filtro {% if filtros.status == valor %}ativo{% endif %}"><input type="radio" name="status" value="{{ valor }}" {% if filtros.status == valor %}checked{% endif %} class="sr-only">{{ rotulo }}</label>
     {% endfor %}
+    <span class="filtros__contagem">{{ resumo.abertos }} chamado{{ resumo.abertos|pluralize }} aberto{{ resumo.abertos|pluralize }} · {{ em_risco }} em risco de SLA{% if resumo.sla_vencido %} · {{ resumo.sla_vencido }} com SLA vencido{% endif %}</span>
   </div>
   {% if setores %}<select name="setor" aria-label="Setor"><option value="">Todos os setores</option>{% for s in setores %}<option value="{{ s.id }}" {% if filtros.setor == s.id|stringformat:"s" %}selected{% endif %}>{{ s.nome }}</option>{% endfor %}</select>{% endif %}
   <select name="prioridade" aria-label="Prioridade"><option value="">Prioridade</option>{% for v, r in prioridades %}<option value="{{ v }}" {% if filtros.prioridade == v %}selected{% endif %}>{{ r }}</option>{% endfor %}</select>
@@ -23,5 +28,5 @@
   <input name="busca" value="{{ filtros.busca|default:'' }}" placeholder="Buscar por número ou assunto" style="min-height:36px;padding:6px 10px;border:1px solid var(--border-default);border-radius:12px;min-width:220px">
 </form>
 
-<div id="tabela">{% include "web/tarefas/_tabela.html" %}</div>
+<div id="tabela" class="recarregavel">{% include "web/tarefas/_tabela.html" %}</div>
 {% endblock %}

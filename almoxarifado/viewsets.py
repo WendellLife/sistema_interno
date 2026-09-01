@@ -1,14 +1,21 @@
+from collections.abc import Sequence
+
 from django.db.models import Q
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    BasePermission,
+    IsAuthenticated,
+    OperandHolder,
+    SingleOperandHolder,
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core import papeis
 from core.mixins import SetorScopedQuerysetMixin
 from core.models import Setor
-from core.permissions import AcessoModulo, papeis_de, ve_todos_setores
+from core.permissions import AcessoModulo, AcessoModuloVisivel, papeis_de, ve_todos_setores
 
 from . import selectors, services
 from .models import (
@@ -22,6 +29,7 @@ from .models import (
     Solicitacao,
     Transferencia,
 )
+from .permissions import PodeAprovarSolicitacao, PodeMovimentar
 from .serializers import (
     AtenderSerializer,
     ContagensEntradaSerializer,
@@ -43,10 +51,17 @@ from .serializers import (
     TransferenciaSerializer,
 )
 
+# Mesmo tipo que `APIView.permission_classes` declara; sem isto o mypy vê dois tipos
+# diferentes para o atributo e recusa a herança múltipla.
+_Permissao = type[BasePermission] | OperandHolder | SingleOperandHolder
+
 
 class _Almox:
+    """Mixin de módulo. Fora da hierarquia da APIView, então `permission_classes` precisa
+    da anotação explícita — senão o mypy vê dois tipos diferentes para o mesmo atributo."""
+
     modulo = "almoxarifado"
-    permission_classes = [IsAuthenticated, AcessoModulo]
+    permission_classes: Sequence[_Permissao] = [IsAuthenticated, AcessoModulo]
 
 
 def _setor_param(request):
@@ -107,6 +122,13 @@ class MovimentoViewSet(_Almox, SetorScopedQuerysetMixin, viewsets.GenericViewSet
     def retrieve(self, request, pk=None):
         return Response(MovimentoSerializer(self.get_object()).data)
 
+    # Movimentar estoque é direito do PAPEL, não do nível de escrita do módulo: o
+    # colaborador tem "E" em almoxarifado porque SOLICITA — solicitar não é dar baixa.
+    def get_permissions(self):
+        if self.action == "create":
+            return [IsAuthenticated(), AcessoModulo(), PodeMovimentar()]
+        return super().get_permissions()
+
     def create(self, request):
         s = MovimentoCreateSerializer(data=request.data)
         s.is_valid(raise_exception=True)
@@ -142,19 +164,26 @@ class SolicitacaoViewSet(_Almox, SetorScopedQuerysetMixin, viewsets.GenericViewS
         sol = services.criar_solicitacao(solicitante=request.user, **s.validated_data)
         return Response(SolicitacaoSerializer(self.get_queryset().get(pk=sol.pk)).data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["post"])
+    # Aprovar/negar é direito do PAPEL (gerente do setor), não do nível de escrita do
+    # módulo — a matriz dá "V" ao gerente em almoxarifado, o que barrava todo POST dele.
+    # Solicitação de outro setor não está no queryset e vira 404, não 403.
+    @action(detail=True, methods=["post"],
+            permission_classes=[IsAuthenticated, AcessoModuloVisivel, PodeAprovarSolicitacao])
     def aprovar(self, request, pk=None):
         sol = services.aprovar_solicitacao(solicitacao=self.get_object(), aprovador=request.user)
         return Response(SolicitacaoSerializer(self.get_queryset().get(pk=sol.pk)).data)
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"],
+            permission_classes=[IsAuthenticated, AcessoModuloVisivel, PodeAprovarSolicitacao])
     def negar(self, request, pk=None):
         s = NegarSerializer(data=request.data)
         s.is_valid(raise_exception=True)
         sol = services.negar_solicitacao(solicitacao=self.get_object(), aprovador=request.user, motivo=s.validated_data["motivo"])
         return Response(SolicitacaoSerializer(self.get_queryset().get(pk=sol.pk)).data)
 
-    @action(detail=True, methods=["post"])
+    # Atender gera as saídas do estoque — quem atende precisa poder movimentar.
+    @action(detail=True, methods=["post"],
+            permission_classes=[IsAuthenticated, AcessoModulo, PodeMovimentar])
     def atender(self, request, pk=None):
         s = AtenderSerializer(data=request.data)
         s.is_valid(raise_exception=True)
@@ -209,6 +238,12 @@ class TransferenciaViewSet(_Almox, viewsets.GenericViewSet):
     def list(self, request):
         page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
         return self.get_paginated_response(TransferenciaSerializer(page, many=True).data)
+
+    def get_permissions(self):
+        # Transferência são dois movimentos: mesma regra da saída.
+        if self.action == "create":
+            return [IsAuthenticated(), AcessoModulo(), PodeMovimentar()]
+        return super().get_permissions()
 
     def create(self, request):
         s = TransferenciaCreateSerializer(data=request.data)

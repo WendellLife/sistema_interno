@@ -10,7 +10,13 @@ from django.db import transaction
 from django.utils import timezone
 
 from apontamentos import services as ap_services
-from apontamentos.models import MOTIVOS_INICIAIS, TIPOS_INICIAIS, Apontamento, MotivoRetrabalho, TipoTrabalho
+from apontamentos.models import (
+    MOTIVOS_INICIAIS,
+    TIPOS_INICIAIS,
+    Apontamento,
+    MotivoRetrabalho,
+    TipoTrabalho,
+)
 from chamados import services as chamados_services
 from chamados.models import Categoria, Chamado, RegraSLA
 from core import papeis
@@ -272,82 +278,6 @@ class Command(BaseCommand):
     def almoxarifado(self):
         from decimal import Decimal
 
-        from almoxarifado import services as alm
-        from almoxarifado.models import Item
-
-        if Item.objects.exists():
-            return
-        compras = self.usuarios_por_setor["CMP"][0]
-        catalogo = [
-            ("MRO-4471", "Rolamento 6205 ZZ", "UN", "MAN", 10, "18.90"),
-            ("MRO-4472", "Correia A-42", "UN", "MAN", 6, "32.50"),
-            ("MRO-4480", "Graxa lítio 1kg", "KG", "MAN", 5, "24.00"),
-            ("MRO-4501", "Fusível 10A", "UN", "MAN", 20, "1.20"),
-            ("EPI-0101", "Luva nitrílica M (par)", "PC", "PRD", 40, "3.10"),
-            ("EPI-0102", "Óculos de proteção", "UN", "PRD", 15, "8.75"),
-            ("EPI-0110", "Protetor auricular", "UN", "PRD", 30, "1.90"),
-            ("EMB-2001", "Caixa papelão 40x30x30", "UN", "EXP", 200, "2.35"),
-            ("EMB-2002", "Fita adesiva 48mm", "UN", "EXP", 30, "4.60"),
-            ("EMB-2010", "Etiqueta térmica 100x150 (rolo)", "UN", "EXP", 12, "27.00"),
-            ("LAB-3001", "Reagente pH 500ml", "UN", "QLD", 4, "56.00"),
-            ("LAB-3002", "Pipeta descartável 5ml (cx)", "CX", "QLD", 3, "41.00"),
-            ("ESC-9001", "Papel A4 (resma)", "UN", "RH", 10, "22.90"),
-            ("ESC-9002", "Toner HP 85A", "UN", "TI", 2, "189.00"),
-            ("TI-7001", "Cabo de rede Cat6 1,5m", "UN", "TI", 10, "9.80"),
-            ("TI-7002", "Mouse USB", "UN", "TI", 5, "29.90"),
-        ]
-        itens = {}
-        for codigo, desc, un, sigla, minimo, custo in catalogo:
-            itens[codigo] = Item.objects.create(
-                codigo=codigo, descricao=desc, unidade=un, setor_dono=self.por_sigla[sigla],
-                estoque_minimo=Decimal(minimo), custo_unitario=Decimal(custo), criado_por=compras,
-            )
-        # Entrada inicial por NF em cada setor dono
-        from datetime import date as _date
-        por_setor: dict[str, list] = {}
-        for codigo, desc, un, sigla, minimo, custo in catalogo:
-            por_setor.setdefault(sigla, []).append((itens[codigo], minimo, custo))
-        for n, (sigla, lista) in enumerate(por_setor.items(), start=1):
-            alm.entrada_por_nota(
-                numero=f"{1000 + n}", serie="1", fornecedor="Distribuidora Industrial Ltda", cnpj="12.345.678/0001-90",
-                emissao=_date.today() - timedelta(days=20), setor=self.por_sigla[sigla], usuario=compras,
-                valor_total=sum(Decimal(c) * (m * 3) for _, m, c in lista),
-                itens=[{"item": it, "quantidade_pedida": m * 3, "quantidade_recebida": m * 3, "custo_unitario": Decimal(c)}
-                       for it, m, c in lista],
-            )
-        # Consumo: solicitações aprovadas e atendidas (algumas parciais) + uma saída sem OS (consumo geral)
-        cc_por_setor = {cc.setor.sigla: cc for cc in CentroCusto.objects.select_related("setor")}
-        for sigla, lista in por_setor.items():
-            gente = self.usuarios_por_setor.get(sigla) or [self.admin]
-            gerente, resp = gente[0], gente[min(1, len(gente) - 1)]
-            for k in range(3):
-                it, minimo, _ = lista[k % len(lista)]
-                sol = alm.criar_solicitacao(
-                    solicitante=random.choice(gente), centro_custo=cc_por_setor[sigla],
-                    itens=[{"item": it, "quantidade": Decimal(max(1, minimo // 2))}],
-                    os_ref=f"OS-{random.randint(1000, 9999)}" if k != 1 else "", urgente=(k == 2),
-                )
-                if k == 2:
-                    continue  # fica aberta para a fila de aprovação
-                alm.aprovar_solicitacao(solicitacao=sol, usuario=gerente if papeis.GERENTE_SETOR in gerente.papeis() else compras)
-                alm.atender_solicitacao(solicitacao=sol, usuario=resp if papeis.RESPONSAVEL in resp.papeis() else compras)
-        # Transferência que fura o mínimo da origem (alerta amarelo do protótipo)
-        alm.transferir(item=itens["MRO-4501"], setor_origem=self.por_sigla["MAN"], setor_destino=self.por_sigla["PRD"],
-                       quantidade=Decimal(45), motivo="Parada de linha na produção", usuario=compras)
-        # Inventário fechado com divergências na Expedição
-        inv = alm.abrir_inventario(setor=self.por_sigla["EXP"], responsavel=compras)
-        for c in inv.contagens.select_related("item"):
-            desvio = {"EMB-2001": -7, "EMB-2002": 2}.get(c.item.codigo, 0)
-            alm.registrar_contagem(inventario=inv, item=c.item, saldo_contado=c.saldo_sistema + desvio, usuario=compras)
-        alm.fechar_inventario(inventario=inv, usuario=compras)
-        # Cotação em andamento
-        cot = alm.abrir_cotacao(item=itens["MRO-4472"], quantidade=Decimal(24), prazo_resposta=date.today() + timedelta(days=5), usuario=compras)
-        alm.adicionar_proposta(cotacao=cot, fornecedor="Correias & Cia", valor_unitario=Decimal("31.20"), prazo_entrega_dias=7)
-        alm.adicionar_proposta(cotacao=cot, fornecedor="Distribuidora Industrial Ltda", valor_unitario=Decimal("33.00"), prazo_entrega_dias=3)
-
-    def almoxarifado(self):
-        from decimal import Decimal
-
         from almoxarifado import services as almox
         from almoxarifado.models import Item, Movimento
 
@@ -380,7 +310,7 @@ class Command(BaseCommand):
                 codigo=codigo, descricao=desc, unidade=un, setor_dono=self.por_sigla[sigla],
                 estoque_minimo=minimo, custo_unitario=Decimal(custo), criado_por=compras,
             )
-        for codigo, item in itens.items():
+        for item in itens.values():
             saldo_inicial = item.estoque_minimo * random.choice([Decimal("0.5"), Decimal("1.5"), Decimal("3"), Decimal("4")])
             almox.registrar_movimento(item=item, setor=item.setor_dono, tipo="entrada",
                                       quantidade=saldo_inicial, usuario=compras, justificativa="Saldo inicial")

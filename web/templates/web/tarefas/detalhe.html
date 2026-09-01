@@ -1,9 +1,9 @@
 {% extends "web/base.html" %}{% load ui %}
 {% block titulo %}{{ c.numero }}{% endblock %}{% block modulo %}Tarefa em andamento{% endblock %}
 {% block conteudo %}
-<div class="tela__head" x-data="{ comentar: false, cancelar: false }">
+<div class="tela__head tela__head--titulo-longo" x-data="{ comentar: false, cancelar: false }">
   <div>
-    <div class="codigo" style="margin-bottom:6px">{{ c.numero }}</div>
+    <div class="tela__sobre">{{ c.numero }} · {{ c.setor_origem.nome }}</div>
     <h1>{{ c.titulo }}</h1>
     <div class="tela__chips"><i class="chip {{ c.prioridade|chip_prioridade }}">{{ c.get_prioridade_display }}</i><i class="chip chip-neutral">{{ c.categoria.nome }}</i><i class="chip {{ c.status|chip_status }}">{{ c.get_status_display }}</i>{% if c.categoria.exige_documentacao %}<i class="chip chip-warn" title="Entrega bloqueada até publicar as seções obrigatórias">Exige documentação</i>{% endif %}</div>
   </div>

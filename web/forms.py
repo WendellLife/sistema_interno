@@ -12,7 +12,7 @@ class NovoChamadoForm(forms.Form):
 
 class LancamentoManualForm(forms.Form):
     tipo = forms.IntegerField()
-    data = forms.DateField()
+    data = forms.DateField()  # type: ignore[assignment]  # a metaclasse move para declared_fields
     inicio = forms.TimeField()
     fim = forms.TimeField()
     observacao = forms.CharField(max_length=240, required=False)

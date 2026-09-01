@@ -1,5 +1,6 @@
 import pytest
 from django.test import Client
+from django.utils.html import strip_tags
 
 from apontamentos.models import MOTIVOS_INICIAIS, TIPOS_INICIAIS, MotivoRetrabalho, TipoTrabalho
 from chamados import services as cham
@@ -245,7 +246,9 @@ def test_almox_nota_e_inventario(web, almox_dados, setores):
     r = cli.get(f"/almoxarifado/inventario/{q}")
     assert r.status_code == 200 and "rodada #" in r.content.decode() and Inventario.objects.filter(status="aberto").count() == 1
     r = cli.post(f"/almoxarifado/inventario/{q}", {"acao": "fechar", "item": [almox_dados["parafuso"].id, almox_dados["luva"].id], "contado": ["18", ""]})
-    assert r.status_code == 200 and "1 divergência" in r.content.decode() and "R$ 3,00".replace(",", ".") in r.content.decode().replace(",", ".")
+    # O número vem em <b>: comparar o HTML cru nunca casaria com "1 divergência".
+    texto = strip_tags(r.content.decode())
+    assert r.status_code == 200 and "1 divergência" in texto and "R$ 3,00" in texto
     assert selectors.saldo(almox_dados["parafuso"], setores["PRD"]) == 18
     assert selectors.saldo(almox_dados["luva"], setores["PRD"]) == 8  # sem contagem: ignorado
     # colaborador não abre inventário
@@ -255,7 +258,10 @@ def test_almox_nota_e_inventario(web, almox_dados, setores):
 def test_almox_qr(web, almox_dados):
     r = web("colab_prd").get("/almoxarifado/qr/MRO-4471/")
     html = r.content.decode()
-    assert r.status_code == 200 and "Parafuso M8" in html and "Saída rápida" in html
+    # Colaborador solicita, não movimenta: o QR oferece reposição, não baixa.
+    assert r.status_code == 200 and "Parafuso M8" in html
+    assert "Solicitar reposição" in html and "Saída rápida" not in html
+    assert "Saída rápida" in web("resp_prd").get("/almoxarifado/qr/MRO-4471/").content.decode()
     r = web("colab_prd").get("/almoxarifado/qr/?codigo=NADA", HTTP_HX_REQUEST="true")
     assert "não encontrado" in r.content.decode() and "<html" not in r.content.decode()
     r = web("colab_prd").get("/almoxarifado/itens/?q=luva")
@@ -340,3 +346,106 @@ def test_historico_de_mudancas(web, chamado):
     html = r.content.decode()
     assert r.status_code == 200 and "chamado.abrir" in html and "chamado.atribuir" in html
     assert web("colab_prd").get("/historico/").status_code == 404
+
+def test_sem_dependencia_de_cdn_externo(web):
+    """A interface inteira depende de HTMX e Alpine: se vierem de CDN, uma rede que
+    bloqueie o domínio deixa tudo inerte sem nenhum erro visível ao usuário."""
+    html = web("colab_prd").get("/tarefas/").content.decode()
+    assert "unpkg.com" not in html and "cdn.jsdelivr" not in html and "cdnjs" not in html
+    assert "/static/js/vendor/htmx-" in html
+    assert "/static/js/vendor/alpine-" in html
+
+
+def test_troca_de_filtro_tem_estado_de_carregamento(web):
+    """05 §2: nenhuma troca de partial acontece em silêncio."""
+    html = web("colab_prd").get("/tarefas/").content.decode()
+    assert 'hx-indicator="#tabela"' in html
+    assert 'id="tabela" class="recarregavel"' in html
+
+def test_coluna_documento_na_central(web, usuarios, categorias, django_assert_max_num_queries):
+    """05 §2: a 8ª coluna é o chip de Documento — OK, Pendente (âmbar) ou N/A."""
+    from documentacao import services as doc
+
+    # categoria que NÃO exige documentação → N/A
+    suporte = cham.abrir_chamado(solicitante=usuarios["colab_prd"], titulo="Sem exigência",
+                                 descricao="d", categoria=categorias["suporte"], prioridade="baixa")  # fmt: skip
+    # categoria que exige, sem publicar nada → Pendente
+    pendente = cham.abrir_chamado(solicitante=usuarios["colab_prd"], titulo="Falta doc",
+                                  descricao="d", categoria=categorias["dev"], prioridade="alta")  # fmt: skip
+    # categoria que exige, com as 4 seções publicadas → OK
+    completo = cham.abrir_chamado(solicitante=usuarios["colab_prd"], titulo="Doc completa",
+                                  descricao="d", categoria=categorias["dev"], prioridade="alta")  # fmt: skip
+    for secao in ["contexto", "regra", "solucao", "teste"]:
+        doc.publicar_secao(chamado=completo, secao=secao, conteudo="texto da seção",
+                           autor=usuarios["colab_prd"])  # fmt: skip
+
+    cliente = web("ger_ti")
+    cliente.get("/tarefas/")  # aquece sessão e caches de papéis/feriados
+    # A coluna custa UMA consulta para a página toda; e o SLA não pode voltar a buscar
+    # feriados por linha (eram 3 consultas por chamado antes do cache do calendário).
+    with django_assert_max_num_queries(24):
+        html = cliente.get("/tarefas/").content.decode()
+
+    assert "<span>Documento</span>" in html and "<span>Status</span>" not in html
+    def celula_documento(numero: str) -> str:
+        """Último <span> da linha do chamado — a coluna Documento."""
+        linha = html.split(numero, 1)[1].split("</a>", 1)[0]
+        return linha.rsplit("<span>", 1)[-1]
+
+    linhas = {n: celula_documento(n) for n in (suporte.numero, pendente.numero, completo.numero)}
+    assert ">N/A<" in linhas[suporte.numero]
+    assert ">Pendente<" in linhas[pendente.numero]
+    assert ">OK<" in linhas[completo.numero]
+
+@pytest.fixture
+def pendente(usuarios, chamado, tipos):
+    """Lançamento manual retroativo: a regra §4 manda ficar pendente de aprovação."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apontamentos import services as ap_services
+
+    inicio = timezone.localtime(timezone.now()).replace(hour=8, minute=0, second=0, microsecond=0) - timedelta(days=10)
+    ap = ap_services.criar_apontamento(usuario=usuarios["colab_prd"], tipo=tipos["analise"], chamado=chamado,
+                                       inicio=inicio, fim=inicio + timedelta(hours=2), observacao="Ajuste na etiqueta")  # fmt: skip
+    assert ap.pendente_aprovacao
+    return ap
+
+
+def test_aprovacao_de_horas_pela_tela(web, usuarios, pendente):
+    """05 §3: sem esta tela, o lançamento pendente não sai desse estado pela interface."""
+    ger = web("ger_prd")
+    html = ger.get("/aprovacoes/").content.decode()
+    assert "Aprovação de horas" in html
+    assert usuarios["colab_prd"].nome in html and "Ajuste na etiqueta" in html
+
+    r = ger.post("/aprovacoes/decidir/", {"ids": [pendente.pk], "acao": "aprovar"})
+    assert r.status_code == 200 and "1 lançamento aprovado" in r.content.decode()
+    pendente.refresh_from_db()
+    assert not pendente.pendente_aprovacao and pendente.aprovado_por == usuarios["ger_prd"]
+
+
+def test_recusa_exige_motivo_e_tira_dos_indicadores(web, usuarios, pendente):
+    ger = web("ger_prd")
+    r = ger.post("/aprovacoes/decidir/", {"ids": [pendente.pk], "acao": "recusar", "motivo": "Sem evidência"})
+    assert r.status_code == 200
+    pendente.refresh_from_db()
+    assert pendente.recusado_em and pendente.motivo_recusa == "Sem evidência"
+    # recusado sai da fila
+    assert "Nada aguardando aprovação" in ger.get("/aprovacoes/").content.decode()
+
+
+def test_escopo_da_fila_de_aprovacao(web, usuarios, pendente):
+    """Duas camadas: quem não aprova não entra (404); quem aprova outro setor não vê."""
+    assert web("colab_prd").get("/aprovacoes/").status_code == 404
+    assert web("resp_prd").get("/aprovacoes/").status_code == 404
+    # o lançamento é de PRD; o gerente de TI vê tudo, mas um id fora da fila dá 404
+    assert str(pendente.pk) in web("ger_ti").get("/aprovacoes/").content.decode()
+    r = web("ger_ti").post("/aprovacoes/decidir/", {"ids": [pendente.pk + 999], "acao": "aprovar"})
+    assert r.status_code == 404
+
+
+def test_decidir_sem_selecionar_recusa_com_causa(web, pendente):
+    r = web("ger_prd").post("/aprovacoes/decidir/", {"acao": "aprovar"})
+    assert r.status_code == 400 and "Selecione ao menos um" in r.content.decode()

@@ -39,6 +39,10 @@
   --ll-success-bg:      #e4f4ec;
   --ll-warning:         #d9922b;
   --ll-warning-bg:      #fbf0dc;
+  /* 06 §1: o texto sobre o fundo âmbar precisa de um tom próprio — `--ll-warning`
+     não alcança AA em 13px. A borda do bloco âmbar sai do mesmo par. */
+  --ll-warning-fg:      #8a5a14;
+  --ll-warning-border:  #f2dcb2;
   --ll-danger:          #d24b46;
   --ll-danger-bg:       #fbe7e6;
   --ll-info:            var(--ll-blue);

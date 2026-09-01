@@ -70,6 +70,16 @@ def chip_status(status) -> str:
 
 
 @register.filter
+def chip_documento(situacao) -> str:
+    return {"ok": "chip-ok", "pendente": "chip-warn", "na": "chip-neutral"}.get(situacao, "chip-neutral")
+
+
+@register.filter
+def rotulo_documento(situacao) -> str:
+    return {"ok": "OK", "pendente": "Pendente", "na": "N/A"}.get(situacao, "N/A")
+
+
+@register.filter
 def pct(valor, maximo) -> int:
     try:
         return round(100 * float(valor) / float(maximo)) if float(maximo) else 0

@@ -9,7 +9,11 @@
 {% endblock %}
 {% block conteudo %}
 <div class="tela__head" x-data="{ exportar: false }">
-  <div><h1>Painel de indicadores</h1><p class="tela__sub">{{ d.periodo.de|date:"d/m" }} – {{ d.periodo.ate|date:"d/m/Y" }}{% if setor %} · {{ setor.nome }}{% else %} · todos os setores{% endif %}</p></div>
+  <div>
+    <div class="tela__sobre">{{ d.periodo.de|date:"d/m" }} – {{ d.periodo.ate|date:"d/m/Y" }}{% if setor %} · {{ setor.nome }}{% else %} · todos os setores{% endif %}</div>
+    <h1>Painel de indicadores</h1>
+    <p class="tela__sub">Onde as horas foram consumidas, o que está fora de SLA e o que o almoxarifado precisa repor.</p>
+  </div>
   <div class="tela__acoes"><button class="btn btn--secundario" @click="exportar = true">Exportar</button></div>
   {% include "web/partials/_modal_exportar.html" %}
 </div>

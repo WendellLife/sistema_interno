@@ -172,7 +172,8 @@ def test_fluxo_solicitacao_parcial(itens, setores, usuarios, cc, estoque_inicial
     assert sol.status == "atendida"
     assert selectors.saldo(itens["parafuso"], setores["MAN"]) == 4
     assert selectors.saldo(itens["oleo"], setores["MAN"]) == 2
-    with pytest.raises(QuantidadeInvalida):
+    # Já atendida: a recusa é de ESTADO, não de quantidade.
+    with pytest.raises(StatusInvalido):
         services.atender_solicitacao(solicitacao=sol, usuario=usuarios["admin"])
 
 

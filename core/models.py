@@ -82,6 +82,10 @@ class Feriado(models.Model):
     data = models.DateField(unique=True)
     nome = models.CharField(max_length=80)
 
+    # Não é campo: o `pre_save` guarda aqui o ano que estava no banco para o `post_save`
+    # saber que, ao mover um feriado de ano, precisa limpar o cache dos DOIS anos.
+    _ano_anterior: int | None = None
+
     class Meta:
         ordering = ["data"]
 

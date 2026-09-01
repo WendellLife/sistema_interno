@@ -73,3 +73,6 @@ class Alocacao(models.Model):
         constraints = [
             models.CheckConstraint(condition=Q(percentual__lte=100), name="aloc_percentual_max_100")
         ]
+
+    def __str__(self) -> str:
+        return f"{self.usuario_id} em {self.projeto_id} ({self.percentual}%)"

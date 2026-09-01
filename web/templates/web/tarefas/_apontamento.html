@@ -1,6 +1,6 @@
 {% load ui %}
 <div class="card" x-data="{ manual: {{ reabrir_manual|yesno:'true,false' }}, retrab: null }">
-  <div class="card__head"><h2>Apontamento de horas</h2><div class="acoes"><span class="muted" style="font-size:12px;align-self:center">total <b class="mono">{{ total_min|horas }}</b>{% if pendentes %} · {{ pendentes }} aguardando aprovação{% endif %}</span><button class="btn btn--sm btn--secundario" @click="manual = true">Lançamento manual</button></div></div>
+  <div class="card__head"><h2>Apontamento de horas</h2><div class="acoes"><span class="muted" style="font-size:12px;align-self:center">total <b class="mono">{{ total_min|horas }}</b>{% if pendentes %} · {{ pendentes }} aguardando aprovação{% endif %}</span>{% if fila_aprovacao %}<button class="btn btn--sm btn--secundario" hx-get="{% url 'web:aprovacoes' %}" hx-target="#modal-erro" title="Fila de lançamentos aguardando decisão">Aprovar horas <i class="badge">{{ fila_aprovacao }}</i></button>{% endif %}<button class="btn btn--sm btn--secundario" @click="manual = true">Lançamento manual</button></div></div>
   {% if aviso %}<div class="aviso aviso--ok" x-data x-init="toast('{{ aviso|escapejs }}')">{{ aviso }}</div>{% endif %}
   {% if erro %}<div class="aviso aviso--danger"><b>{{ erro.mensagem|default:"" }}</b>{% for k, v in erro.items %}{% if k != "mensagem" and k != "erro" and k != "conflitante_id" %}<div>{{ v|join:" " }}</div>{% endif %}{% endfor %}</div>{% endif %}
   {% if ativo and not ativo_neste %}<div class="aviso aviso--warn">Seu cronômetro está rodando em <b>{{ ativo.tipo.nome }}</b> de outro chamado. Iniciar aqui pausa aquele.</div>{% endif %}
@@ -42,7 +42,7 @@
       {% csrf_token %}
       <div class="modal__head"><h2 id="manual-titulo">Lançamento manual de horas</h2><button type="button" class="btn btn--fantasma btn--sm modal__fechar" @click="manual = false" aria-label="Fechar">{% include "web/partials/_icone.html" with nome="fechar" %}</button></div>
       {% if erro and reabrir_manual %}<div class="aviso aviso--danger">{{ erro.mensagem }}{% for k, v in erro.items %}{% if k not in "mensagem erro conflitante_id" %} {{ v|join:" " }}{% endif %}{% endfor %}</div>{% endif %}
-      <div class="form-grid" hx-get="{% url 'web:previa_manual' c.pk %}" hx-trigger="change from:closest form" hx-include="closest form" hx-target="#avisos-manual">
+      <div class="form-grid" hx-get="{% url 'web:previa_manual' c.pk %}" hx-trigger="change from:closest form" hx-include="closest form" hx-target="#avisos-manual" hx-indicator="#avisos-manual">
         <div class="campo"><label>Tipo</label><select name="tipo" required @change="tipoRetrab = $el.selectedOptions[0].dataset.causa === '1'">{% for l in linhas %}<option value="{{ l.tipo.id }}" data-causa="{{ l.tipo.exige_causa|yesno:'1,0' }}">{{ l.tipo.nome }}</option>{% endfor %}</select></div>
         <div class="campo"><label>Data</label><input type="date" name="data" value="{{ hoje|date:'Y-m-d' }}" required></div>
         <div class="campo"><label>Início</label><input type="time" name="inicio" required></div>
@@ -53,7 +53,7 @@
           <select name="motivo_retrabalho"><option value="">Motivo…</option>{% for m in motivos %}<option value="{{ m.id }}">{{ m.nome }}</option>{% endfor %}</select>
           <input name="detalhe_retrabalho" minlength="15" placeholder="O que foi refeito e por quê (mín. 15 caracteres)"></div></template>
       </div>
-      <div id="avisos-manual" style="margin-top:12px"></div>
+      <div id="avisos-manual" class="recarregavel" style="margin-top:12px"></div>
       <div class="modal__rodape"><button type="button" class="btn btn--secundario" @click="manual = false">Cancelar</button><button class="btn btn--primario">Lançar horas</button></div>
     </form>
   </div>

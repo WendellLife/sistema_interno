@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from django.db.models import Count, F, Q, Sum
 
+from core import papeis
+from core.permissions import papeis_de
+
 from .models import Apontamento
 
 
@@ -28,27 +31,51 @@ def validos(de=None, ate=None, setor=None, usuario=None):
 
 
 def horas_por_tipo(qs):
-    return list(
-        qs.values(tipo_id=F("tipo__id"), tipo=F("tipo__nome"), ordem=F("tipo__ordem"))
+    # `tipo` e `tipo_id` são campos do próprio Apontamento: usar os dois como apelido de
+    # anotação faz o Django recusar a consulta. Agrega pelo caminho e renomeia depois.
+    linhas = (
+        qs.values("tipo_id", "tipo__nome", "tipo__ordem")
         .annotate(minutos=Sum("minutos"), apontamentos=Count("id"))
-        .order_by("ordem")
+        .order_by("tipo__ordem")
     )
+    return [
+        {
+            "tipo_id": linha["tipo_id"],
+            "tipo": linha["tipo__nome"],
+            "ordem": linha["tipo__ordem"],
+            "minutos": linha["minutos"],
+            "apontamentos": linha["apontamentos"],
+        }
+        for linha in linhas
+    ]
 
 
 def horas_por_pessoa(qs):
-    return list(
-        qs.values(usuario_id=F("usuario__id"), nome=F("usuario__first_name"),
-                  sobrenome=F("usuario__last_name"), setor=F("usuario__setor__sigla"))
-        .annotate(minutos=Sum("minutos"),
+    # O apelido da soma NÃO pode ser "minutos": ele passaria a sombrear a coluna, e o
+    # segundo Sum("minutos") somaria a própria soma em vez do campo.
+    linhas = (
+        qs.values("usuario_id", "usuario__first_name", "usuario__last_name", "usuario__setor__sigla")
+        .annotate(total_min=Sum("minutos"),
                   retrabalho_min=Sum("minutos", filter=Q(tipo__exige_causa=True)))
-        .order_by("-minutos")
+        .order_by("-total_min")
     )  # fmt: skip
+    return [
+        {
+            "usuario_id": linha["usuario_id"],
+            "nome": linha["usuario__first_name"],
+            "sobrenome": linha["usuario__last_name"],
+            "setor": linha["usuario__setor__sigla"],
+            "minutos": linha["total_min"],
+            "retrabalho_min": linha["retrabalho_min"] or 0,
+        }
+        for linha in linhas
+    ]
 
 
 def horas_por_chamado(qs):
     return list(
         qs.filter(chamado__isnull=False)
-        .values(chamado_id=F("chamado__id"), numero=F("chamado__numero"), titulo=F("chamado__titulo"),
+        .values("chamado_id", numero=F("chamado__numero"), titulo=F("chamado__titulo"),
                 previstas_min=F("chamado__horas_previstas_min"))
         .annotate(minutos=Sum("minutos"))
         .order_by("-minutos")
@@ -84,3 +111,19 @@ def percentual_retrabalho(qs) -> dict:
         "retrabalho_min": retrabalho,
         "percentual": round(100 * retrabalho / total, 1) if total else 0.0,
     }
+
+
+def pendentes_para(aprovador, qs=None):
+    """Fila de aprovação que `aprovador` enxerga — a MESMA regra do serviço `pode_aprovar`.
+
+    Gerente de setor vê o próprio setor; Gerente de TI e Administrador veem tudo. Existe
+    como selector para a tela e a API não terem duas implementações do mesmo escopo.
+    """
+    qs = base_listagem() if qs is None else qs
+    qs = qs.filter(pendente_aprovacao=True, recusado_em__isnull=True).order_by("inicio")
+    meus = papeis_de(aprovador)
+    if meus & {papeis.GERENTE_TI, papeis.ADMINISTRADOR}:
+        return qs
+    if papeis.GERENTE_SETOR in meus:
+        return qs.filter(usuario__setor=aprovador.setor)
+    return qs.none()

@@ -1,19 +1,17 @@
 """Views: validação de entrada, permissão, chamada de serviço, resposta. Sem regra aqui."""
 
-from django.db.models import Q
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from core import papeis
 from core.mixins import SetorScopedQuerysetMixin
-from core.permissions import AcessoModulo, EhAdministrador, eh_ti, papeis_de
+from core.permissions import AcessoModulo, EhAdministrador, eh_ti
 
 from . import selectors, services
 from .filters import ChamadoFilter
-from .models import Categoria, Chamado, RegraSLA
+from .models import Categoria, RegraSLA
 from .serializers import (
     AnexoSerializer,
     CategoriaSerializer,
@@ -38,10 +36,8 @@ class ChamadoViewSet(SetorScopedQuerysetMixin, viewsets.GenericViewSet):
 
     def escopar_para_setor(self, qs, user):
         # Colaborador: só os que abriu ou é responsável. Responsável/Gerente: o setor inteiro.
-        meus = papeis_de(user)
-        if meus & {papeis.RESPONSAVEL, papeis.GERENTE_SETOR}:
-            return qs.filter(setor_origem=user.setor)
-        return qs.filter(Q(solicitante=user) | Q(responsavel=user))
+        # A regra mora no selector para o painel poder reusá-la sem um request.
+        return selectors.escopo_do_usuario(user, qs)
 
     def get_serializer_class(self):
         return {

@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 from almoxarifado import selectors as almox_sel
 from almoxarifado import services as almox
 from almoxarifado.models import AlertaReposicao, Estoque, Inventario, Item, Movimento, Solicitacao
+from almoxarifado.permissions import MOVIMENTA, tem_papel
 from core import papeis
 from core.exceptions import RegraDeNegocio
 from core.models import CentroCusto, Setor
@@ -28,7 +29,18 @@ def _setor_da_tela(request) -> Setor:
 
 
 def _pode_escrever(request) -> bool:
+    """Pode usar o módulo para escrever — inclui SOLICITAR, que o colaborador faz."""
     return nivel_no_modulo(request.user, "almoxarifado") == "E"
+
+
+def _pode_movimentar(request) -> bool:
+    """Pode dar baixa/entrada no estoque. Colaborador solicita, não movimenta."""
+    return _pode_escrever(request) and tem_papel(request.user, MOVIMENTA)
+
+
+def _exige_movimentar(request) -> None:
+    if not _pode_movimentar(request):
+        raise Http404
 
 
 def _pode_compras(request, setor) -> bool:
@@ -67,7 +79,7 @@ def _ctx_solicitacoes(request, setor):
     return {
         "solicitacoes": qs[:20],
         "pode_aprovar": bool(meus & {papeis.GERENTE_SETOR, papeis.ADMINISTRADOR}) and (papeis.ADMINISTRADOR in meus or setor.pk == request.user.setor_id),
-        "pode_atender": _pode_escrever(request) and (ve_todos_setores(request.user) or setor.pk == request.user.setor_id),
+        "pode_atender": _pode_movimentar(request) and (ve_todos_setores(request.user) or setor.pk == request.user.setor_id),
     }
 
 
@@ -89,6 +101,7 @@ def almoxarifado(request):
             "alertas": AlertaReposicao.objects.filter(setor=setor, resolvido_em__isnull=True).count(),
         },
         "pode_escrever": _pode_escrever(request) and (ve_todos_setores(request.user) or setor.pk == request.user.setor_id),
+        "pode_movimentar": _pode_movimentar(request) and (ve_todos_setores(request.user) or setor.pk == request.user.setor_id),
         "pode_compras": _pode_compras(request, setor),
         "inventario_aberto": Inventario.objects.filter(setor=setor, status="aberto").first(),
         "hoje": timezone.localdate(),
@@ -149,7 +162,9 @@ def solicitar(request):
 def solicitacao_acao(request, pk, acao):
     # aprovar/negar é decisão de gerente (matriz "V" basta; o serviço confere o papel e o setor);
     # atender movimenta estoque e exige "E".
-    _exige_modulo(request, "almoxarifado", "E" if acao == "atender" else "V")
+    _exige_modulo(request, "almoxarifado", "V")
+    if acao == "atender":
+        _exige_movimentar(request)  # atender gera as saídas
     sol = get_object_or_404(Solicitacao, pk=pk)
     try:
         if acao == "aprovar":
@@ -170,7 +185,7 @@ def solicitacao_acao(request, pk, acao):
 @require_POST
 def saida_rapida(request):
     """Saída direta (QR / linha do estoque): exige referência — o serviço recusa sem ela."""
-    _exige_modulo(request, "almoxarifado", "E")
+    _exige_movimentar(request)
     setor = _setor_da_tela(request)
     item = get_object_or_404(Item, pk=request.POST.get("item"))
     cc = CentroCusto.objects.filter(pk=request.POST.get("centro_custo") or 0).first()
@@ -185,7 +200,7 @@ def saida_rapida(request):
 @login_required
 @require_POST
 def transferir(request):
-    _exige_modulo(request, "almoxarifado", "E")
+    _exige_movimentar(request)
     origem = _setor_da_tela(request)
     destino = get_object_or_404(Setor, pk=request.POST.get("setor_destino"))
     item = get_object_or_404(Item, pk=request.POST.get("item"))
@@ -283,7 +298,8 @@ def qrcode(request, codigo=None):
     item = Item.objects.filter(codigo=codigo, ativo=True).select_related("setor_dono").first() if codigo else None
     saldo = almox_sel.saldo(item, setor) if item else None
     ctx = {"setor": setor, "codigo": codigo, "item": item, "saldo": saldo,
-           "ccs": CentroCusto.objects.filter(setor=setor, ativo=True), "pode_escrever": _pode_escrever(request)}  # fmt: skip
+           "ccs": CentroCusto.objects.filter(setor=setor, ativo=True),
+           "pode_escrever": _pode_escrever(request), "pode_movimentar": _pode_movimentar(request)}  # fmt: skip
     if item:
         ctx["cls"], ctx["rotulo"] = _situacao(saldo, item.estoque_minimo)
     if request.headers.get("HX-Request"):
