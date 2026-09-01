@@ -13,10 +13,10 @@
     <a class="btn btn--secundario" href="{% url 'web:almox_qr' %}{% if setores %}?setor={{ setor.id }}{% endif %}">Leitura de QR Code</a>
     {% if pode_compras %}<button class="btn btn--secundario" hx-get="{% url 'web:almox_inventario' %}{% if setores %}?setor={{ setor.id }}{% endif %}" hx-target="#modal-erro">Inventário cíclico{% if inventario_aberto %} <i class="dot ativo" title="rodada em andamento"></i>{% endif %}</button>
     <button class="btn btn--secundario" @click="modal = 'nota'">Entrada por nota fiscal</button>{% endif %}
-    {% if pode_escrever %}<button class="btn btn--secundario" @click="modal = 'transf'">Transferência</button>
+    {% if pode_movimentar %}<button class="btn btn--secundario" @click="modal = 'transf'">Transferência</button>
     <button class="btn btn--primario" @click="modal = 'solicitar'">{% include "web/partials/_icone.html" with nome="mais" %} Solicitar material</button>{% endif %}
   </div>
-  {% if pode_escrever %}{% include "web/almox/_modal_solicitar.html" %}{% include "web/almox/_modal_transferencia.html" %}{% endif %}
+  {% if pode_escrever %}{% include "web/almox/_modal_solicitar.html" %}{% endif %}{% if pode_movimentar %}{% include "web/almox/_modal_transferencia.html" %}{% endif %}
   {% if pode_compras %}{% include "web/almox/_modal_nota.html" %}{% endif %}
 </div>
 

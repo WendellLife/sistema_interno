@@ -258,7 +258,10 @@ def test_almox_nota_e_inventario(web, almox_dados, setores):
 def test_almox_qr(web, almox_dados):
     r = web("colab_prd").get("/almoxarifado/qr/MRO-4471/")
     html = r.content.decode()
-    assert r.status_code == 200 and "Parafuso M8" in html and "Saída rápida" in html
+    # Colaborador solicita, não movimenta: o QR oferece reposição, não baixa.
+    assert r.status_code == 200 and "Parafuso M8" in html
+    assert "Solicitar reposição" in html and "Saída rápida" not in html
+    assert "Saída rápida" in web("resp_prd").get("/almoxarifado/qr/MRO-4471/").content.decode()
     r = web("colab_prd").get("/almoxarifado/qr/?codigo=NADA", HTTP_HX_REQUEST="true")
     assert "não encontrado" in r.content.decode() and "<html" not in r.content.decode()
     r = web("colab_prd").get("/almoxarifado/itens/?q=luva")

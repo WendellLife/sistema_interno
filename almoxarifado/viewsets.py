@@ -29,7 +29,7 @@ from .models import (
     Solicitacao,
     Transferencia,
 )
-from .permissions import PodeAprovarSolicitacao
+from .permissions import PodeAprovarSolicitacao, PodeMovimentar
 from .serializers import (
     AtenderSerializer,
     ContagensEntradaSerializer,
@@ -122,6 +122,13 @@ class MovimentoViewSet(_Almox, SetorScopedQuerysetMixin, viewsets.GenericViewSet
     def retrieve(self, request, pk=None):
         return Response(MovimentoSerializer(self.get_object()).data)
 
+    # Movimentar estoque é direito do PAPEL, não do nível de escrita do módulo: o
+    # colaborador tem "E" em almoxarifado porque SOLICITA — solicitar não é dar baixa.
+    def get_permissions(self):
+        if self.action == "create":
+            return [IsAuthenticated(), AcessoModulo(), PodeMovimentar()]
+        return super().get_permissions()
+
     def create(self, request):
         s = MovimentoCreateSerializer(data=request.data)
         s.is_valid(raise_exception=True)
@@ -174,7 +181,9 @@ class SolicitacaoViewSet(_Almox, SetorScopedQuerysetMixin, viewsets.GenericViewS
         sol = services.negar_solicitacao(solicitacao=self.get_object(), aprovador=request.user, motivo=s.validated_data["motivo"])
         return Response(SolicitacaoSerializer(self.get_queryset().get(pk=sol.pk)).data)
 
-    @action(detail=True, methods=["post"])
+    # Atender gera as saídas do estoque — quem atende precisa poder movimentar.
+    @action(detail=True, methods=["post"],
+            permission_classes=[IsAuthenticated, AcessoModulo, PodeMovimentar])
     def atender(self, request, pk=None):
         s = AtenderSerializer(data=request.data)
         s.is_valid(raise_exception=True)
@@ -229,6 +238,12 @@ class TransferenciaViewSet(_Almox, viewsets.GenericViewSet):
     def list(self, request):
         page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
         return self.get_paginated_response(TransferenciaSerializer(page, many=True).data)
+
+    def get_permissions(self):
+        # Transferência são dois movimentos: mesma regra da saída.
+        if self.action == "create":
+            return [IsAuthenticated(), AcessoModulo(), PodeMovimentar()]
+        return super().get_permissions()
 
     def create(self, request):
         s = TransferenciaCreateSerializer(data=request.data)

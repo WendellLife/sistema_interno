@@ -10,7 +10,7 @@ D = Decimal
 
 
 def test_saldo_insuficiente_409_estruturado(api, usuarios, itens, setores, cc, estoque_inicial):
-    r = api(usuarios["colab_man"]).post("/api/v1/almoxarifado/movimentos/", {
+    r = api(usuarios["compras"]).post("/api/v1/almoxarifado/movimentos/", {
         "item": itens["parafuso"].id, "setor": setores["MAN"].id, "tipo": "saida",
         "quantidade": "12", "centro_custo": cc["MAN"].id,
     })  # fmt: skip
@@ -19,7 +19,7 @@ def test_saldo_insuficiente_409_estruturado(api, usuarios, itens, setores, cc, e
 
 
 def test_saida_sem_referencia_400(api, usuarios, itens, setores, estoque_inicial):
-    r = api(usuarios["colab_man"]).post("/api/v1/almoxarifado/movimentos/", {
+    r = api(usuarios["compras"]).post("/api/v1/almoxarifado/movimentos/", {
         "item": itens["parafuso"].id, "setor": setores["MAN"].id, "tipo": "saida", "quantidade": "1",
     })  # fmt: skip
     assert r.status_code == 400 and r.data["erro"] == "saida_sem_referencia"
@@ -35,14 +35,34 @@ def test_movimento_sem_put_patch_delete(api, usuarios, itens, setores, estoque_i
     assert cli.delete(url).status_code == 405
 
 
-def test_colaborador_nao_movimenta_outro_setor(api, usuarios, itens, setores, cc, estoque_inicial):
-    r = api(usuarios["colab_prd"]).post("/api/v1/almoxarifado/movimentos/", {
+def test_colaborador_solicita_mas_nao_movimenta(api, usuarios, itens, setores, cc, estoque_inicial):
+    """Colaborador tem "E" em almoxarifado porque SOLICITA — solicitar não é dar baixa."""
+    corpo = {"item": itens["luva"].id, "setor": setores["PRD"].id, "tipo": "saida",
+             "quantidade": "1", "centro_custo": cc["PRD"].id}  # fmt: skip
+    # nem no próprio setor
+    assert api(usuarios["colab_prd"]).post("/api/v1/almoxarifado/movimentos/", corpo).status_code == 403
+    # transferência são dois movimentos: mesma recusa
+    r = api(usuarios["colab_prd"]).post("/api/v1/almoxarifado/transferencias/", {
+        "item": itens["luva"].id, "setor_origem": setores["PRD"].id,
+        "setor_destino": setores["MAN"].id, "quantidade": "1", "motivo": "teste",
+    }, format="json")  # fmt: skip
+    assert r.status_code == 403
+    # mas solicitar continua sendo dele
+    r = api(usuarios["colab_prd"]).post("/api/v1/almoxarifado/solicitacoes/", {
+        "centro_custo": cc["PRD"].id, "itens": [{"item": itens["luva"].id, "quantidade": "1"}],
+    }, format="json")  # fmt: skip
+    assert r.status_code == 201
+
+
+def test_responsavel_nao_movimenta_outro_setor(api, usuarios, itens, setores, cc, estoque_inicial):
+    """Quem movimenta ainda é limitado ao próprio setor — as duas camadas valem juntas."""
+    r = api(usuarios["resp_prd"]).post("/api/v1/almoxarifado/movimentos/", {
         "item": itens["parafuso"].id, "setor": setores["MAN"].id, "tipo": "saida",
         "quantidade": "1", "centro_custo": cc["MAN"].id,
     })  # fmt: skip
     assert r.status_code == 403
     # e não vê os movimentos de MAN
-    ids = {m["id"] for m in api(usuarios["colab_prd"]).get("/api/v1/almoxarifado/movimentos/").data["results"]}
+    ids = {m["id"] for m in api(usuarios["resp_prd"]).get("/api/v1/almoxarifado/movimentos/").data["results"]}
     assert all(Movimento.objects.get(pk=i).setor_id == setores["PRD"].id for i in ids)
 
 
