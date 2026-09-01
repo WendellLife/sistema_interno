@@ -1,0 +1,2364 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/design-system-lifelaboral-14ad6328-00d0-4aab-95b3-913cedf98805/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/design-system-lifelaboral-14ad6328-00d0-4aab-95b3-913cedf98805/tokens/colors.css">
+<link rel="stylesheet" href="_ds/design-system-lifelaboral-14ad6328-00d0-4aab-95b3-913cedf98805/tokens/typography.css">
+<link rel="stylesheet" href="_ds/design-system-lifelaboral-14ad6328-00d0-4aab-95b3-913cedf98805/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/design-system-lifelaboral-14ad6328-00d0-4aab-95b3-913cedf98805/tokens/effects.css">
+<link rel="stylesheet" href="_ds/design-system-lifelaboral-14ad6328-00d0-4aab-95b3-913cedf98805/tokens/base.css">
+<link rel="stylesheet" href="_ds/design-system-lifelaboral-14ad6328-00d0-4aab-95b3-913cedf98805/styles.css">
+<script src="_ds/design-system-lifelaboral-14ad6328-00d0-4aab-95b3-913cedf98805/_ds_bundle.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-page);color:var(--text-body);font-family:var(--font-body);-webkit-font-smoothing:antialiased;text-wrap:pretty}
+a{color:var(--text-link);text-decoration:none}
+a:hover{color:var(--color-primary)}
+::selection{background:var(--ll-teal-100)}
+button{font-family:inherit;cursor:pointer}
+select{font-family:inherit}
+::-webkit-scrollbar{height:10px;width:10px}
+::-webkit-scrollbar-thumb{background:var(--ll-slate-300);border-radius:8px}
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.25}}
+</style>
+</helmet>
+<div style="display:flex;align-items:stretch;min-height:100vh;background:var(--surface-page)">
+
+  <aside style="width:250px;flex:none;background:var(--surface-card);border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto">
+    <div style="padding:22px 18px 16px;border-bottom:1px solid var(--border-subtle);display:flex;flex-direction:column;align-items:flex-start;gap:12px">
+      <img src="assets/logo-horizontal.png" alt="Life Laboral" style="height:44px;width:auto;display:block">
+      <div style="align-self:stretch;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--ll-slate-050);font:600 9.5px/1.2 var(--font-display);letter-spacing:.16em;text-transform:uppercase;color:var(--color-primary);text-align:center">Operação interna · TI</div>
+    </div>
+
+    <div style="padding:14px 16px;background:var(--ll-slate-050);border-bottom:1px solid var(--border-subtle)">
+      <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Perfil de acesso</div>
+      <select value="{{ perfil }}" onChange="{{ trocaPerfil }}" style="margin-top:7px;width:100%;background:var(--surface-card);color:var(--text-strong);border:1px solid var(--border-subtle);border-radius:8px;padding:8px 9px;font:600 12.5px/1.2 var(--font-body)">
+        <sc-for list="{{ perfis }}" as="p" hint-placeholder-count="5">
+          <option value="{{ p }}">{{ p }}</option>
+        </sc-for>
+      </select>
+      <div style="margin-top:9px;font-size:11px;line-height:1.5;color:var(--text-muted)">{{ perfilDescricao }}</div>
+      <div style="margin-top:11px;display:flex;gap:6px;flex-wrap:wrap">
+        <span style="font:600 10.5px/1 var(--font-body);padding:4px 8px;border-radius:999px;background:var(--ll-teal-050);color:var(--ll-teal-700);border:1px solid var(--ll-teal-100)">34 chamados</span>
+        <span style="font:600 10.5px/1 var(--font-body);padding:4px 8px;border-radius:999px;background:var(--ll-blue-050);color:var(--ll-blue-700);border:1px solid var(--ll-blue-100)">11 setores</span>
+      </div>
+    </div>
+
+    <nav style="flex:1;padding:14px 10px 20px;display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="6">
+        <div>
+          <sc-if value="{{ n.grupo }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:12px 8px 4px;font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ll-slate-400)">{{ n.grupo }}</div>
+          </sc-if>
+          <button type="button" onClick="{{ n.ir }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:none;border-radius:10px;font:600 13px/1.2 var(--font-body);text-align:left;transition:background 130ms;background:{{ n.bg }};color:{{ n.fg }}">
+            <span style="width:17px;height:17px;flex:none;display:grid;place-items:center">{{ n.icone }}</span>
+            <span>{{ n.label }}</span>
+            <sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}">
+              <span style="margin-left:auto;font:700 10px/1 var(--font-display);padding:3px 7px;border-radius:999px;background:{{ n.badgeBg }};color:{{ n.badgeFg }}">{{ n.badge }}</span>
+            </sc-if>
+          </button>
+        </div>
+      </sc-for>
+    </nav>
+
+    <div style="padding:12px 14px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;gap:10px">
+      <span style="width:32px;height:32px;flex:none;border-radius:50%;background:var(--gradient-brand);color:#fff;display:flex;align-items:center;justify-content:center;font:700 11.5px/1 var(--font-display);box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)">MR</span>
+      <div style="min-width:0">
+        <div style="font:700 12px/1.3 var(--font-display);color:var(--text-strong)">Marcos Ribeiro</div>
+        <div style="font-size:10.5px;color:var(--text-muted)">Analista de TI</div>
+      </div>
+    </div>
+  </aside>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+
+    <header style="position:sticky;top:0;z-index:20;display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;padding:10px 28px;min-height:58px;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-subtle)">
+      <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-muted)">
+        <span>Life Laboral</span>
+        <span style="color:var(--ll-slate-300)">/</span>
+        <span>Tecnologia da Informação</span>
+        <span style="color:var(--ll-slate-300)">/</span>
+        <span style="font-weight:600;color:var(--text-strong)">{{ migalha }}</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;flex-wrap:wrap;gap:10px">
+        <sc-if value="{{ timerAtivo }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:9px;padding:6px 11px;border:1px solid var(--ll-teal-100);border-radius:999px;background:var(--ll-teal-050)">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--color-primary);animation:pulseDot 1.4s infinite"></span>
+            <span style="font:600 12.5px/1 var(--font-mono);color:var(--ll-teal-700)">{{ timerTexto }}</span>
+            <span style="font-size:11px;color:var(--text-muted)">{{ timerContexto }}</span>
+            <button type="button" onClick="{{ pausar }}" style="border:1px solid var(--ll-teal-100);background:var(--surface-card);border-radius:999px;padding:4px 9px;font:600 10.5px/1 var(--font-body);color:var(--ll-teal-700)">Pausar</button>
+          </div>
+        </sc-if>
+        <button type="button" onClick="{{ abrirBusca }}" style="display:flex;align-items:center;gap:7px;padding:7px 12px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);flex:0 1 260px;min-width:170px;text-align:left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px;color:var(--ll-slate-400);flex:none"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <span style="font-size:12.5px;color:var(--ll-slate-400)">Buscar chamado, item, projeto…</span>
+        </button>
+        <span style="display:inline-flex;align-items:center;gap:6px;font:600 11px/1 var(--font-body);padding:6px 10px;border-radius:999px;background:var(--ll-warning-bg);color:#8a5a14">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px"><path d="M12 8v4M12 16h.01"></path><circle cx="12" cy="12" r="9"></circle></svg>
+          {{ alertaTopo }}
+        </span>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:26px 28px 72px;min-width:0">
+
+      <sc-if value="{{ telaPainel }}" hint-placeholder-val="{{ true }}">
+        <div style="max-width:1400px">
+          <div style="display:flex;align-items:flex-end;flex-wrap:wrap;gap:18px;margin-bottom:22px">
+            <div>
+              <div style="font:700 11px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--color-primary);margin-bottom:8px">Agosto de 2026 · equipe de 5</div>
+              <h1 style="margin:0;font:800 30px/1.15 var(--font-display);letter-spacing:-.02em;color:var(--text-strong)">Painel de indicadores</h1>
+              <p style="margin:8px 0 0;font-size:14px;color:var(--text-muted);max-width:620px">Onde as horas foram consumidas, o que está fora de SLA e o que o almoxarifado precisa repor.</p>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:9px">
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="outline" size="sm" onClick="{{ exportarPainel }}" hint-size="auto,38px">Exportar painel</x-import>
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="gradient" size="sm" onClick="{{ irTarefas }}" hint-size="auto,38px">Abrir chamados</x-import>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px">
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="551,5h" label="Horas apontadas no mês · previsto 512h" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="87%" label="Cumprimento de SLA · meta 90%" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="2,4d" label="Tempo médio de conclusão" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="34" label="Demandas abertas · 6 atrasadas" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="12,9%" label="Horas em documentação" hint-size="100%,116px"></x-import>
+          </div>
+
+          <div style="margin-bottom:18px">
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Alert" tone="warning" title="Retrabalho acima da meta em dois projetos" hint-size="100%,84px">34h do mês foram lançadas como <strong>retrabalho</strong> — 6,1% contra a meta de 4%. As duas maiores ocorrências vieram de mudança de regra de negócio após a homologação, nos chamados #2811 e #2841.</x-import>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;align-items:start">
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+              <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
+                <h2 style="margin:0;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Onde as horas foram consumidas</h2>
+                <span style="font-size:11.5px;color:var(--text-muted)">551,5h no mês</span>
+              </div>
+              <div style="margin-top:18px;display:flex;flex-direction:column;gap:13px">
+                <sc-for list="{{ horasTipo }}" as="h" hint-placeholder-count="8">
+                  <div style="display:grid;grid-template-columns:130px 1fr 62px;align-items:center;gap:12px">
+                    <span style="font:600 12.5px/1.3 var(--font-body);color:var(--text-strong)">{{ h.tipo }}</span>
+                    <span style="position:relative;height:9px;border-radius:999px;background:var(--surface-sunken);overflow:hidden;display:block">
+                      <span style="position:absolute;inset:0 auto 0 0;border-radius:999px;background:{{ h.cor }};width:{{ h.largura }};display:block"></span>
+                    </span>
+                    <span style="font:600 11.5px/1 var(--font-mono);color:var(--text-muted);text-align:right">{{ h.rotulo }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border-subtle);display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Documentação</div>
+                  <div style="margin-top:6px;font:700 19px/1 var(--font-display);color:var(--text-strong)">12,9%</div>
+                  <div style="margin-top:3px;font-size:11px;color:var(--ll-success)">meta ≥ 10%</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Retrabalho</div>
+                  <div style="margin-top:6px;font:700 19px/1 var(--font-display);color:var(--text-strong)">6,1%</div>
+                  <div style="margin-top:3px;font-size:11px;color:var(--ll-warning)">meta 4%</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Previsto × realizado</div>
+                  <div style="margin-top:6px;font:700 19px/1 var(--font-display);color:var(--text-strong)">512h → 551,5h</div>
+                  <div style="margin-top:3px;font-size:11px;color:var(--ll-danger)">+7,7% de estouro</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+              <h2 style="margin:0 0 4px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Horas por colaborador</h2>
+              <span style="font-size:11.5px;color:var(--text-muted)">realizado sobre a capacidade do mês</span>
+              <div style="margin-top:18px;display:flex;flex-direction:column;gap:14px">
+                <sc-for list="{{ colaboradores }}" as="c" hint-placeholder-count="5">
+                  <div>
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+                      <span style="font:600 12.5px/1.3 var(--font-body);color:var(--text-strong)">{{ c.nome }}</span>
+                      <span style="font:500 11px/1 var(--font-mono);color:var(--text-muted)">{{ c.rotulo }}</span>
+                    </div>
+                    <span style="position:relative;height:8px;border-radius:999px;background:var(--surface-sunken);overflow:hidden;display:block">
+                      <span style="position:absolute;inset:0 auto 0 0;border-radius:999px;background:{{ c.cor }};width:{{ c.largura }};display:block"></span>
+                    </span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border-subtle);font-size:12px;color:var(--text-muted)">Capacidade da equipe 82% comprometida — restam 118h livres nas próximas três semanas.</div>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+              <h2 style="margin:0 0 14px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Risco de SLA</h2>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ risco }}" as="r" hint-placeholder-count="4">
+                  <div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--ll-slate-100)">
+                    <div style="min-width:0">
+                      <div style="font:600 11px/1 var(--font-mono);color:var(--ll-blue-700)">{{ r.chamado }}</div>
+                      <div style="margin-top:4px;font-size:12.5px;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.titulo }}</div>
+                    </div>
+                    <span style="font:600 11px/1.4 var(--font-mono);color:{{ r.cor }};white-space:nowrap">{{ r.sla }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+              <h2 style="margin:0 0 14px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Projetos por etapa</h2>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ resumoEtapas }}" as="e" hint-placeholder-count="6">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--ll-slate-100)">
+                    <span style="font:600 12.5px/1.3 var(--font-body);color:var(--text-strong)">{{ e.etapa }}</span>
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <span style="position:relative;width:70px;height:8px;border-radius:999px;background:var(--surface-sunken);overflow:hidden;display:block">
+                        <span style="position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--color-secondary);width:{{ e.largura }};display:block"></span>
+                      </span>
+                      <span style="font:700 12px/1 var(--font-display);color:var(--text-strong);width:14px;text-align:right">{{ e.qtd }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+              <h2 style="margin:0 0 14px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Almoxarifado · alertas</h2>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ alertasEstoque }}" as="a" hint-placeholder-count="5">
+                  <div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--ll-slate-100)">
+                    <div style="min-width:0">
+                      <div style="font-size:12.5px;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.item }}</div>
+                      <div style="margin-top:2px;font-size:11px;color:var(--text-muted)">{{ a.setor }}</div>
+                    </div>
+                    <span style="font:600 11px/1.4 var(--font-mono);color:{{ a.cor }};white-space:nowrap">{{ a.saldo }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border-subtle);font-size:12px;color:var(--text-muted)">Valor imobilizado em estoque: <strong style="color:var(--text-strong)">R$ 214.380</strong></div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ telaTarefas }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:1400px">
+          <div style="display:flex;align-items:flex-end;flex-wrap:wrap;gap:18px;margin-bottom:20px">
+            <div>
+              <div style="font:700 11px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--color-primary);margin-bottom:8px">Central de tarefas</div>
+              <h1 style="margin:0;font:800 30px/1.15 var(--font-display);letter-spacing:-.02em;color:var(--text-strong)">Chamados e horas</h1>
+              <p style="margin:8px 0 0;font-size:14px;color:var(--text-muted);max-width:620px">SLA, horas previstas contra realizadas e cobertura de documentação por chamado.</p>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:9px">
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="outline" size="sm" onClick="{{ exportarTarefas }}" hint-size="auto,38px">Exportar CSV</x-import>
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="gradient" size="sm" onClick="{{ abrirChamado }}" hint-size="auto,38px">Novo chamado</x-import>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+            <sc-for list="{{ filtros }}" as="f" hint-placeholder-count="5">
+              <button type="button" onClick="{{ f.ir }}" style="border:1px solid {{ f.borda }};background:{{ f.bg }};color:{{ f.cor }};border-radius:999px;padding:7px 14px;font:600 12px/1 var(--font-body)">{{ f.label }}</button>
+            </sc-for>
+            <span style="margin-left:auto;font:500 11px/1 var(--font-mono);color:var(--text-muted)">{{ contagemTarefas }}</span>
+          </div>
+
+          <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);overflow-x:auto">
+            <div style="min-width:1120px;display:grid;grid-template-columns:92px 2.2fr 130px 96px 132px 116px 156px 104px;gap:14px;padding:12px 22px;border-bottom:1px solid var(--border-subtle);background:var(--ll-slate-050);font:700 8.5px/1.2 var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">
+              <span>Chamado</span><span>Assunto</span><span>Solicitante</span><span>Prioridade</span><span>Responsável</span><span>Horas P/R</span><span>SLA</span><span>Documento</span>
+            </div>
+            <sc-for list="{{ tarefas }}" as="t" hint-placeholder-count="8">
+              <div onClick="{{ t.abrir }}" style="min-width:1120px;display:grid;grid-template-columns:92px 2.2fr 130px 96px 132px 116px 156px 104px;gap:14px;padding:14px 22px;border-top:1px solid var(--ll-slate-100);align-items:center;font-size:12.5px;cursor:pointer;transition:background 130ms" style-hover="background:var(--ll-slate-050)">
+                <span style="font:600 11.5px/1 var(--font-mono);color:var(--ll-blue-700)">{{ t.id }}</span>
+                <div style="min-width:0">
+                  <div style="font:600 13px/1.3 var(--font-body);color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.titulo }}</div>
+                  <div style="margin-top:3px;font-size:11px;color:var(--text-muted)">{{ t.categoria }} · {{ t.origem }}</div>
+                </div>
+                <span style="color:var(--text-body)">{{ t.solicitante }}</span>
+                <span style="font:600 11px/1 var(--font-body);padding:4px 9px;border-radius:999px;background:{{ t.prioridadeBg }};color:{{ t.prioridadeCor }};justify-self:start">{{ t.prioridade }}</span>
+                <span style="color:var(--text-body)">{{ t.responsavel }}</span>
+                <span style="font:600 11.5px/1 var(--font-mono);color:{{ t.horasCor }}">{{ t.horas }}</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="position:relative;flex:1;height:6px;border-radius:999px;background:var(--surface-sunken);overflow:hidden;display:block">
+                    <span style="position:absolute;inset:0 auto 0 0;border-radius:999px;background:{{ t.slaCor }};width:{{ t.slaLargura }};display:block"></span>
+                  </span>
+                  <span style="font:600 10.5px/1 var(--font-mono);color:{{ t.slaCor }};white-space:nowrap">{{ t.sla }}</span>
+                </div>
+                <span style="font-size:11.5px;color:{{ t.docCor }}">{{ t.doc }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ telaTarefa }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:1400px">
+          <div style="display:flex;align-items:flex-end;flex-wrap:wrap;gap:18px;margin-bottom:20px">
+            <div>
+              <div style="font:700 11px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--color-primary);margin-bottom:8px">Chamado #2841 · Produção</div>
+              <h1 style="margin:0;font:800 27px/1.2 var(--font-display);letter-spacing:-.02em;color:var(--text-strong);max-width:720px">Integração do apontamento de produção com o Sankhya</h1>
+              <div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">
+                <span style="font:600 11px/1 var(--font-body);padding:5px 10px;border-radius:999px;background:var(--ll-warning-bg);color:#8a5a14">Prioridade alta</span>
+                <span style="font:600 11px/1 var(--font-body);padding:5px 10px;border-radius:999px;background:var(--ll-blue-050);color:var(--ll-blue-700);border:1px solid var(--ll-blue-100)">Desenvolvimento</span>
+                <span style="font:600 11px/1 var(--font-body);padding:5px 10px;border-radius:999px;background:var(--ll-teal-050);color:var(--ll-teal-700);border:1px solid var(--ll-teal-100)">Em testes</span>
+              </div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:9px">
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="outline" size="sm" onClick="{{ voltarLista }}" hint-size="auto,38px">Voltar aos chamados</x-import>
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="gradient" size="sm" onClick="{{ abrirEntrega }}" hint-size="auto,38px">Enviar para aprovação</x-import>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px">
+                <sc-for list="{{ metaTarefa }}" as="m" hint-placeholder-count="4">
+                  <div>
+                    <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">{{ m.rotulo }}</div>
+                    <div style="margin-top:7px;font:600 13px/1.4 var(--font-body);color:{{ m.cor }}">{{ m.valor }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+                <div style="display:flex;align-items:baseline;gap:10px">
+                  <h2 style="margin:0;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Apontamento por tipo de hora</h2>
+                  <span style="margin-left:auto;font:500 11px/1 var(--font-mono);color:var(--text-muted)">{{ resumoApontamento }}</span>
+                </div>
+                <p style="margin:6px 0 16px;font-size:12px;color:var(--text-muted)">Um cronômetro por tipo. Iniciar um tipo pausa o anterior e registra a virada no histórico.</p>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ tiposHora }}" as="th" hint-placeholder-count="8">
+                    <div style="display:grid;grid-template-columns:150px 1fr 88px 96px;gap:14px;align-items:center;padding:10px 14px;border:1px solid {{ th.borda }};background:{{ th.bg }};border-radius:12px">
+                      <div style="display:flex;align-items:center;gap:9px">
+                        <span style="width:7px;height:7px;flex:none;border-radius:50%;background:{{ th.ponto }};animation:{{ th.animacao }}"></span>
+                        <span style="font:600 12.5px/1.3 var(--font-body);color:var(--text-strong)">{{ th.tipo }}</span>
+                      </div>
+                      <span style="position:relative;height:7px;border-radius:999px;background:var(--surface-sunken);overflow:hidden;display:block">
+                        <span style="position:absolute;inset:0 auto 0 0;border-radius:999px;background:{{ th.cor }};width:{{ th.largura }};display:block"></span>
+                      </span>
+                      <span style="font:600 12.5px/1 var(--font-mono);color:var(--text-strong);text-align:right">{{ th.tempo }}</span>
+                      <button type="button" onClick="{{ th.acao }}" style="border:1px solid {{ th.botaoBorda }};background:{{ th.botaoBg }};color:{{ th.botaoCor }};border-radius:999px;padding:6px 10px;font:600 11.5px/1 var(--font-body)">{{ th.botao }}</button>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="margin-top:16px;display:flex;align-items:center;flex-wrap:wrap;gap:10px">
+                  <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="outline" size="sm" onClick="{{ abrirHoras }}" hint-size="auto,36px">Lançamento manual</x-import>
+                  <span style="font-size:11.5px;color:var(--ll-warning);margin-left:auto">{{ avisoDoc }}</span>
+                </div>
+              </div>
+
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+                <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
+                  <h2 style="margin:0;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Documento técnico da solução</h2>
+                  <span style="margin-left:auto;font:500 10.5px/1 var(--font-mono);color:var(--text-muted)">v3 · revisado 21/08/2026</span>
+                </div>
+                <div style="display:flex;flex-direction:column">
+                  <sc-for list="{{ documentacao }}" as="d" hint-placeholder-count="6">
+                    <div style="display:grid;grid-template-columns:180px 1fr 96px;gap:14px;padding:12px 0;border-top:1px solid var(--ll-slate-100);align-items:start">
+                      <span style="font:600 12.5px/1.4 var(--font-body);color:var(--text-strong)">{{ d.secao }}</span>
+                      <span style="font-size:12.5px;line-height:1.55;color:var(--text-muted)">{{ d.conteudo }}</span>
+                      <span style="font:600 11px/1.4 var(--font-body);color:{{ d.cor }};text-align:right">{{ d.status }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+                <h2 style="margin:0 0 14px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Aprovação da entrega</h2>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <sc-for list="{{ aprovacoes }}" as="ap" hint-placeholder-count="3">
+                    <div style="display:flex;gap:12px;align-items:flex-start">
+                      <span style="width:9px;height:9px;flex:none;border-radius:50%;background:{{ ap.cor }};margin-top:5px"></span>
+                      <div style="min-width:0">
+                        <div style="font:600 12.5px/1.3 var(--font-body);color:var(--text-strong)">{{ ap.etapa }}</div>
+                        <div style="margin-top:3px;font-size:11.5px;color:var(--text-muted)">{{ ap.detalhe }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+                <h2 style="margin:0 0 6px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Motivo de retrabalho</h2>
+                <div style="margin-top:10px;padding:12px 14px;border-radius:12px;background:var(--ll-warning-bg);font-size:12.5px;line-height:1.55;color:#8a5a14">Regra de rateio por centro de custo mudou após a homologação. 4h20 reclassificadas de Desenvolvimento para Retrabalho, com justificativa obrigatória registrada.</div>
+                <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ anexos }}" as="ax" hint-placeholder-count="3">
+                    <div style="display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--ll-slate-050);font-size:12px">
+                      <span style="color:var(--text-strong)">{{ ax.nome }}</span>
+                      <span style="font:500 10.5px/1.4 var(--font-mono);color:var(--text-muted)">{{ ax.tamanho }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+                <h2 style="margin:0 0 10px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Histórico</h2>
+                <div style="display:flex;flex-direction:column">
+                  <sc-for list="{{ historico }}" as="h" hint-placeholder-count="6">
+                    <div style="display:grid;grid-template-columns:78px 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--ll-slate-100)">
+                      <span style="font:500 10.5px/1.4 var(--font-mono);color:var(--text-muted)">{{ h.quando }}</span>
+                      <span style="font-size:12px;line-height:1.5;color:var(--text-body)">{{ h.texto }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ telaProjetos }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:1600px">
+          <div style="display:flex;align-items:flex-end;flex-wrap:wrap;gap:18px;margin-bottom:20px">
+            <div>
+              <div style="font:700 11px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--color-primary);margin-bottom:8px">Portfólio de TI</div>
+              <h1 style="margin:0;font:800 30px/1.15 var(--font-display);letter-spacing:-.02em;color:var(--text-strong)">Projetos de desenvolvimento</h1>
+              <p style="margin:8px 0 0;font-size:14px;color:var(--text-muted);max-width:620px">Cada projeto na sua etapa, com percentual de conclusão, horas, risco e próxima entrega.</p>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:9px">
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="outline" size="sm" onClick="{{ irHistorico }}" hint-size="auto,38px">Concluídos e cancelados</x-import>
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="gradient" size="sm" onClick="{{ abrirProjeto }}" hint-size="auto,38px">Novo projeto</x-import>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px">
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="17" label="Projetos ativos · 4 em desenvolvimento" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="1.240 / 1.318" label="Horas previstas × realizadas" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="3" label="Projetos com risco alto" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="R$ 412k" label="Orçamento comprometido no ano" hint-size="100%,116px"></x-import>
+          </div>
+
+          <div style="display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;align-items:flex-start">
+            <sc-for list="{{ colunas }}" as="col" hint-placeholder-count="6">
+              <div style="flex:0 0 268px;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:16px">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+                  <span style="font:700 9px/1.2 var(--font-display);letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">{{ col.etapa }}</span>
+                  <span style="font:700 11px/1 var(--font-display);color:var(--text-strong)">{{ col.qtd }}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ col.cards }}" as="p" hint-placeholder-count="2">
+                    <div style="border:1px solid var(--border-subtle);background:var(--ll-slate-050);border-radius:12px;padding:13px 14px">
+                      <div style="font:600 12.5px/1.35 var(--font-body);color:var(--text-strong)">{{ p.nome }}</div>
+                      <div style="margin-top:5px;font-size:11px;color:var(--text-muted)">{{ p.setor }} · {{ p.responsavel }}</div>
+                      <span style="position:relative;display:block;height:6px;border-radius:999px;background:var(--surface-sunken);overflow:hidden;margin-top:11px">
+                        <span style="position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--gradient-brand);width:{{ p.largura }};display:block"></span>
+                      </span>
+                      <div style="display:flex;justify-content:space-between;margin-top:8px;font:500 10.5px/1 var(--font-mono);color:var(--text-muted)">
+                        <span>{{ p.pctTexto }}</span>
+                        <span>{{ p.horas }}</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:9px;border-top:1px solid var(--ll-slate-200)">
+                        <span style="font:600 10.5px/1 var(--font-body);color:{{ p.riscoCor }}">{{ p.risco }}</span>
+                        <span style="font-size:10.5px;color:var(--text-muted)">{{ p.prazo }}</span>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ telaAlmox }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:1500px">
+          <div style="display:flex;align-items:flex-end;flex-wrap:wrap;gap:18px;margin-bottom:18px">
+            <div>
+              <div style="font:700 11px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--color-primary);margin-bottom:8px">Almoxarifado · {{ setorAtual }}</div>
+              <h1 style="margin:0;font:800 30px/1.15 var(--font-display);letter-spacing:-.02em;color:var(--text-strong)">Estoque do setor</h1>
+              <p style="margin:8px 0 0;font-size:14px;color:var(--text-muted);max-width:620px">{{ escopoAlmox }} · centro de custo {{ centroCusto }}.</p>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:9px">
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="outline" size="sm" onClick="{{ abrirQr }}" hint-size="auto,38px">Ler QR Code</x-import>
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="gradient" size="sm" onClick="{{ abrirMaterial }}" hint-size="auto,38px">Solicitar material</x-import>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+            <sc-for list="{{ setoresVisiveis }}" as="s" hint-placeholder-count="6">
+              <button type="button" onClick="{{ s.ir }}" style="border:1px solid {{ s.borda }};background:{{ s.bg }};color:{{ s.cor }};border-radius:999px;padding:7px 14px;font:600 12px/1 var(--font-body)">{{ s.nome }}</button>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px">
+            <sc-for list="{{ kpiAlmox }}" as="k" hint-placeholder-count="4">
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:18px 20px">
+                <div style="font:700 18px/1.1 var(--font-display);color:var(--text-strong)">{{ k.valor }}</div>
+                <div style="margin-top:7px;font:600 9px/1.3 var(--font-display);letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">{{ k.label }}</div>
+                <div style="margin-top:5px;font-size:11.5px;color:{{ k.cor }}">{{ k.nota }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;align-items:start">
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);overflow-x:auto">
+              <div style="min-width:660px;padding:20px 22px 12px;display:flex;align-items:baseline;gap:10px">
+                <h2 style="margin:0;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">{{ tituloEstoque }}</h2>
+                <span style="margin-left:auto;font:500 10.5px/1 var(--font-mono);color:var(--text-muted)">CC {{ centroCusto }}</span>
+              </div>
+              <div style="min-width:660px;display:grid;grid-template-columns:76px 2fr 80px 76px 92px 128px;gap:12px;padding:11px 22px;border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle);background:var(--ll-slate-050);font:700 8.5px/1.2 var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">
+                <span>Código</span><span>Item</span><span>Saldo</span><span>Mínimo</span><span>Unitário</span><span>Situação</span>
+              </div>
+              <sc-for list="{{ estoque }}" as="i" hint-placeholder-count="6">
+                <div style="min-width:660px;display:grid;grid-template-columns:76px 2fr 80px 76px 92px 128px;gap:12px;padding:13px 22px;border-top:1px solid var(--ll-slate-100);align-items:center;font-size:12.5px">
+                  <span style="font:600 11px/1 var(--font-mono);color:var(--ll-blue-700)">{{ i.codigo }}</span>
+                  <div style="min-width:0">
+                    <div style="color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ i.nome }}</div>
+                    <div style="margin-top:2px;font-size:11px;color:var(--text-muted)">{{ i.movimento }}</div>
+                  </div>
+                  <span style="font:600 12px/1 var(--font-mono);color:var(--text-strong)">{{ i.saldo }}</span>
+                  <span style="font:500 12px/1 var(--font-mono);color:var(--text-muted)">{{ i.minimo }}</span>
+                  <span style="font:500 12px/1 var(--font-mono);color:var(--text-body)">{{ i.unit }}</span>
+                  <span style="font:600 11px/1 var(--font-body);padding:4px 9px;border-radius:999px;background:{{ i.bg }};color:{{ i.cor }};justify-self:start">{{ i.situacao }}</span>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+                <h2 style="margin:0 0 4px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Solicitações do setor</h2>
+                <span style="font-size:11.5px;color:var(--text-muted)">colaborador solicita, gerente do setor aprova, Compras repõe</span>
+                <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ solicitacoes }}" as="s" hint-placeholder-count="4">
+                    <div onClick="{{ s.abrir }}" style="border:1px solid var(--border-subtle);background:var(--ll-slate-050);border-radius:12px;padding:12px 14px;cursor:pointer">
+                      <div style="display:flex;justify-content:space-between;gap:10px">
+                        <span style="font:600 12.5px/1.3 var(--font-body);color:var(--text-strong)">{{ s.item }}</span>
+                        <span style="font:500 11px/1.3 var(--font-mono);color:var(--text-muted)">{{ s.qtd }}</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;gap:10px;margin-top:7px;font-size:11.5px">
+                        <span style="color:var(--text-muted)">{{ s.quem }}</span>
+                        <span style="font-weight:600;color:{{ s.cor }}">{{ s.status }}</span>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+                <h2 style="margin:0 0 10px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Movimentações de hoje</h2>
+                <div style="display:flex;flex-direction:column">
+                  <sc-for list="{{ movimentos }}" as="m" hint-placeholder-count="5">
+                    <div style="display:grid;grid-template-columns:52px 1fr auto;gap:12px;padding:10px 0;border-top:1px solid var(--ll-slate-100);align-items:baseline">
+                      <span style="font:500 10.5px/1.4 var(--font-mono);color:var(--text-muted)">{{ m.hora }}</span>
+                      <span style="font-size:12px;line-height:1.45;color:var(--text-body)">{{ m.texto }}</span>
+                      <span style="font:600 11px/1.4 var(--font-mono);color:{{ m.cor }}">{{ m.qtd }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-subtle);display:flex;gap:8px;flex-wrap:wrap">
+                  <button type="button" onClick="{{ abrirEntrada }}" style="border:1px solid var(--border-subtle);background:var(--surface-card);border-radius:999px;padding:7px 12px;font:600 11.5px/1 var(--font-body);color:var(--text-body)">Entrada por nota</button>
+                  <button type="button" onClick="{{ abrirTransferencia }}" style="border:1px solid var(--border-subtle);background:var(--surface-card);border-radius:999px;padding:7px 12px;font:600 11.5px/1 var(--font-body);color:var(--text-body)">Transferir entre setores</button>
+                  <button type="button" onClick="{{ abrirInventario }}" style="border:1px solid var(--border-subtle);background:var(--surface-card);border-radius:999px;padding:7px 12px;font:600 11.5px/1 var(--font-body);color:var(--text-body)">Inventário</button>
+                </div>
+                <div style="margin-top:12px;font-size:11.5px;color:var(--text-muted);line-height:1.5">Toda saída exige vínculo com ordem de serviço ou centro de custo — é o que separa consumo normal de desperdício.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ telaCompras }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:1500px">
+          <div style="display:flex;align-items:flex-end;flex-wrap:wrap;gap:18px;margin-bottom:20px">
+            <div>
+              <div style="font:700 11px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--color-primary);margin-bottom:8px">Compras · 11 setores</div>
+              <h1 style="margin:0;font:800 30px/1.15 var(--font-display);letter-spacing:-.02em;color:var(--text-strong)">Consumo e reposição</h1>
+              <p style="margin:8px 0 0;font-size:14px;color:var(--text-muted);max-width:620px">Visão consolidada de todos os setores: consumo, rupturas e fila de compra.</p>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:9px">
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="outline" size="sm" onClick="{{ exportarCompras }}" hint-size="auto,38px">Exportar necessidade</x-import>
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="gradient" size="sm" onClick="{{ abrirCotacao }}" hint-size="auto,38px">Abrir cotação</x-import>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px">
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="19" label="Itens em ruptura · 11 setores" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="17" label="Solicitações abertas · 6 a aprovar" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="R$ 214k" label="Valor imobilizado em estoque" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="R$ 116.860" label="Consumo do mês · todos os CC" hint-size="100%,116px"></x-import>
+          </div>
+
+          <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);overflow-x:auto;margin-bottom:16px">
+            <div style="min-width:960px;padding:20px 22px 12px">
+              <h2 style="margin:0;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Consumo e ruptura por setor</h2>
+            </div>
+            <div style="min-width:960px;display:grid;grid-template-columns:1.4fr 96px 130px 130px 1fr 128px;gap:14px;padding:11px 22px;border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle);background:var(--ll-slate-050);font:700 8.5px/1.2 var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">
+              <span>Setor</span><span>C. custo</span><span>Consumo/mês</span><span>Abaixo do mínimo</span><span>Mais consumido</span><span>Ação</span>
+            </div>
+            <sc-for list="{{ setoresCompras }}" as="s" hint-placeholder-count="8">
+              <div style="min-width:960px;display:grid;grid-template-columns:1.4fr 96px 130px 130px 1fr 128px;gap:14px;padding:13px 22px;border-top:1px solid var(--ll-slate-100);align-items:center;font-size:12.5px">
+                <span style="font:600 13px/1.3 var(--font-body);color:var(--text-strong)">{{ s.setor }}</span>
+                <span style="font:600 11px/1 var(--font-mono);color:var(--ll-blue-700)">{{ s.cc }}</span>
+                <span style="font:500 12px/1 var(--font-mono);color:var(--text-body)">{{ s.consumo }}</span>
+                <span style="font:600 12px/1 var(--font-mono);color:{{ s.faltaCor }}">{{ s.faltas }}</span>
+                <span style="color:var(--text-muted)">{{ s.top }}</span>
+                <span style="font:600 11px/1 var(--font-body);padding:4px 9px;border-radius:999px;background:{{ s.acaoBg }};color:{{ s.acaoCor }};justify-self:start">{{ s.acao }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;align-items:start">
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+              <h2 style="margin:0 0 10px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Fila de reposição</h2>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ reposicao }}" as="r" hint-placeholder-count="6">
+                  <div style="display:grid;grid-template-columns:1fr 86px 132px;gap:12px;padding:12px 0;border-top:1px solid var(--ll-slate-100);align-items:center;font-size:12.5px">
+                    <div style="min-width:0">
+                      <div style="color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.item }}</div>
+                      <div style="margin-top:2px;font-size:11px;color:var(--text-muted)">{{ r.setores }}</div>
+                    </div>
+                    <span style="font:500 11.5px/1 var(--font-mono);color:var(--text-body)">{{ r.qtd }}</span>
+                    <span style="font:600 11px/1.3 var(--font-body);color:{{ r.cor }};text-align:right">{{ r.status }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <sc-if value="{{ mostrarIntegracoes }}" hint-placeholder-val="{{ true }}">
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+                <h2 style="margin:0 0 4px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Entradas automáticas</h2>
+                <span style="font-size:11.5px;color:var(--text-muted)">mensagens e leituras que viram chamado ou movimentação sem digitação</span>
+                <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ integracoes }}" as="ig" hint-placeholder-count="3">
+                    <div style="border:1px solid var(--border-subtle);background:var(--ll-slate-050);border-radius:12px;padding:13px 15px">
+                      <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline">
+                        <span style="font:600 12.5px/1.3 var(--font-body);color:var(--text-strong)">{{ ig.canal }}</span>
+                        <span style="font:600 10.5px/1 var(--font-mono);color:{{ ig.cor }}">{{ ig.estado }}</span>
+                      </div>
+                      <div style="margin-top:7px;font-size:12px;line-height:1.5;color:var(--text-muted)">{{ ig.texto }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ telaHistorico }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:1400px">
+          <div style="display:flex;align-items:flex-end;flex-wrap:wrap;gap:18px;margin-bottom:20px">
+            <div>
+              <div style="font:700 11px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--color-primary);margin-bottom:8px">Portfólio · encerrados</div>
+              <h1 style="margin:0;font:800 30px/1.15 var(--font-display);letter-spacing:-.02em;color:var(--text-strong)">Concluídos e cancelados</h1>
+              <p style="margin:8px 0 0;font-size:14px;color:var(--text-muted);max-width:640px">O histórico é onde a estimativa aprende: previsto contra realizado de cada projeto encerrado, e o motivo de quem foi cancelado.</p>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:9px">
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="outline" size="sm" onClick="{{ voltarProjetos }}" hint-size="auto,38px">Voltar ao quadro</x-import>
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="gradient" size="sm" onClick="{{ exportarHistorico }}" hint-size="auto,38px">Exportar histórico</x-import>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px">
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="23" label="Projetos concluídos em 2026" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="+11%" label="Desvio médio de horas" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="5" label="Cancelados · 312h investidas" hint-size="100%,116px"></x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.StatCard" value="38d" label="Duração média de um projeto" hint-size="100%,116px"></x-import>
+          </div>
+
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+            <sc-for list="{{ filtrosHistorico }}" as="f" hint-placeholder-count="3">
+              <button type="button" onClick="{{ f.ir }}" style="border:1px solid {{ f.borda }};background:{{ f.bg }};color:{{ f.cor }};border-radius:999px;padding:7px 14px;font:600 12px/1 var(--font-body)">{{ f.label }}</button>
+            </sc-for>
+          </div>
+
+          <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);overflow-x:auto">
+            <div style="min-width:1040px;display:grid;grid-template-columns:2fr 130px 120px 132px 96px 1.3fr;gap:14px;padding:12px 22px;border-bottom:1px solid var(--border-subtle);background:var(--ll-slate-050);font:700 8.5px/1.2 var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">
+              <span>Projeto</span><span>Setor</span><span>Encerrado em</span><span>Horas P/R</span><span>Desvio</span><span>Situação final</span>
+            </div>
+            <sc-for list="{{ encerrados }}" as="e" hint-placeholder-count="7">
+              <div style="min-width:1040px;display:grid;grid-template-columns:2fr 130px 120px 132px 96px 1.3fr;gap:14px;padding:14px 22px;border-top:1px solid var(--ll-slate-100);align-items:center;font-size:12.5px">
+                <div style="min-width:0">
+                  <div style="font:600 13px/1.3 var(--font-body);color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.nome }}</div>
+                  <div style="margin-top:3px;font-size:11px;color:var(--text-muted)">{{ e.responsavel }}</div>
+                </div>
+                <span style="color:var(--text-body)">{{ e.setor }}</span>
+                <span style="font:500 11.5px/1 var(--font-mono);color:var(--text-muted)">{{ e.data }}</span>
+                <span style="font:600 11.5px/1 var(--font-mono);color:var(--text-body)">{{ e.horas }}</span>
+                <span style="font:600 11.5px/1 var(--font-mono);color:{{ e.desvioCor }}">{{ e.desvio }}</span>
+                <div style="min-width:0">
+                  <span style="font:600 11px/1 var(--font-body);padding:4px 9px;border-radius:999px;background:{{ e.bg }};color:{{ e.cor }}">{{ e.situacao }}</span>
+                  <div style="margin-top:5px;font-size:11px;line-height:1.45;color:var(--text-muted)">{{ e.motivo }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:16px;padding:18px 22px;border:1px solid var(--ll-teal-100);border-radius:16px;background:var(--ll-teal-050);font-size:13px;line-height:1.6;color:var(--ll-teal-700)">Os cinco projetos cancelados têm o mesmo padrão: nenhum tinha patrocinador definido na abertura. Exigir patrocinador é a mudança de regra com maior retorno aqui.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ telaConfig }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:1400px">
+          <div style="display:flex;align-items:flex-end;flex-wrap:wrap;gap:18px;margin-bottom:20px">
+            <div>
+              <div style="font:700 11px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--color-primary);margin-bottom:8px">Configuração</div>
+              <h1 style="margin:0;font:800 30px/1.15 var(--font-display);letter-spacing:-.02em;color:var(--text-strong)">SLA, permissões e regras</h1>
+              <p style="margin:8px 0 0;font-size:14px;color:var(--text-muted);max-width:620px">O que aqui muda vale para todos os chamados novos — os já abertos mantêm o SLA com que nasceram.</p>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:9px">
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="outline" size="sm" onClick="{{ abrirAuditoria }}" hint-size="auto,38px">Histórico de mudanças</x-import>
+              <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="gradient" size="sm" onClick="{{ salvarConfig }}" hint-size="auto,38px">Salvar regras</x-import>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px;align-items:start">
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+              <h2 style="margin:0 0 4px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">SLA por prioridade</h2>
+              <span style="font-size:11.5px;color:var(--text-muted)">contagem em horário comercial · pausa quando o chamado aguarda o solicitante ou terceiros</span>
+              <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ regrasSla }}" as="r" hint-placeholder-count="4">
+                  <div style="display:grid;grid-template-columns:1fr 140px 96px;gap:12px;align-items:center;padding:11px 14px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--ll-slate-050)">
+                    <div style="display:flex;align-items:center;gap:9px">
+                      <span style="width:8px;height:8px;flex:none;border-radius:50%;background:{{ r.ponto }}"></span>
+                      <span style="font:600 12.5px/1.2 var(--font-body);color:var(--text-strong)">{{ r.prioridade }}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <button type="button" onClick="{{ r.menos }}" style="width:26px;height:26px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface-card);color:var(--text-body);font-size:13px">−</button>
+                      <span style="font:700 14px/1 var(--font-display);color:var(--text-strong);min-width:44px;text-align:center">{{ r.horas }}h</span>
+                      <button type="button" onClick="{{ r.mais }}" style="width:26px;height:26px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface-card);color:var(--text-body);font-size:13px">+</button>
+                    </div>
+                    <span style="font-size:11px;color:var(--text-muted);text-align:right">{{ r.exemplo }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:16px;padding:13px 15px;border-radius:12px;background:var(--ll-teal-050);border:1px solid var(--ll-teal-100);font-size:12.5px;line-height:1.55;color:var(--ll-teal-700)">{{ efeitoSla }}</div>
+            </div>
+
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+              <h2 style="margin:0 0 4px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Regras de documentação e horas</h2>
+              <span style="font-size:11.5px;color:var(--text-muted)">o que trava o fechamento de uma tarefa</span>
+              <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ regrasGerais }}" as="g" hint-placeholder-count="5">
+                  <button type="button" onClick="{{ g.alterna }}" style="display:flex;align-items:flex-start;gap:12px;text-align:left;padding:12px 14px;border:1px solid {{ g.borda }};border-radius:12px;background:{{ g.bg }};width:100%">
+                    <span style="width:34px;height:20px;flex:none;border-radius:999px;background:{{ g.trilha }};position:relative;display:block;margin-top:2px">
+                      <span style="position:absolute;top:2px;left:{{ g.pino }};width:16px;height:16px;border-radius:50%;background:#fff;display:block;box-shadow:0 1px 2px rgba(8,44,82,.25)"></span>
+                    </span>
+                    <span style="min-width:0">
+                      <span style="display:block;font:600 12.5px/1.35 var(--font-body);color:var(--text-strong)">{{ g.titulo }}</span>
+                      <span style="display:block;margin-top:3px;font-size:11.5px;line-height:1.5;color:var(--text-muted)">{{ g.desc }}</span>
+                    </span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);overflow-x:auto">
+            <div style="min-width:900px;padding:20px 22px 12px">
+              <h2 style="margin:0;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Matriz de permissões</h2>
+              <span style="font-size:11.5px;color:var(--text-muted)">clique para alternar entre ver, editar e sem acesso</span>
+            </div>
+            <div style="min-width:900px;display:grid;grid-template-columns:180px repeat(5,1fr);gap:10px;padding:11px 22px;border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle);background:var(--ll-slate-050);font:700 8.5px/1.2 var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">
+              <span>Módulo</span>
+              <sc-for list="{{ perfisMatriz }}" as="p" hint-placeholder-count="5">
+                <span>{{ p }}</span>
+              </sc-for>
+            </div>
+            <sc-for list="{{ matriz }}" as="linha" hint-placeholder-count="6">
+              <div style="min-width:900px;display:grid;grid-template-columns:180px repeat(5,1fr);gap:10px;padding:11px 22px;border-top:1px solid var(--ll-slate-100);align-items:center">
+                <span style="font:600 12.5px/1.3 var(--font-body);color:var(--text-strong)">{{ linha.modulo }}</span>
+                <sc-for list="{{ linha.celulas }}" as="c" hint-placeholder-count="5">
+                  <button type="button" onClick="{{ c.alterna }}" style="border:1px solid {{ c.borda }};background:{{ c.bg }};color:{{ c.cor }};border-radius:999px;padding:5px 10px;font:600 11px/1 var(--font-body);justify-self:start">{{ c.nivel }}</button>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;align-items:start">
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+              <h2 style="margin:0 0 10px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Estoque mínimo e reposição</h2>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ regrasEstoque }}" as="r" hint-placeholder-count="4">
+                  <div style="display:grid;grid-template-columns:1fr auto;gap:12px;padding:11px 0;border-top:1px solid var(--ll-slate-100);align-items:baseline">
+                    <div style="min-width:0">
+                      <div style="font:600 12.5px/1.3 var(--font-body);color:var(--text-strong)">{{ r.regra }}</div>
+                      <div style="margin-top:3px;font-size:11.5px;line-height:1.5;color:var(--text-muted)">{{ r.desc }}</div>
+                    </div>
+                    <span style="font:600 11px/1 var(--font-body);padding:4px 10px;border-radius:999px;background:{{ r.bg }};color:{{ r.cor }}">{{ r.valor }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-sm);padding:22px 24px">
+              <h2 style="margin:0 0 10px;font:700 16px/1.2 var(--font-display);letter-spacing:-.01em;color:var(--text-strong)">Integrações</h2>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ integracoesConfig }}" as="i" hint-placeholder-count="4">
+                  <div style="display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-top:1px solid var(--ll-slate-100);align-items:center">
+                    <div style="min-width:0">
+                      <div style="font:600 12.5px/1.3 var(--font-body);color:var(--text-strong)">{{ i.nome }}</div>
+                      <div style="margin-top:3px;font-size:11.5px;line-height:1.5;color:var(--text-muted)">{{ i.desc }}</div>
+                    </div>
+                    <span style="font:600 10.5px/1 var(--font-mono);color:{{ i.cor }}">{{ i.estado }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+    </main>
+  </div>
+
+  <sc-if value="{{ modalAberto }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:60;display:flex;align-items:flex-start;justify-content:center;padding:48px 24px;overflow:auto;background:rgba(8,44,82,.44);backdrop-filter:blur(3px)">
+      <div style="width:100%;max-width:{{ modalLargura }};background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:18px;box-shadow:var(--shadow-lg);overflow:hidden">
+
+        <div style="display:flex;align-items:flex-start;gap:16px;padding:22px 26px 18px;border-bottom:1px solid var(--border-subtle)">
+          <div style="min-width:0">
+            <div style="font:700 10px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--color-primary);margin-bottom:7px">{{ modalEyebrow }}</div>
+            <h2 style="margin:0;font:800 21px/1.2 var(--font-display);letter-spacing:-.02em;color:var(--text-strong)">{{ modalTitulo }}</h2>
+            <p style="margin:6px 0 0;font-size:12.5px;color:var(--text-muted);max-width:520px">{{ modalSubtitulo }}</p>
+          </div>
+          <button type="button" onClick="{{ fecharModal }}" style="margin-left:auto;flex:none;width:32px;height:32px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--ll-slate-050);color:var(--text-muted);font:400 16px/1 var(--font-body)">×</button>
+        </div>
+
+        <div style="padding:22px 26px 8px">
+
+          <sc-if value="{{ modalChamado }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--ll-teal-100);border-radius:12px;background:var(--ll-teal-050)">
+                <span style="font:700 9px/1 var(--font-display);letter-spacing:.12em;text-transform:uppercase;color:var(--ll-teal-700)">Assistente</span>
+                <span style="font-size:12px;color:var(--ll-teal-700);line-height:1.45">Cole a mensagem do WhatsApp e a IA preenche categoria, prioridade e setor — você confere antes de abrir.</span>
+              </div>
+
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Assunto do chamado</div>
+                <div style="padding:11px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--ll-slate-050);font-size:13px;color:var(--text-strong)">Relatório de inadimplência por carteira não abre no fim do mês</div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Setor solicitante</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font-size:13px;color:var(--text-strong)">Cobrança · Renata Alves</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Categoria</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <sc-for list="{{ categorias }}" as="c" hint-placeholder-count="4">
+                      <button type="button" onClick="{{ c.ir }}" style="border:1px solid {{ c.borda }};background:{{ c.bg }};color:{{ c.cor }};border-radius:999px;padding:6px 11px;font:600 11.5px/1 var(--font-body)">{{ c.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Prioridade e SLA</div>
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <sc-for list="{{ prioridades }}" as="p" hint-placeholder-count="4">
+                      <button type="button" onClick="{{ p.ir }}" style="display:flex;align-items:center;gap:10px;text-align:left;border:1px solid {{ p.borda }};background:{{ p.bg }};border-radius:12px;padding:9px 12px">
+                        <span style="width:8px;height:8px;flex:none;border-radius:50%;background:{{ p.ponto }}"></span>
+                        <span style="font:600 12.5px/1.2 var(--font-body);color:var(--text-strong)">{{ p.label }}</span>
+                        <span style="margin-left:auto;font:500 11px/1 var(--font-mono);color:var(--text-muted)">{{ p.sla }}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:14px">
+                  <div>
+                    <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Responsável sugerido</div>
+                    <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font-size:13px;color:var(--text-strong)">Rafael Nunes · 39h livres</div>
+                  </div>
+                  <div>
+                    <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Horas previstas</div>
+                    <div style="display:flex;align-items:center;gap:10px;padding:8px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card)">
+                      <span style="font:700 17px/1 var(--font-display);color:var(--text-strong)">{{ horasPrevistas }}h</span>
+                      <div style="margin-left:auto;display:flex;gap:6px">
+                        <button type="button" onClick="{{ menosHoras }}" style="width:28px;height:28px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--ll-slate-050);color:var(--text-body);font-size:14px">−</button>
+                        <button type="button" onClick="{{ maisHoras }}" style="width:28px;height:28px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--ll-slate-050);color:var(--text-body);font-size:14px">+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="padding:13px 15px;border-radius:12px;background:var(--ll-slate-050);border:1px solid var(--border-subtle)">
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Consequência da escolha</div>
+                <div style="font-size:12.5px;line-height:1.55;color:var(--text-body)">{{ consequenciaSla }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalMaterial }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <span style="font:600 11px/1 var(--font-body);padding:6px 11px;border-radius:999px;background:var(--ll-blue-050);color:var(--ll-blue-700);border:1px solid var(--ll-blue-100)">Setor {{ setorAtual }}</span>
+                <span style="font:600 11px/1 var(--font-body);padding:6px 11px;border-radius:999px;background:var(--ll-slate-050);color:var(--text-muted);border:1px solid var(--border-subtle)">Centro de custo {{ centroCusto }}</span>
+                <button type="button" onClick="{{ abrirQr }}" style="margin-left:auto;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border-subtle);border-radius:999px;background:var(--surface-card);padding:7px 12px;font:600 11.5px/1 var(--font-body);color:var(--text-body)">Ler QR Code do item</button>
+              </div>
+
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Itens do pedido</div>
+                <div style="border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden">
+                  <sc-for list="{{ carrinho }}" as="c" hint-placeholder-count="3">
+                    <div style="display:grid;grid-template-columns:1fr 92px 108px 34px;gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--ll-slate-100)">
+                      <div style="min-width:0">
+                        <div style="font:600 12.5px/1.3 var(--font-body);color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.nome }}</div>
+                        <div style="margin-top:2px;font-size:11px;color:var(--text-muted)">{{ c.saldoTexto }}</div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:5px">
+                        <button type="button" onClick="{{ c.menos }}" style="width:24px;height:24px;border:1px solid var(--border-subtle);border-radius:7px;background:var(--ll-slate-050);color:var(--text-body);font-size:13px">−</button>
+                        <span style="font:600 12px/1 var(--font-mono);color:var(--text-strong);min-width:22px;text-align:center">{{ c.qtd }}</span>
+                        <button type="button" onClick="{{ c.mais }}" style="width:24px;height:24px;border:1px solid var(--border-subtle);border-radius:7px;background:var(--ll-slate-050);color:var(--text-body);font-size:13px">+</button>
+                      </div>
+                      <span style="font:600 11px/1 var(--font-body);padding:4px 9px;border-radius:999px;background:{{ c.bg }};color:{{ c.cor }};justify-self:start">{{ c.aviso }}</span>
+                      <button type="button" onClick="{{ c.remover }}" style="width:26px;height:26px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface-card);color:var(--text-muted);font-size:13px">×</button>
+                    </div>
+                  </sc-for>
+                  <div style="display:flex;align-items:center;gap:8px;padding:11px 14px;background:var(--ll-slate-050)">
+                    <span style="font-size:12.5px;color:var(--text-muted)">Adicionar item do estoque:</span>
+                    <sc-for list="{{ sugestoes }}" as="s" hint-placeholder-count="3">
+                      <button type="button" onClick="{{ s.add }}" style="border:1px solid var(--border-subtle);background:var(--surface-card);border-radius:999px;padding:5px 11px;font:600 11.5px/1 var(--font-body);color:var(--text-body)">{{ s.nome }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Vínculo do consumo</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <sc-for list="{{ vinculos }}" as="v" hint-placeholder-count="3">
+                      <button type="button" onClick="{{ v.ir }}" style="border:1px solid {{ v.borda }};background:{{ v.bg }};color:{{ v.cor }};border-radius:999px;padding:6px 11px;font:600 11.5px/1 var(--font-body)">{{ v.label }}</button>
+                    </sc-for>
+                  </div>
+                  <div style="margin-top:8px;padding:9px 12px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font:500 12px/1 var(--font-mono);color:var(--text-strong)">{{ vinculoValor }}</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Quando precisa</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <sc-for list="{{ prazos }}" as="p" hint-placeholder-count="3">
+                      <button type="button" onClick="{{ p.ir }}" style="border:1px solid {{ p.borda }};background:{{ p.bg }};color:{{ p.cor }};border-radius:999px;padding:6px 11px;font:600 11.5px/1 var(--font-body)">{{ p.label }}</button>
+                    </sc-for>
+                  </div>
+                  <div style="margin-top:8px;font-size:11.5px;color:var(--text-muted);line-height:1.5">Pedido de urgência notifica o gerente do setor e Compras ao mesmo tempo.</div>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:12px;background:var(--ll-slate-050);border:1px solid var(--border-subtle)">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Valor estimado</div>
+                  <div style="margin-top:5px;font:700 18px/1 var(--font-display);color:var(--text-strong)">{{ valorPedido }}</div>
+                </div>
+                <div style="font-size:12px;line-height:1.5;color:var(--text-body);max-width:320px">{{ avisoPedido }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalHoras }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Chamado</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--ll-slate-050);font:600 12.5px/1 var(--font-mono);color:var(--ll-blue-700)">#2841</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Data</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font-size:13px;color:var(--text-strong)">21/08/2026</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Duração</div>
+                  <div style="display:flex;align-items:center;gap:10px;padding:8px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card)">
+                    <span style="font:700 17px/1 var(--font-display);color:var(--text-strong)">{{ duracaoManual }}</span>
+                    <div style="margin-left:auto;display:flex;gap:6px">
+                      <button type="button" onClick="{{ menosDuracao }}" style="width:28px;height:28px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--ll-slate-050);color:var(--text-body);font-size:14px">−</button>
+                      <button type="button" onClick="{{ maisDuracao }}" style="width:28px;height:28px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--ll-slate-050);color:var(--text-body);font-size:14px">+</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Tipo de hora</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ tiposManual }}" as="t" hint-placeholder-count="8">
+                    <button type="button" onClick="{{ t.ir }}" style="border:1px solid {{ t.borda }};background:{{ t.bg }};color:{{ t.cor }};border-radius:999px;padding:7px 12px;font:600 12px/1 var(--font-body)">{{ t.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Justificativa do lançamento manual</div>
+                <div style="padding:12px 14px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font-size:12.5px;line-height:1.55;color:var(--text-strong);min-height:70px">Reunião de alinhamento com a Produção no chão de fábrica, sem acesso ao sistema no momento.</div>
+              </div>
+
+              <div style="padding:13px 15px;border-radius:12px;background:{{ avisoManualBg }};border:1px solid var(--border-subtle);font-size:12.5px;line-height:1.55;color:{{ avisoManualCor }}">{{ avisoManual }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalAprovacao }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;padding:15px 17px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--ll-slate-050)">
+                <sc-for list="{{ pedidoResumo }}" as="p" hint-placeholder-count="4">
+                  <div>
+                    <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">{{ p.rotulo }}</div>
+                    <div style="margin-top:6px;font:600 13px/1.35 var(--font-body);color:{{ p.cor }}">{{ p.valor }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">O que o sistema verificou</div>
+                <div style="display:flex;flex-direction:column">
+                  <sc-for list="{{ verificacoes }}" as="v" hint-placeholder-count="4">
+                    <div style="display:grid;grid-template-columns:20px 1fr auto;gap:11px;align-items:baseline;padding:10px 0;border-top:1px solid var(--ll-slate-100)">
+                      <span style="font:700 12px/1.3 var(--font-display);color:{{ v.cor }}">{{ v.marca }}</span>
+                      <span style="font-size:12.5px;line-height:1.5;color:var(--text-body)">{{ v.texto }}</span>
+                      <span style="font:500 11px/1.4 var(--font-mono);color:var(--text-muted)">{{ v.dado }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Decisão</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ decisoes }}" as="d" hint-placeholder-count="3">
+                    <button type="button" onClick="{{ d.ir }}" style="border:1px solid {{ d.borda }};background:{{ d.bg }};color:{{ d.cor }};border-radius:999px;padding:7px 13px;font:600 12px/1 var(--font-body)">{{ d.label }}</button>
+                  </sc-for>
+                </div>
+                <div style="margin-top:10px;padding:12px 14px;border-radius:12px;background:{{ decisaoBg }};border:1px solid var(--border-subtle);font-size:12.5px;line-height:1.55;color:{{ decisaoCor }}">{{ decisaoTexto }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalProjeto }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Nome do projeto</div>
+                <div style="padding:11px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--ll-slate-050);font-size:13px;color:var(--text-strong)">Portal de autoatendimento do colaborador</div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Setor beneficiado</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font-size:13px;color:var(--text-strong)">RH · Marina Corrêa</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Patrocinador</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font-size:13px;color:var(--text-strong)">Diretoria Administrativa</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Horas previstas</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font:600 13px/1 var(--font-mono);color:var(--text-strong)">180h</div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Etapa inicial</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ etapasIniciais }}" as="e" hint-placeholder-count="4">
+                    <button type="button" onClick="{{ e.ir }}" style="border:1px solid {{ e.borda }};background:{{ e.bg }};color:{{ e.cor }};border-radius:999px;padding:7px 12px;font:600 12px/1 var(--font-body)">{{ e.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Risco declarado na abertura</div>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <sc-for list="{{ riscosProjeto }}" as="r" hint-placeholder-count="3">
+                    <button type="button" onClick="{{ r.ir }}" style="display:flex;align-items:center;gap:11px;text-align:left;border:1px solid {{ r.borda }};background:{{ r.bg }};border-radius:12px;padding:10px 13px">
+                      <span style="width:8px;height:8px;flex:none;border-radius:50%;background:{{ r.ponto }}"></span>
+                      <span style="font:600 12.5px/1.2 var(--font-body);color:var(--text-strong)">{{ r.label }}</span>
+                      <span style="margin-left:auto;font-size:11.5px;color:var(--text-muted)">{{ r.nota }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalExportar }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Formato</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ formatos }}" as="f" hint-placeholder-count="3">
+                    <button type="button" onClick="{{ f.ir }}" style="border:1px solid {{ f.borda }};background:{{ f.bg }};color:{{ f.cor }};border-radius:999px;padding:7px 13px;font:600 12px/1 var(--font-body)">{{ f.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Período</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ periodos }}" as="p" hint-placeholder-count="4">
+                    <button type="button" onClick="{{ p.ir }}" style="border:1px solid {{ p.borda }};background:{{ p.bg }};color:{{ p.cor }};border-radius:999px;padding:7px 13px;font:600 12px/1 var(--font-body)">{{ p.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Colunas incluídas</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ colunasExport }}" as="c" hint-placeholder-count="6">
+                    <button type="button" onClick="{{ c.alterna }}" style="display:inline-flex;align-items:center;gap:7px;border:1px solid {{ c.borda }};background:{{ c.bg }};color:{{ c.cor }};border-radius:999px;padding:6px 12px;font:600 11.5px/1 var(--font-body)">
+                      <span style="width:6px;height:6px;border-radius:50%;background:{{ c.ponto }}"></span>{{ c.label }}
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:12px;background:var(--ll-slate-050);border:1px solid var(--border-subtle)">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Linhas no arquivo</div>
+                  <div style="margin-top:5px;font:700 18px/1 var(--font-display);color:var(--text-strong)">{{ linhasExport }}</div>
+                </div>
+                <div style="font-size:12px;line-height:1.5;color:var(--text-body);max-width:360px">{{ avisoExport }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalEntrega }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Verificação antes de enviar</div>
+                <div style="display:flex;flex-direction:column">
+                  <sc-for list="{{ checklistEntrega }}" as="c" hint-placeholder-count="5">
+                    <div style="display:grid;grid-template-columns:20px 1fr auto;gap:11px;align-items:baseline;padding:11px 0;border-top:1px solid var(--ll-slate-100)">
+                      <span style="font:700 12px/1.3 var(--font-display);color:{{ c.cor }}">{{ c.marca }}</span>
+                      <span style="font-size:12.5px;line-height:1.5;color:var(--text-body)">{{ c.texto }}</span>
+                      <span style="font:500 11px/1.4 var(--font-mono);color:var(--text-muted)">{{ c.dado }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Resumo da entrega para o solicitante</div>
+                <div style="padding:12px 14px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font-size:12.5px;line-height:1.55;color:var(--text-strong);min-height:66px">O apontamento de produção passa a subir para o Sankhya a cada 5 minutos, com log de divergência acessível no terminal do chão de fábrica. Manual do usuário na aba Documentos.</div>
+              </div>
+              <div style="padding:13px 15px;border-radius:12px;background:{{ entregaAvisoBg }};border:1px solid var(--border-subtle);font-size:12.5px;line-height:1.55;color:{{ entregaAvisoCor }}">{{ entregaAviso }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalQr }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:center">
+                <div style="aspect-ratio:1;border-radius:14px;background:var(--surface-brand-deep);display:grid;place-items:center;position:relative;overflow:hidden">
+                  <span style="width:74px;height:74px;border:3px solid var(--color-primary);border-radius:10px;display:block"></span>
+                  <span style="position:absolute;left:14px;right:14px;top:50%;height:2px;background:var(--color-primary);opacity:.85;display:block"></span>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Item identificado</div>
+                  <div style="margin-top:8px;font:800 19px/1.2 var(--font-display);color:var(--text-strong)">{{ qrItem }}</div>
+                  <div style="margin-top:7px;font:600 12px/1 var(--font-mono);color:var(--ll-blue-700)">{{ qrCodigo }} · CC {{ centroCusto }}</div>
+                  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+                    <span style="font:600 11px/1 var(--font-body);padding:5px 10px;border-radius:999px;background:var(--ll-slate-050);color:var(--text-body);border:1px solid var(--border-subtle)">Saldo {{ qrSaldo }}</span>
+                    <span style="font:600 11px/1 var(--font-body);padding:5px 10px;border-radius:999px;background:{{ qrBg }};color:{{ qrCor }}">{{ qrSituacao }}</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">O que fazer com a leitura</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ acoesQr }}" as="a" hint-placeholder-count="4">
+                    <button type="button" onClick="{{ a.ir }}" style="border:1px solid {{ a.borda }};background:{{ a.bg }};color:{{ a.cor }};border-radius:999px;padding:7px 13px;font:600 12px/1 var(--font-body)">{{ a.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Quantidade</div>
+                  <div style="display:flex;align-items:center;gap:10px;padding:8px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card)">
+                    <span style="font:700 17px/1 var(--font-display);color:var(--text-strong)">{{ qtdQr }}</span>
+                    <div style="margin-left:auto;display:flex;gap:6px">
+                      <button type="button" onClick="{{ menosQr }}" style="width:28px;height:28px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--ll-slate-050);color:var(--text-body);font-size:14px">−</button>
+                      <button type="button" onClick="{{ maisQr }}" style="width:28px;height:28px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--ll-slate-050);color:var(--text-body);font-size:14px">+</button>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Vínculo</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font:500 12px/1.3 var(--font-mono);color:var(--text-strong)">OS 4471</div>
+                </div>
+              </div>
+              <div style="padding:13px 15px;border-radius:12px;background:var(--ll-slate-050);border:1px solid var(--border-subtle);font-size:12.5px;line-height:1.55;color:var(--text-body)">{{ qrAviso }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalCotacao }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;padding:15px 17px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--ll-slate-050)">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Itens na cotação</div>
+                  <div style="margin-top:6px;font:700 15px/1.2 var(--font-display);color:var(--text-strong)">4 itens · 3 setores</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Valor de referência</div>
+                  <div style="margin-top:6px;font:700 15px/1.2 var(--font-display);color:var(--text-strong)">R$ 4.812,00</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Prazo para resposta</div>
+                  <div style="margin-top:6px;font:700 15px/1.2 var(--font-display);color:var(--text-strong)">27/08 · 3 dias</div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Fornecedores convidados</div>
+                <div style="border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden">
+                  <sc-for list="{{ fornecedores }}" as="f" hint-placeholder-count="4">
+                    <button type="button" onClick="{{ f.alterna }}" style="display:grid;grid-template-columns:22px 1fr 110px 96px;gap:12px;align-items:center;width:100%;text-align:left;padding:12px 14px;border:none;border-bottom:1px solid var(--ll-slate-100);background:{{ f.bg }}">
+                      <span style="width:16px;height:16px;border-radius:5px;border:1.5px solid {{ f.marcaBorda }};background:{{ f.marcaBg }};display:grid;place-items:center;font:700 10px/1 var(--font-display);color:#fff">{{ f.marca }}</span>
+                      <span style="min-width:0">
+                        <span style="display:block;font:600 12.5px/1.3 var(--font-body);color:var(--text-strong)">{{ f.nome }}</span>
+                        <span style="display:block;margin-top:2px;font-size:11px;color:var(--text-muted)">{{ f.nota }}</span>
+                      </span>
+                      <span style="font:500 11.5px/1 var(--font-mono);color:var(--text-body)">{{ f.prazo }}</span>
+                      <span style="font:600 11px/1 var(--font-body);color:{{ f.cor }}">{{ f.desempenho }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:12px;background:var(--ll-slate-050);border:1px solid var(--border-subtle)">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Convidados</div>
+                  <div style="margin-top:5px;font:700 18px/1 var(--font-display);color:var(--text-strong)">{{ totalFornecedores }}</div>
+                </div>
+                <div style="font-size:12px;line-height:1.5;color:var(--text-body);max-width:380px">{{ avisoCotacao }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalAuditoria }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <sc-for list="{{ filtrosAuditoria }}" as="f" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ f.ir }}" style="border:1px solid {{ f.borda }};background:{{ f.bg }};color:{{ f.cor }};border-radius:999px;padding:6px 12px;font:600 11.5px/1 var(--font-body)">{{ f.label }}</button>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ auditoria }}" as="a" hint-placeholder-count="6">
+                  <div style="display:grid;grid-template-columns:96px 1fr 150px;gap:14px;padding:12px 0;border-top:1px solid var(--ll-slate-100);align-items:start">
+                    <span style="font:500 10.5px/1.4 var(--font-mono);color:var(--text-muted)">{{ a.quando }}</span>
+                    <div style="min-width:0">
+                      <div style="font:600 12.5px/1.35 var(--font-body);color:var(--text-strong)">{{ a.mudanca }}</div>
+                      <div style="margin-top:3px;font-size:11.5px;line-height:1.5;color:var(--text-muted)">{{ a.detalhe }}</div>
+                    </div>
+                    <span style="font-size:11.5px;color:var(--text-body);text-align:right">{{ a.autor }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalBusca }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border:1.5px solid var(--ll-teal-100);border-radius:12px;background:var(--ll-teal-050)">
+                <span style="font:600 12px/1 var(--font-mono);color:var(--ll-teal-700)">⌕</span>
+                <span style="font:600 13.5px/1 var(--font-body);color:var(--text-strong)">{{ termoBusca }}</span>
+                <span style="margin-left:auto;font:500 10.5px/1 var(--font-mono);color:var(--text-muted)">{{ totalResultados }}</span>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <sc-for list="{{ tiposBusca }}" as="t" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ t.ir }}" style="border:1px solid {{ t.borda }};background:{{ t.bg }};color:{{ t.cor }};border-radius:999px;padding:6px 12px;font:600 11.5px/1 var(--font-body)">{{ t.label }}</button>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ resultados }}" as="r" hint-placeholder-count="5">
+                  <button type="button" onClick="{{ r.ir }}" style="display:grid;grid-template-columns:96px 1fr auto;gap:14px;align-items:center;width:100%;text-align:left;padding:12px 4px;border:none;border-top:1px solid var(--ll-slate-100);background:transparent">
+                    <span style="font:600 10px/1 var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:{{ r.tipoCor }}">{{ r.tipo }}</span>
+                    <span style="min-width:0">
+                      <span style="display:block;font:600 12.5px/1.35 var(--font-body);color:var(--text-strong)">{{ r.titulo }}</span>
+                      <span style="display:block;margin-top:2px;font-size:11.5px;color:var(--text-muted)">{{ r.contexto }}</span>
+                    </span>
+                    <span style="font:500 11px/1.3 var(--font-mono);color:var(--text-muted)">{{ r.meta }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalEntrada }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Nota fiscal</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--ll-slate-050);font:600 12.5px/1 var(--font-mono);color:var(--ll-blue-700)">88.402</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Fornecedor</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font-size:13px;color:var(--text-strong)">Ferramentas Bandeirantes</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Pedido de origem</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font-size:13px;color:var(--text-strong)">PC 1.204 · Compras</div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Conferência de recebimento</div>
+                <div style="border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden">
+                  <div style="display:grid;grid-template-columns:1fr 78px 96px 118px;gap:12px;padding:10px 14px;background:var(--ll-slate-050);border-bottom:1px solid var(--border-subtle);font:700 8.5px/1.2 var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">
+                    <span>Item</span><span>Pedido</span><span>Recebido</span><span>Situação</span>
+                  </div>
+                  <sc-for list="{{ conferencia }}" as="c" hint-placeholder-count="3">
+                    <div style="display:grid;grid-template-columns:1fr 78px 96px 118px;gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--ll-slate-100)">
+                      <span style="font-size:12.5px;color:var(--text-strong)">{{ c.nome }}</span>
+                      <span style="font:500 12px/1 var(--font-mono);color:var(--text-muted)">{{ c.pedido }}</span>
+                      <div style="display:flex;align-items:center;gap:5px">
+                        <button type="button" onClick="{{ c.menos }}" style="width:24px;height:24px;border:1px solid var(--border-subtle);border-radius:7px;background:var(--ll-slate-050);color:var(--text-body);font-size:13px">−</button>
+                        <span style="font:600 12px/1 var(--font-mono);color:var(--text-strong);min-width:22px;text-align:center">{{ c.recebido }}</span>
+                        <button type="button" onClick="{{ c.mais }}" style="width:24px;height:24px;border:1px solid var(--border-subtle);border-radius:7px;background:var(--ll-slate-050);color:var(--text-body);font-size:13px">+</button>
+                      </div>
+                      <span style="font:600 11px/1 var(--font-body);padding:4px 9px;border-radius:999px;background:{{ c.bg }};color:{{ c.cor }};justify-self:start">{{ c.situacao }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Setor de destino</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font-size:13px;color:var(--text-strong)">{{ setorAtual }} · CC {{ centroCusto }}</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Etiquetagem</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <sc-for list="{{ etiquetagem }}" as="e" hint-placeholder-count="2">
+                      <button type="button" onClick="{{ e.ir }}" style="border:1px solid {{ e.borda }};background:{{ e.bg }};color:{{ e.cor }};border-radius:999px;padding:6px 11px;font:600 11.5px/1 var(--font-body)">{{ e.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+
+              <div style="padding:13px 15px;border-radius:12px;background:{{ entradaAvisoBg }};border:1px solid var(--border-subtle);font-size:12.5px;line-height:1.55;color:{{ entradaAvisoCor }}">{{ entradaAviso }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalTransferencia }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:grid;grid-template-columns:1fr 46px 1fr;gap:12px;align-items:center">
+                <div style="padding:14px 16px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--ll-slate-050)">
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Origem</div>
+                  <div style="margin-top:7px;font:700 15px/1.2 var(--font-display);color:var(--text-strong)">{{ setorAtual }}</div>
+                  <div style="margin-top:5px;font-size:11.5px;color:var(--text-muted)">saldo do item: {{ saldoOrigem }}</div>
+                </div>
+                <div style="text-align:center;font:700 18px/1 var(--font-display);color:var(--color-primary)">→</div>
+                <div style="padding:14px 16px;border:1px solid var(--ll-teal-100);border-radius:12px;background:var(--ll-teal-050)">
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ll-teal-700)">Destino</div>
+                  <div style="margin-top:7px;font:700 15px/1.2 var(--font-display);color:var(--text-strong)">{{ setorDestino }}</div>
+                  <div style="margin-top:5px;font-size:11.5px;color:var(--text-muted)">centro de custo {{ ccDestino }}</div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Setor de destino</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ destinos }}" as="d" hint-placeholder-count="6">
+                    <button type="button" onClick="{{ d.ir }}" style="border:1px solid {{ d.borda }};background:{{ d.bg }};color:{{ d.cor }};border-radius:999px;padding:6px 12px;font:600 11.5px/1 var(--font-body)">{{ d.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Item</div>
+                  <div style="padding:10px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card);font-size:13px;color:var(--text-strong)">{{ itemTransferencia }}</div>
+                </div>
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">Quantidade</div>
+                  <div style="display:flex;align-items:center;gap:10px;padding:8px 13px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-card)">
+                    <span style="font:700 17px/1 var(--font-display);color:var(--text-strong)">{{ qtdTransferencia }}</span>
+                    <div style="margin-left:auto;display:flex;gap:6px">
+                      <button type="button" onClick="{{ menosTransf }}" style="width:28px;height:28px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--ll-slate-050);color:var(--text-body);font-size:14px">−</button>
+                      <button type="button" onClick="{{ maisTransf }}" style="width:28px;height:28px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--ll-slate-050);color:var(--text-body);font-size:14px">+</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="padding:13px 15px;border-radius:12px;background:{{ transfAvisoBg }};border:1px solid var(--border-subtle);font-size:12.5px;line-height:1.55;color:{{ transfAvisoCor }}">{{ transfAviso }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ modalInventario }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <span style="font:600 11px/1 var(--font-body);padding:6px 11px;border-radius:999px;background:var(--ll-blue-050);color:var(--ll-blue-700);border:1px solid var(--ll-blue-100)">Contagem cíclica · {{ setorAtual }}</span>
+                <span style="font:600 11px/1 var(--font-body);padding:6px 11px;border-radius:999px;background:var(--ll-slate-050);color:var(--text-muted);border:1px solid var(--border-subtle)">Responsável: Marcos Ribeiro</span>
+                <span style="margin-left:auto;font:500 11px/1 var(--font-mono);color:var(--text-muted)">{{ progressoInventario }}</span>
+              </div>
+
+              <div style="border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden">
+                <div style="display:grid;grid-template-columns:1fr 82px 110px 130px;gap:12px;padding:10px 14px;background:var(--ll-slate-050);border-bottom:1px solid var(--border-subtle);font:700 8.5px/1.2 var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">
+                  <span>Item</span><span>Sistema</span><span>Contado</span><span>Divergência</span>
+                </div>
+                <sc-for list="{{ contagem }}" as="c" hint-placeholder-count="5">
+                  <div style="display:grid;grid-template-columns:1fr 82px 110px 130px;gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--ll-slate-100)">
+                    <div style="min-width:0">
+                      <div style="font-size:12.5px;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.nome }}</div>
+                      <div style="margin-top:2px;font:500 10.5px/1 var(--font-mono);color:var(--text-muted)">{{ c.codigo }}</div>
+                    </div>
+                    <span style="font:500 12px/1 var(--font-mono);color:var(--text-muted)">{{ c.sistema }}</span>
+                    <div style="display:flex;align-items:center;gap:5px">
+                      <button type="button" onClick="{{ c.menos }}" style="width:24px;height:24px;border:1px solid var(--border-subtle);border-radius:7px;background:var(--ll-slate-050);color:var(--text-body);font-size:13px">−</button>
+                      <span style="font:600 12px/1 var(--font-mono);color:var(--text-strong);min-width:26px;text-align:center">{{ c.contado }}</span>
+                      <button type="button" onClick="{{ c.mais }}" style="width:24px;height:24px;border:1px solid var(--border-subtle);border-radius:7px;background:var(--ll-slate-050);color:var(--text-body);font-size:13px">+</button>
+                    </div>
+                    <span style="font:600 11px/1 var(--font-body);padding:4px 9px;border-radius:999px;background:{{ c.bg }};color:{{ c.cor }};justify-self:start">{{ c.divergencia }}</span>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:12px;background:{{ invAvisoBg }};border:1px solid var(--border-subtle)">
+                <div>
+                  <div style="font:600 9px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Impacto no estoque</div>
+                  <div style="margin-top:5px;font:700 18px/1 var(--font-display);color:{{ invAvisoCor }}">{{ impactoInventario }}</div>
+                </div>
+                <div style="font-size:12px;line-height:1.5;color:var(--text-body);max-width:360px">{{ invAviso }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:18px 26px 22px;border-top:1px solid var(--border-subtle);background:var(--ll-slate-050)">
+          <span style="font-size:11.5px;color:var(--text-muted);max-width:340px;line-height:1.5">{{ modalNota }}</span>
+          <div style="margin-left:auto;display:flex;gap:9px">
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="outline" size="sm" onClick="{{ fecharModal }}" hint-size="auto,38px">Cancelar</x-import>
+            <x-import component-from-global-scope="DesignSystemLifeLaboral_14ad63.Button" variant="gradient" size="sm" onClick="{{ confirmarModal }}" hint-size="auto,38px">{{ modalAcao }}</x-import>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:11px;padding:13px 18px;border-radius:999px;background:var(--surface-brand-deep);color:#fff;box-shadow:var(--shadow-lg)">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--color-primary)"></span>
+      <span style="font:600 12.5px/1 var(--font-body)">{{ toast }}</span>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mostrarIntegracoes&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Diferenciais&quot;},&quot;docBloqueante&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Regras&quot;}}">
+const TEAL = 'var(--color-primary)', BLUE = 'var(--color-secondary)', BLUE7 = 'var(--ll-blue-700)',
+  VD = 'var(--ll-success)', VD_BG = 'var(--ll-success-bg)',
+  AM = 'var(--ll-warning)', AM_BG = 'var(--ll-warning-bg)', AM_FG = '#8a5a14',
+  VM = 'var(--ll-danger)', VM_BG = 'var(--ll-danger-bg)',
+  MUT = 'var(--text-muted)', SUNK = 'var(--surface-sunken)';
+
+const ICON = {
+  painel: 'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z',
+  tarefas: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11',
+  timer: 'M12 7v5l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z',
+  projetos: 'M3 3v18h18M7 15l4-4 3 3 5-6',
+  almox: 'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10',
+  compras: 'M3 4h2l2 12h11l2-8H7M9 20h.01M17 20h.01',
+  config: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6'
+};
+
+class Component extends DCLogic {
+  state = {
+    tela: 'painel',
+    perfil: 'Gerente de TI',
+    setor: 'Manutenção',
+    filtro: 'Abertas',
+    rodando: 'Desenvolvimento',
+    segundos: 4 * 3600 + 12 * 60 + 8,
+    modal: null,
+    toast: '',
+    categoria: 'Desenvolvimento',
+    prioridade: 'Alta',
+    horasPrevistas: 16,
+    vinculo: 'Ordem de serviço',
+    prazoPedido: 'Esta semana',
+    tipoManual: 'Reunião',
+    minutosManual: 90,
+    decisao: 'Aprovar',
+    etapaInicial: 'Em análise',
+    riscoProjeto: 'Médio',
+    itens: [
+      { nome: 'Disco de corte 7"', saldo: 5, minimo: 12, qtd: 30, preco: 14.7 },
+      { nome: 'Graxa industrial 1kg', saldo: 7, minimo: 6, qtd: 4, preco: 68 }
+    ],
+    recebidos: { 0: 30, 1: 12, 2: 4 },
+    destino: 'Produção',
+    qtdTransf: 5,
+    contados: { 0: 85, 1: 16, 2: 7, 3: 34, 4: 5 },
+    etiqueta: 'Gerar QR Code',
+    sla: { 'Crítica': 4, 'Alta': 8, 'Média': 24, 'Baixa': 72 },
+    exportContexto: 'painel',
+    formato: 'Excel (.xlsx)',
+    periodo: 'Este mês',
+    colunasOff: {},
+    acaoQr: 'Registrar saída',
+    qtdQr: 4,
+    fornecedoresOff: {},
+    filtroAuditoria: 'Tudo',
+    tipoBusca: 'Tudo',
+    filtroHistorico: 'Todos',
+    flags: { docDev: true, docAtend: false, causaRetrabalho: true, cronometroUnico: true, aprovacaoEntrega: true },
+    permissoes: {}
+  };
+
+  abrir(modal) { return () => this.setState({ modal, toast: '' }); }
+
+  confirma(msg) {
+    return () => {
+      this.setState({ modal: null, toast: msg });
+      clearTimeout(this._toast);
+      this._toast = setTimeout(() => this.setState({ toast: '' }), 4200);
+    };
+  }
+
+  pill(ativo) {
+    return {
+      bg: ativo ? 'var(--gradient-brand)' : 'var(--surface-card)',
+      cor: ativo ? '#fff' : 'var(--text-body)',
+      borda: ativo ? 'transparent' : 'var(--border-subtle)'
+    };
+  }
+
+  grupo(lista, atual, campo) {
+    return lista.map(label => Object.assign(
+      { label, ir: () => this.setState({ [campo]: label }) },
+      this.pill(atual === label)
+    ));
+  }
+
+  componentDidMount() {
+    this._t = setInterval(() => {
+      if (this.state.rodando) this.setState(s => ({ segundos: s.segundos + 1 }));
+    }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+
+  hms(sec) {
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+  }
+
+  icone(nome) {
+    return React.createElement('svg', {
+      viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2,
+      strokeLinecap: 'round', strokeLinejoin: 'round',
+      style: { width: 17, height: 17, flex: 'none' }
+    }, React.createElement('path', { d: ICON[nome] }));
+  }
+
+  renderVals() {
+    const st = this.state;
+    const p = st.perfil;
+    const perm = {
+      compras: p === 'Compras' || p === 'Administrador',
+      todosSetores: p === 'Compras' || p === 'Administrador',
+      projetos: p !== 'Colaborador',
+      painel: p !== 'Colaborador'
+    };
+    const ir = tela => () => this.setState({ tela });
+
+    const perfis = ['Colaborador', 'Responsável do setor', 'Gerente do setor', 'Gerente de TI', 'Compras', 'Administrador'];
+    const descricoes = {
+      'Colaborador': 'Abre chamados, aponta suas horas e solicita material do próprio setor.',
+      'Responsável do setor': 'Movimenta o estoque do seu setor e acompanha as solicitações.',
+      'Gerente do setor': 'Aprova solicitações do setor e acompanha os indicadores dele.',
+      'Gerente de TI': 'Aprova entregas, vê as horas de todos e o portfólio completo.',
+      'Compras': 'Vê todos os setores, faltas e necessidade de reposição.',
+      'Administrador': 'Configuração e acesso completo ao sistema.'
+    };
+
+    const navBase = [
+      { id: 'painel', label: 'Painel de indicadores', icone: 'painel', grupo: 'Gestão', badge: '', ver: perm.painel },
+      { id: 'tarefas', label: 'Central de tarefas', icone: 'tarefas', grupo: perm.painel ? '' : 'Trabalho', badge: '34', badgeBg: 'var(--ll-blue-050)', badgeFg: BLUE7, ver: true },
+      { id: 'tarefa', label: 'Tarefa em andamento', icone: 'timer', grupo: '', badge: st.rodando ? '●' : '', badgeBg: 'var(--ll-teal-050)', badgeFg: 'var(--ll-teal-700)', ver: true },
+      { id: 'projetos', label: 'Projetos de TI', icone: 'projetos', grupo: 'Portfólio', badge: '17', badgeBg: 'var(--ll-blue-050)', badgeFg: BLUE7, ver: perm.projetos },
+      { id: 'almox', label: 'Almoxarifado', icone: 'almox', grupo: 'Materiais', badge: '6', badgeBg: AM_BG, badgeFg: AM_FG, ver: true },
+      { id: 'compras', label: 'Compras', icone: 'compras', grupo: '', badge: '9', badgeBg: AM_BG, badgeFg: AM_FG, ver: perm.compras },
+      { id: 'config', label: 'SLA e permissões', icone: 'config', grupo: 'Administração', badge: '', ver: p === 'Administrador' }
+    ];
+    const nav = navBase.filter(n => n.ver).map(n => {
+      const at = st.tela === n.id || (n.id === 'projetos' && st.tela === 'historico');
+      return {
+        label: n.label, grupo: n.grupo || false, ir: ir(n.id),
+        icone: this.icone(n.icone),
+        badge: n.badge || false, badgeBg: n.badgeBg, badgeFg: n.badgeFg,
+        bg: at ? 'var(--color-primary-soft)' : 'transparent',
+        fg: at ? 'var(--ll-teal-700)' : 'var(--text-body)'
+      };
+    });
+
+    const migalhas = {
+      painel: 'Painel de indicadores', tarefas: 'Central de tarefas', tarefa: 'Chamado #2841',
+      projetos: 'Portfólio de projetos', almox: 'Almoxarifado · ' + st.setor, compras: 'Compras',
+      config: 'SLA e permissões', historico: 'Projetos encerrados'
+    };
+
+    const barra = (v, max) => Math.round(v / max * 1000) / 10 + '%';
+
+    const horas = [
+      ['Desenvolvimento', 186.5, BLUE], ['Atendimento', 92.0, BLUE], ['Análise', 74.5, BLUE],
+      ['Documentação', 71.0, TEAL], ['Testes', 48.0, BLUE], ['Implantação', 34.0, BLUE],
+      ['Reunião', 31.5, AM], ['Retrabalho', 34.0, VM]
+    ];
+    const horasTipo = horas.map(([tipo, v, cor]) => ({
+      tipo, cor, largura: barra(v, 186.5), rotulo: v.toFixed(1).replace('.', ',') + 'h'
+    }));
+
+    const colaboradores = [
+      ['Marcos Ribeiro', 148, 160], ['Aline Duarte', 132, 160], ['Rafael Nunes', 121, 160],
+      ['Juliana Prado', 96, 120], ['Diego Matos', 54.5, 80]
+    ].map(([nome, feito, cap]) => {
+      const pct = feito / cap * 100;
+      return {
+        nome, largura: Math.min(pct, 100) + '%',
+        rotulo: String(feito).replace('.', ',') + 'h / ' + cap + 'h',
+        cor: pct > 95 ? VM : pct > 80 ? 'var(--gradient-brand)' : TEAL
+      };
+    });
+
+    const risco = [
+      { chamado: '#2841', titulo: 'Integração apontamento × Sankhya', sla: '2h restantes', cor: AM },
+      { chamado: '#2836', titulo: 'Etiquetas QR do almoxarifado', sla: 'estourado 6h', cor: VM },
+      { chamado: '#2829', titulo: 'Relatório de horas por centro de custo', sla: '1d restante', cor: MUT },
+      { chamado: '#2822', titulo: 'Acesso VPN — turno da noite', sla: 'estourado 1d', cor: VM }
+    ];
+
+    const resumoEtapas = [
+      ['Em desenvolvimento', 4], ['Em análise', 3], ['Planejado', 3],
+      ['Em testes', 2], ['Em homologação', 2], ['Aguardando aprovação', 2], ['Suspenso', 1]
+    ].map(([etapa, qtd]) => ({ etapa, qtd, largura: qtd / 4 * 100 + '%' }));
+
+    const alertasEstoque = [
+      { item: 'Luva nitrílica CA 28.907', setor: 'Produção', saldo: '12 / mín 60', cor: VM },
+      { item: 'Toner HP 26A', setor: 'Cobrança', saldo: '2 / mín 6', cor: VM },
+      { item: 'Uniforme camisa polo', setor: 'RH', saldo: '54 / mín 80', cor: VM },
+      { item: 'Nobreak 1200VA', setor: 'TI', saldo: '1 / mín 2', cor: AM },
+      { item: 'Cabo de rede Cat6 (m)', setor: 'Manutenção', saldo: '85 / mín 100', cor: AM }
+    ];
+
+    const filtros = ['Abertas', 'Minhas', 'Atrasadas', 'Aguardando aprovação', 'Concluídas'].map(label => {
+      const at = st.filtro === label;
+      return {
+        label, ir: () => this.setState({ filtro: label }),
+        bg: at ? 'var(--gradient-brand)' : 'var(--surface-card)',
+        cor: at ? '#fff' : 'var(--text-body)',
+        borda: at ? 'transparent' : 'var(--border-subtle)'
+      };
+    });
+
+    const prio = {
+      'Crítica': [VM, VM_BG], 'Alta': [AM_FG, AM_BG],
+      'Média': [BLUE7, 'var(--ll-blue-050)'], 'Baixa': [MUT, SUNK]
+    };
+    const brutas = [
+      ['#2841', 'Integração do apontamento de produção com o Sankhya', 'Desenvolvimento', 'WhatsApp', 'Produção', 'Alta', 'Marcos R.', '40h / 47h', 1, 62, '2h', 'v3 aprovada', 1],
+      ['#2836', 'Etiquetas QR para itens do almoxarifado', 'Desenvolvimento', 'Portal', 'Compras', 'Crítica', 'Aline D.', '24h / 31h', 1, 100, 'estourado', 'pendente', 0],
+      ['#2834', 'Painel de horas por centro de custo', 'Análise', 'Portal', 'Financeiro', 'Média', 'Rafael N.', '16h / 9h', 0, 38, '1d 4h', 'rascunho', 0],
+      ['#2831', 'Reserva de material para parada programada', 'Atendimento', 'WhatsApp', 'Manutenção', 'Média', 'Juliana P.', '8h / 6h30', 0, 45, '18h', 'v1 aprovada', 1],
+      ['#2830', 'Régua de cobrança automática por e-mail', 'Desenvolvimento', 'Portal', 'Cobrança', 'Alta', 'Aline D.', '32h / 27h', 0, 55, '2d', 'em revisão', 2],
+      ['#2829', 'Relatório de consumo por setor', 'Documentação', 'Portal', 'Compras', 'Baixa', 'Diego M.', '12h / 11h', 0, 71, '1d', 'em revisão', 2],
+      ['#2825', 'Ajuste de layout do e-mail de campanha', 'Atendimento', 'WhatsApp', 'Marketing', 'Baixa', 'Diego M.', '4h / 3h20', 0, 30, '3d', 'não exigida', 3],
+      ['#2822', 'Acesso VPN para o turno da noite', 'Atendimento', 'Telefone', 'Produção', 'Alta', 'Marcos R.', '2h / 5h', 1, 100, 'estourado 1d', 'não exigida', 3],
+      ['#2818', 'Inventário cíclico da Expedição', 'Implantação', 'Portal', 'Expedição', 'Média', 'Aline D.', '20h / 18h', 0, 52, '3d', 'v2 aprovada', 1],
+      ['#2811', 'Ajuste de rateio de custo por ordem', 'Retrabalho', 'Portal', 'Financeiro', 'Alta', 'Rafael N.', '6h / 10h20', 1, 88, '6h', 'pendente', 0]
+    ];
+    const docCores = { 0: AM, 1: VD, 2: BLUE7, 3: MUT };
+    const tarefas = brutas.map(b => ({
+      id: b[0], titulo: b[1], categoria: b[2], origem: b[3], solicitante: b[4],
+      prioridade: b[5], prioridadeCor: prio[b[5]][0], prioridadeBg: prio[b[5]][1],
+      responsavel: b[6], horas: b[7], horasCor: b[8] ? VM : 'var(--text-body)',
+      slaLargura: b[9] + '%', sla: b[10], slaCor: b[9] >= 100 ? VM : b[9] >= 60 ? AM : VD,
+      doc: b[11], docCor: docCores[b[12]], abrir: ir('tarefa')
+    }));
+
+    const metaTarefa = [
+      { rotulo: 'Solicitante', valor: 'Produção · Carlos Menezes', cor: 'var(--text-strong)' },
+      { rotulo: 'Prazo e SLA', valor: '26/08 · 2h restantes', cor: AM },
+      { rotulo: 'Horas prev. / real.', valor: '40h → 47h (+17%)', cor: VM },
+      { rotulo: 'Etapa', valor: 'Em testes · aguarda validação', cor: 'var(--text-strong)' }
+    ];
+
+    const tiposHoras = [
+      ['Análise', 6.5], ['Desenvolvimento', st.segundos / 3600], ['Testes', 5.0],
+      ['Reunião', 2.5], ['Atendimento', 1.0], ['Documentação', 6.0],
+      ['Implantação', 0], ['Retrabalho', 4.33]
+    ];
+    const maxT = Math.max.apply(null, tiposHoras.map(t => t[1])) || 1;
+    const tiposHora = tiposHoras.map(([tipo, v]) => {
+      const ativo = st.rodando === tipo;
+      return {
+        tipo,
+        tempo: ativo ? this.hms(st.segundos) : (v === 0 ? '—' : Math.floor(v) + 'h' + String(Math.round((v % 1) * 60)).padStart(2, '0')),
+        largura: barra(v, maxT),
+        cor: tipo === 'Retrabalho' ? VM : tipo === 'Documentação' ? TEAL : BLUE,
+        ponto: ativo ? TEAL : 'var(--ll-slate-300)',
+        animacao: ativo ? 'pulseDot 1.4s infinite' : 'none',
+        bg: ativo ? 'var(--ll-teal-050)' : 'var(--surface-card)',
+        borda: ativo ? 'var(--ll-teal-100)' : 'var(--border-subtle)',
+        botao: ativo ? 'Pausar' : 'Iniciar',
+        botaoBg: ativo ? 'var(--gradient-brand)' : 'var(--surface-card)',
+        botaoCor: ativo ? '#fff' : 'var(--text-body)',
+        botaoBorda: ativo ? 'transparent' : 'var(--border-subtle)',
+        acao: () => this.setState({ rodando: ativo ? null : tipo })
+      };
+    });
+
+    const documentacao = [
+      { secao: 'Problema ou necessidade', conteudo: 'Apontamento de produção lançado em planilha, sem rastreio por ordem.', status: 'completo', cor: VD },
+      { secao: 'Regra de negócio', conteudo: 'Cada apontamento gera movimento no Sankhya com o centro de custo do setor.', status: 'completo', cor: VD },
+      { secao: 'Solução aplicada', conteudo: 'Fila intermediária com reprocessamento e log de divergência.', status: 'completo', cor: VD },
+      { secao: 'Evidências', conteudo: '4 anexos · homologação com a Produção em 19/08.', status: 'completo', cor: VD },
+      { secao: 'Manual do usuário', conteudo: 'Passo a passo do apontamento no terminal do chão de fábrica.', status: 'em revisão', cor: AM },
+      { secao: 'Histórico de versões', conteudo: 'v1 08/08 · v2 15/08 · v3 21/08, com autor e diferença registrados.', status: 'completo', cor: VD },
+      { secao: 'Aprovação e revisão', conteudo: 'Gerente de TI · última revisão 21/08/2026.', status: 'pendente', cor: VM }
+    ];
+
+    const aprovacoes = [
+      { etapa: 'Entrega técnica registrada', detalhe: 'Marcos Ribeiro · 21/08 às 17:42', cor: VD },
+      { etapa: 'Validação do solicitante', detalhe: 'Produção · aguardando desde ontem', cor: AM },
+      { etapa: 'Aprovação do gerente de TI', detalhe: 'Bloqueada até o manual ser revisado', cor: 'var(--ll-slate-300)' }
+    ];
+
+    const historico = [
+      { quando: '21/08 17:42', texto: 'Entrega registrada e enviada para validação da Produção.' },
+      { quando: '20/08 14:05', texto: '4h20 reclassificadas para Retrabalho — mudança na regra de rateio.' },
+      { quando: '19/08 09:30', texto: 'Homologação concluída com Carlos Menezes.' },
+      { quando: '15/08 11:12', texto: 'Documento técnico v2 aprovado.' },
+      { quando: '12/08 08:20', texto: 'Cronômetro iniciado em Desenvolvimento por Marcos Ribeiro.' },
+      { quando: '08/08 16:48', texto: 'Chamado criado a partir de mensagem no WhatsApp da Produção.' }
+    ];
+
+    const anexos = [
+      { nome: 'evidencia-homologacao.pdf', tamanho: '1,4 MB' },
+      { nome: 'regra-rateio-v3.xlsx', tamanho: '284 KB' },
+      { nome: 'manual-terminal-producao.pdf', tamanho: '2,1 MB' }
+    ];
+
+    const proj = (nome, setor, responsavel, pct, horas, r, prazo) => ({
+      nome, setor, responsavel, largura: pct + '%', pctTexto: pct + '%', horas, prazo,
+      risco: 'Risco ' + r, riscoCor: r === 'alto' ? VM : r === 'médio' ? AM : VD
+    });
+    const colunas = [
+      { etapa: 'Ideia', qtd: 2, cards: [proj('App de checklist de manutenção', 'Manutenção', 'Aline D.', 0, '— / 60h', 'baixo', 'a definir')] },
+      { etapa: 'Em análise', qtd: 3, cards: [proj('Portal do fornecedor', 'Compras', 'Rafael N.', 15, '12h / 80h', 'médio', 'set/26'), proj('Ponto eletrônico integrado', 'RH', 'Diego M.', 8, '6h / 90h', 'baixo', 'out/26')] },
+      { etapa: 'Aguardando aprovação', qtd: 2, cards: [proj('CRM de carteira comercial', 'Comercial', 'Rafael N.', 5, '4h / 140h', 'médio', 'a definir')] },
+      { etapa: 'Planejado', qtd: 3, cards: [proj('Etiquetas QR do almoxarifado', 'Compras', 'Aline D.', 25, '31h / 120h', 'médio', '15/09/26')] },
+      { etapa: 'Em desenvolvimento', qtd: 4, cards: [proj('Integração Sankhya · apontamento', 'Produção', 'Marcos R.', 72, '47h / 40h', 'alto', '26/08/26'), proj('Régua de cobrança automática', 'Cobrança', 'Aline D.', 55, '27h / 32h', 'médio', '05/09/26')] },
+      { etapa: 'Em testes', qtd: 2, cards: [proj('Inventário cíclico Expedição', 'Expedição', 'Aline D.', 85, '18h / 20h', 'baixo', '30/08/26')] },
+      { etapa: 'Em homologação', qtd: 2, cards: [proj('Solicitação de material por celular', 'Todos', 'Juliana P.', 92, '54h / 50h', 'médio', '05/09/26')] },
+      { etapa: 'Em sustentação', qtd: 2, cards: [proj('Chamados via WhatsApp', 'Todos', 'Marcos R.', 100, '96h / 90h', 'baixo', 'contínuo')] },
+      { etapa: 'Suspenso', qtd: 1, cards: [proj('BI de custo por ordem', 'Financeiro', '—', 30, '22h / 110h', 'alto', 'sem data')] }
+    ];
+
+    const setoresTodos = ['Manutenção', 'Produção', 'Expedição', 'Qualidade', 'Cobrança', 'Financeiro', 'Marketing', 'Comercial', 'RH', 'Compras', 'TI'];
+    const setoresVisiveis = (perm.todosSetores ? setoresTodos : [st.setor]).map(nome => {
+      const at = st.setor === nome;
+      return {
+        nome, ir: () => this.setState({ setor: nome }),
+        bg: at ? 'var(--gradient-brand)' : 'var(--surface-card)',
+        cor: at ? '#fff' : 'var(--text-body)',
+        borda: at ? 'transparent' : 'var(--border-subtle)'
+      };
+    });
+
+    const centros = { 'Manutenção': '3102', 'Produção': '2001', 'Expedição': '4010', 'Qualidade': '2200', 'Cobrança': '1210', 'Financeiro': '1200', 'Marketing': '1400', 'Comercial': '1300', 'RH': '1100', 'Compras': '1500', 'TI': '1600' };
+
+    const estoquePorSetor = {
+      'Manutenção': [
+        ['MN-014', 'Cabo de rede Cat6 (metro)', '85', '100', 'R$ 3,20', 2, 'saída 40 m na OS 4471'],
+        ['MN-002', 'Rolamento 6204 ZZ', '18', '10', 'R$ 42,90', 0, 'entrada 12 un em 18/08'],
+        ['MN-031', 'Graxa industrial 1kg', '7', '6', 'R$ 68,00', 1, 'saída 2 un hoje'],
+        ['MN-045', 'Fita isolante 20m', '34', '15', 'R$ 8,40', 0, 'reservado 6 un'],
+        ['MN-077', 'Disco de corte 7"', '5', '12', 'R$ 14,70', 2, 'solicitado 30 un'],
+        ['MN-090', 'Parafuso M8 (cx 100)', '22', '8', 'R$ 31,00', 0, 'inventário conferido'],
+        ['MN-101', 'Luva de vaqueta (par)', '41', '20', 'R$ 12,50', 0, 'transferido 5 da Produção']
+      ],
+      'Produção': [
+        ['PR-008', 'Luva nitrílica CA 28.907 (par)', '12', '60', 'R$ 4,80', 2, 'consumo 45/semana'],
+        ['PR-012', 'Protetor auricular plug', '210', '100', 'R$ 1,90', 0, 'entrada 300 un'],
+        ['PR-020', 'Avental PVC', '28', '25', 'R$ 22,00', 1, 'saída 6 un hoje'],
+        ['PR-033', 'Máscara PFF2', '340', '200', 'R$ 2,40', 0, 'lote validade 12/27'],
+        ['PR-044', 'Óculos de proteção', '19', '30', 'R$ 9,80', 2, 'aguardando compra']
+      ],
+      'Expedição': [
+        ['EX-003', 'Fita de arquear 16mm (rolo)', '4', '10', 'R$ 96,00', 2, 'consumo 3/semana'],
+        ['EX-007', 'Filme stretch 500mm', '26', '12', 'R$ 54,00', 0, 'entrada 20 un'],
+        ['EX-011', 'Etiqueta térmica 100x50 (rolo)', '58', '30', 'R$ 27,50', 0, 'saída 4 rolos'],
+        ['EX-019', 'Selo metálico para arqueadeira', '900', '500', 'R$ 0,18', 0, 'inventário 20/08']
+      ],
+      'Qualidade': [
+        ['QA-002', 'Paquímetro digital 150mm', '3', '2', 'R$ 420,00', 0, 'calibração 09/26'],
+        ['QA-006', 'Álcool isopropílico 1L', '6', '8', 'R$ 38,00', 2, 'saída 2 L'],
+        ['QA-011', 'Papel para laudo (bloco)', '14', '6', 'R$ 11,00', 0, '—']
+      ],
+      'Cobrança': [
+        ['CB-001', 'Toner HP 26A', '2', '6', 'R$ 389,00', 2, 'saída 1 un hoje'],
+        ['CB-004', 'Envelope timbrado (cx 500)', '7', '10', 'R$ 92,00', 1, 'consumo 3 cx/mês'],
+        ['CB-008', 'Papel A4 (resma)', '34', '20', 'R$ 26,90', 0, 'entrada 40 resmas'],
+        ['CB-012', 'Headset USB para discadora', '4', '3', 'R$ 168,00', 0, '1 un em manutenção'],
+        ['CB-019', 'Pasta suspensa', '35', '40', 'R$ 3,80', 1, 'solicitado 50 un']
+      ],
+      'Financeiro': [
+        ['FN-002', 'Bobina para autenticadora', '11', '8', 'R$ 14,50', 0, 'saída 2 un'],
+        ['FN-005', 'Toner Brother TN-3472', '1', '4', 'R$ 512,00', 2, 'aguardando compra'],
+        ['FN-009', 'Envelope de segurança', '120', '100', 'R$ 1,90', 0, 'inventário 20/08'],
+        ['FN-014', 'Pasta AZ lombo largo', '18', '12', 'R$ 21,00', 0, '—'],
+        ['FN-021', 'Saco coletor de fragmentadora', '5', '6', 'R$ 8,70', 1, 'saída 1 un hoje']
+      ],
+      'Marketing': [
+        ['MK-001', 'Banner lona 1x2m', '3', '5', 'R$ 148,00', 2, 'feira em setembro'],
+        ['MK-004', 'Caneca personalizada', '210', '150', 'R$ 18,40', 0, 'saída 40 un'],
+        ['MK-007', 'Catálogo de produtos (un)', '640', '300', 'R$ 6,20', 0, 'lote 08/26'],
+        ['MK-012', 'Cartão de visita (cx 500)', '4', '6', 'R$ 76,00', 1, 'solicitado 10 cx'],
+        ['MK-018', 'Sacola personalizada', '85', '100', 'R$ 3,40', 2, 'consumo 60/mês']
+      ],
+      'Comercial': [
+        ['CM-002', 'Mochila técnica para notebook', '6', '4', 'R$ 189,00', 0, '2 un com representantes'],
+        ['CM-006', 'Amostra de produto (kit)', '22', '30', 'R$ 54,00', 2, 'saída 8 kits'],
+        ['CM-011', 'Bloco de pedido (un)', '48', '25', 'R$ 9,80', 0, '—'],
+        ['CM-015', 'Crachá com cordão', '30', '20', 'R$ 7,50', 0, 'entrada 50 un']
+      ],
+      'RH': [
+        ['RH-001', 'Uniforme camisa polo (un)', '54', '80', 'R$ 42,00', 2, 'admissões em setembro'],
+        ['RH-005', 'Kit de integração (un)', '12', '10', 'R$ 33,00', 0, 'saída 3 un'],
+        ['RH-009', 'Crachá virgem', '160', '100', 'R$ 2,10', 0, '—'],
+        ['RH-013', 'Papel para exame admissional', '9', '12', 'R$ 11,00', 1, 'solicitado 20 un']
+      ],
+      'Compras': [
+        ['CP-002', 'Toner HP 58A', '5', '4', 'R$ 421,00', 0, 'saída 1 un'],
+        ['CP-006', 'Etiqueta de identificação de item', '780', '400', 'R$ 0,42', 0, 'usada no QR Code'],
+        ['CP-010', 'Leitor de código de barras', '2', '3', 'R$ 390,00', 2, '1 un em conserto']
+      ],
+      'TI': [
+        ['TI-001', 'Cabo HDMI 2m', '9', '6', 'R$ 34,00', 0, 'saída 2 un'],
+        ['TI-004', 'SSD 480GB', '3', '5', 'R$ 268,00', 2, 'troca de parque'],
+        ['TI-008', 'Mouse USB', '14', '8', 'R$ 29,90', 0, 'entrada 20 un'],
+        ['TI-012', 'Conector RJ45 (cx 100)', '2', '2', 'R$ 68,00', 1, 'reservado para obra'],
+        ['TI-017', 'Nobreak 1200VA', '1', '2', 'R$ 1.190,00', 2, 'aguardando compra']
+      ]
+    };
+    const sit = { 0: ['Normal', VD, VD_BG], 1: ['Atenção', AM_FG, AM_BG], 2: ['Abaixo do mínimo', VM, VM_BG] };
+    const linhas = estoquePorSetor[st.setor] || estoquePorSetor['Manutenção'];
+    const estoque = linhas.map(l => ({
+      codigo: l[0], nome: l[1], saldo: l[2], minimo: l[3], unit: l[4],
+      situacao: sit[l[5]][0], cor: sit[l[5]][1], bg: sit[l[5]][2], movimento: l[6]
+    }));
+    const abaixo = linhas.filter(l => l[5] === 2).length;
+    const consumos = { 'Manutenção': 'R$ 18.940', 'Produção': 'R$ 31.280', 'Expedição': 'R$ 14.120', 'Qualidade': 'R$ 3.600', 'Cobrança': 'R$ 8.470', 'Financeiro': 'R$ 6.910', 'Marketing': 'R$ 12.640', 'Comercial': 'R$ 5.280', 'RH': 'R$ 4.150', 'Compras': 'R$ 1.840', 'TI': 'R$ 9.730' };
+
+    const kpiAlmox = [
+      { label: 'Itens cadastrados', valor: String(linhas.length * 9), nota: 'no setor ' + st.setor, cor: MUT },
+      { label: 'Abaixo do mínimo', valor: String(abaixo), nota: abaixo ? 'reposição necessária' : 'situação normal', cor: abaixo ? VM : VD },
+      { label: 'Consumo do mês', valor: consumos[st.setor] || '—', nota: 'centro de custo ' + (centros[st.setor] || '—'), cor: MUT },
+      { label: 'Aguardando aprovação', valor: '3', nota: 'gerente do setor', cor: AM }
+    ];
+
+    const solicitacoes = [
+      { item: 'Disco de corte 7"', qtd: '30 un', quem: 'Everton S. · hoje 08:12', status: 'Aguardando gerente', cor: AM },
+      { item: 'Cabo de rede Cat6', qtd: '200 m', quem: 'Marcos R. · ontem', status: 'Aprovado · em compra', cor: BLUE7 },
+      { item: 'Graxa industrial 1kg', qtd: '4 un', quem: 'Tiago L. · 20/08', status: 'Entregue', cor: VD },
+      { item: 'Luva de vaqueta', qtd: '10 pares', quem: 'Everton S. · 19/08', status: 'Recusado · saldo suficiente', cor: VM }
+    ].map(s => Object.assign(s, { abrir: this.abrir('aprovacao') }));
+
+    const movimentos = [
+      { hora: '14:52', texto: 'Saída para a OS 4471 — Cabo de rede Cat6', qtd: '−40 m', cor: VM },
+      { hora: '11:20', texto: 'Transferência recebida da Produção — Luva de vaqueta', qtd: '+5 pares', cor: VD },
+      { hora: '10:04', texto: 'Entrada NF 88.213 — Rolamento 6204 ZZ', qtd: '+12 un', cor: VD },
+      { hora: '09:15', texto: 'Reserva para parada programada — Graxa industrial', qtd: '2 un', cor: MUT },
+      { hora: '08:40', texto: 'Devolução do turno da noite — Fita isolante', qtd: '+3 un', cor: VD }
+    ];
+
+    const acao = { 'Comprar hoje': [VM, VM_BG], 'Cotar': [AM_FG, AM_BG], 'Normal': [VD, VD_BG] };
+    const setoresCompras = [
+      ['Produção', '2001', 'R$ 31.280', 3, 'Luva nitrílica CA 28.907', 'Comprar hoje'],
+      ['Manutenção', '3102', 'R$ 18.940', 2, 'Cabo de rede Cat6', 'Cotar'],
+      ['Expedição', '4010', 'R$ 14.120', 1, 'Fita de arquear 16mm', 'Cotar'],
+      ['Marketing', '1400', 'R$ 12.640', 3, 'Catálogo de produtos', 'Comprar hoje'],
+      ['TI', '1600', 'R$ 9.730', 3, 'SSD 480GB', 'Comprar hoje'],
+      ['Cobrança', '1210', 'R$ 8.470', 2, 'Toner HP 26A', 'Comprar hoje'],
+      ['Financeiro', '1200', 'R$ 6.910', 2, 'Toner Brother TN-3472', 'Cotar'],
+      ['Comercial', '1300', 'R$ 5.280', 1, 'Amostra de produto (kit)', 'Cotar'],
+      ['RH', '1100', 'R$ 4.150', 1, 'Uniforme camisa polo', 'Cotar'],
+      ['Qualidade', '2200', 'R$ 3.600', 1, 'Álcool isopropílico 1L', 'Normal'],
+      ['Compras', '1500', 'R$ 1.840', 1, 'Etiqueta de identificação', 'Normal']
+    ].map(s => ({
+      setor: s[0], cc: s[1], consumo: s[2], faltas: String(s[3]),
+      faltaCor: s[3] >= 2 ? VM : AM, top: s[4],
+      acao: s[5], acaoCor: acao[s[5]][0], acaoBg: acao[s[5]][1]
+    }));
+
+    const reposicao = [
+      { item: 'Luva nitrílica CA 28.907', setores: 'Produção · 48 pares faltando', qtd: '300 pares', status: 'Cotação aberta', cor: AM },
+      { item: 'Toner HP 26A', setores: 'Cobrança', qtd: '6 un', status: 'Pedido emitido', cor: BLUE7 },
+      { item: 'Uniforme camisa polo', setores: 'RH · admissões de setembro', qtd: '60 un', status: 'Aguardando aprovação', cor: AM },
+      { item: 'SSD 480GB', setores: 'TI', qtd: '10 un', status: 'Cotação aberta', cor: AM },
+      { item: 'Disco de corte 7"', setores: 'Manutenção', qtd: '30 un', status: 'Aguardando aprovação', cor: AM },
+      { item: 'Sacola personalizada', setores: 'Marketing', qtd: '300 un', status: 'Pedido emitido', cor: BLUE7 },
+      { item: 'Fita de arquear 16mm', setores: 'Expedição', qtd: '20 rolos', status: 'Entrega em 27/08', cor: VD }
+    ];
+
+    const integracoes = [
+      { canal: 'WhatsApp · Produção', estado: 'CHAMADO #2841', cor: VD, texto: '“O apontamento não subiu no Sankhya de novo” — a IA classificou como Desenvolvimento, prioridade alta, e vinculou ao projeto de integração.' },
+      { canal: 'Leitura de QR Code · Expedição', estado: 'MOVIMENTO OK', cor: VD, texto: 'Baixa de 4 rolos de etiqueta térmica registrada direto do coletor, com centro de custo 4010 e OS vinculada.' },
+      { canal: 'Sankhya · pedidos de compra', estado: 'SINCRONIZANDO', cor: AM, texto: 'Pedido 88.402 conciliado com a solicitação da Cobrança; entrada aguardando conferência.' }
+    ];
+
+    const slaPorPrioridade = { 'Crítica': '4h', 'Alta': '8h', 'Média': '24h', 'Baixa': '72h' };
+    const pontoPrio = { 'Crítica': VM, 'Alta': AM, 'Média': BLUE, 'Baixa': 'var(--ll-slate-300)' };
+    const prioridades = ['Crítica', 'Alta', 'Média', 'Baixa'].map(label => {
+      const at = st.prioridade === label;
+      return {
+        label, sla: slaPorPrioridade[label] + ' úteis', ponto: pontoPrio[label],
+        ir: () => this.setState({ prioridade: label }),
+        bg: at ? 'var(--ll-teal-050)' : 'var(--surface-card)',
+        borda: at ? 'var(--ll-teal-100)' : 'var(--border-subtle)'
+      };
+    });
+
+    const totalPedido = st.itens.reduce((s, i) => s + i.qtd * i.preco, 0);
+    const carrinho = st.itens.map((i, idx) => {
+      const excede = i.qtd > i.saldo;
+      return {
+        nome: i.nome, qtd: i.qtd,
+        saldoTexto: 'saldo ' + i.saldo + ' · mínimo ' + i.minimo,
+        aviso: excede ? 'Vai gerar compra' : 'Atende do estoque',
+        cor: excede ? AM_FG : VD, bg: excede ? AM_BG : VD_BG,
+        mais: () => this.setState(s => ({ itens: s.itens.map((x, j) => j === idx ? Object.assign({}, x, { qtd: x.qtd + 1 }) : x) })),
+        menos: () => this.setState(s => ({ itens: s.itens.map((x, j) => j === idx ? Object.assign({}, x, { qtd: Math.max(1, x.qtd - 1) }) : x) })),
+        remover: () => this.setState(s => ({ itens: s.itens.filter((x, j) => j !== idx) }))
+      };
+    });
+    const catalogo = [
+      { nome: 'Cabo de rede Cat6 (m)', saldo: 85, minimo: 100, qtd: 50, preco: 3.2 },
+      { nome: 'Fita isolante 20m', saldo: 34, minimo: 15, qtd: 5, preco: 8.4 },
+      { nome: 'Luva de vaqueta (par)', saldo: 41, minimo: 20, qtd: 10, preco: 12.5 }
+    ];
+    const sugestoes = catalogo.filter(c => !st.itens.some(i => i.nome === c.nome)).map(c => ({
+      nome: c.nome, add: () => this.setState(s => ({ itens: s.itens.concat([c]) }))
+    }));
+
+    const minutos = st.minutosManual;
+    const duracaoManual = Math.floor(minutos / 60) + 'h' + String(minutos % 60).padStart(2, '0');
+    const manualBloqueado = st.tipoManual === 'Retrabalho';
+
+    const decisaoTextos = {
+      'Aprovar': ['Aprovado sai do saldo do setor na hora. O que exceder o saldo entra na fila de Compras com o centro de custo 3102.', VD_BG, 'var(--ll-slate-700)'],
+      'Aprovar parcial': ['Aprova 12 unidades do saldo atual e deixa as outras 18 na fila de reposição, sem travar a manutenção da semana.', AM_BG, AM_FG],
+      'Recusar': ['Recusar exige motivo — ele volta para o solicitante e fica no histórico do item, junto com o saldo do dia.', VM_BG, 'var(--ll-slate-700)']
+    };
+    const dec = decisaoTextos[st.decisao];
+
+    const itensNota = [
+      { nome: 'Disco de corte 7"', pedido: 30 },
+      { nome: 'Graxa industrial 1kg', pedido: 12 },
+      { nome: 'Fita isolante 20m', pedido: 4 }
+    ];
+    const ajusta = (campo, idx, delta, min) => () => this.setState(s => {
+      const novo = Object.assign({}, s[campo]);
+      novo[idx] = Math.max(min, (novo[idx] || 0) + delta);
+      return { [campo]: novo };
+    });
+    let notaDivergente = false;
+    const conferencia = itensNota.map((i, idx) => {
+      const rec = st.recebidos[idx] || 0;
+      const dif = rec - i.pedido;
+      if (dif !== 0) notaDivergente = true;
+      return {
+        nome: i.nome, pedido: i.pedido, recebido: rec,
+        situacao: dif === 0 ? 'Conforme' : dif < 0 ? 'Falta ' + Math.abs(dif) : 'Sobra ' + dif,
+        cor: dif === 0 ? VD : AM_FG, bg: dif === 0 ? VD_BG : AM_BG,
+        mais: ajusta('recebidos', idx, 1, 0), menos: ajusta('recebidos', idx, -1, 0)
+      };
+    });
+
+    const setoresOutros = setoresTodos.filter(s => s !== st.setor);
+    const destinoAtual = setoresOutros.indexOf(st.destino) >= 0 ? st.destino : setoresOutros[0];
+    const itemTransf = linhas[0];
+    const saldoOrigem = Number(itemTransf[2]);
+    const minimoOrigem = Number(itemTransf[3]);
+    const sobra = saldoOrigem - st.qtdTransf;
+    const furaMinimo = sobra < minimoOrigem;
+
+    const itensContagem = linhas.slice(0, 5);
+    let divergencias = 0, impacto = 0;
+    const contagem = itensContagem.map((l, idx) => {
+      const sistema = Number(l[2]);
+      const cont = st.contados[idx] === undefined ? sistema : st.contados[idx];
+      const dif = cont - sistema;
+      if (dif !== 0) { divergencias++; impacto += dif * Number(String(l[4]).replace('R$ ', '').replace(/\./g, '').replace(',', '.')); }
+      return {
+        nome: l[1], codigo: l[0], sistema: String(sistema), contado: String(cont),
+        divergencia: dif === 0 ? 'Sem divergência' : (dif > 0 ? '+' + dif : String(dif)),
+        cor: dif === 0 ? VD : VM, bg: dif === 0 ? VD_BG : VM_BG,
+        mais: ajusta('contados', idx, 1, 0), menos: ajusta('contados', idx, -1, 0)
+      };
+    });
+    const impactoFmt = (impacto < 0 ? '−R$ ' : 'R$ ') + Math.abs(impacto).toFixed(2).replace('.', ',');
+
+    const ctxExport = {
+      painel: { titulo: 'Exportar painel de indicadores', eyebrow: 'Painel · agosto de 2026', colunas: ['Horas por tipo', 'Horas por colaborador', 'SLA', 'Documentação', 'Retrabalho', 'Capacidade'], linhas: 'Resumo + 5 abas', acao: 'Gerar arquivo' },
+      tarefas: { titulo: 'Exportar chamados', eyebrow: 'Central de tarefas', colunas: ['Chamado', 'Solicitante', 'Prioridade', 'Horas P/R', 'SLA', 'Documento', 'Histórico'], linhas: '34 chamados', acao: 'Gerar CSV' },
+      compras: { titulo: 'Exportar necessidade de compra', eyebrow: 'Compras · 11 setores', colunas: ['Item', 'Setor', 'Centro de custo', 'Saldo', 'Mínimo', 'Sugestão', 'Fornecedor atual'], linhas: '19 itens em ruptura', acao: 'Gerar arquivo' },
+      historico: { titulo: 'Exportar histórico de projetos', eyebrow: 'Portfólio · encerrados', colunas: ['Projeto', 'Setor', 'Horas P/R', 'Desvio', 'Duração', 'Motivo do encerramento'], linhas: '28 projetos encerrados', acao: 'Gerar arquivo' }
+    };
+    const cx = ctxExport[st.exportContexto] || ctxExport.painel;
+    const colunasExport = cx.colunas.map(label => {
+      const on = !st.colunasOff[label];
+      return {
+        label, ponto: on ? 'var(--color-primary)' : 'var(--ll-slate-300)',
+        alterna: () => this.setState(s => Object.assign({}, { colunasOff: Object.assign({}, s.colunasOff, { [label]: !!on }) })),
+        bg: on ? 'var(--ll-teal-050)' : 'var(--surface-card)',
+        cor: on ? 'var(--ll-teal-700)' : 'var(--text-muted)',
+        borda: on ? 'var(--ll-teal-100)' : 'var(--border-subtle)'
+      };
+    });
+    const colunasAtivas = cx.colunas.filter(c => !st.colunasOff[c]).length;
+
+    const entregaPendencias = st.flags.docDev ? 1 : 0;
+    const checklistEntrega = [
+      { marca: '✓', cor: VD, texto: 'Horas apontadas e classificadas por tipo', dado: '47h03' },
+      { marca: '✓', cor: VD, texto: 'Evidências de homologação anexadas', dado: '4 anexos' },
+      { marca: st.flags.docDev ? '✕' : '!', cor: st.flags.docDev ? VM : AM, texto: 'Manual do usuário revisado e aprovado', dado: 'em revisão' },
+      { marca: '✓', cor: VD, texto: 'Motivo do retrabalho registrado', dado: '4h20' },
+      { marca: '!', cor: AM, texto: 'Validação do solicitante ainda não recebida', dado: 'Produção' }
+    ];
+
+    const qrLinha = linhas[0];
+    const qrSit = sit[qrLinha[5]];
+    const qrAvisos = {
+      'Registrar saída': 'Saída de ' + st.qtdQr + ' un vinculada à OS 4471. O saldo cai para ' + (Number(qrLinha[2]) - st.qtdQr) + ' un e a movimentação vai para o histórico do item.',
+      'Registrar entrada': 'Entrada de ' + st.qtdQr + ' un sem nota exige aprovação do responsável do setor — usada para devolução de material não consumido.',
+      'Contar no inventário': 'A leitura preenche a contagem do item na contagem cíclica aberta, sem precisar digitar o código.',
+      'Ver ficha do item': 'Abre saldo, consumo médio, fornecedor atual e as últimas 20 movimentações deste item.'
+    };
+
+    const fornecedoresBase = [
+      { nome: 'Ferramentas Bandeirantes', nota: 'fornecedor atual · 14 pedidos', prazo: '3 dias', desempenho: 'Entrega 96%', cor: VD, padrao: true },
+      { nome: 'Suprimentos Vale Norte', nota: 'último pedido em maio', prazo: '5 dias', desempenho: 'Entrega 88%', cor: AM_FG, padrao: true },
+      { nome: 'Industrial Paulista EPI', nota: 'especialista em EPI', prazo: '2 dias', desempenho: 'Entrega 99%', cor: VD, padrao: true },
+      { nome: 'Comercial Três Rios', nota: 'cadastro sem histórico', prazo: '7 dias', desempenho: 'Sem histórico', cor: MUT, padrao: false }
+    ];
+    const fornecedores = fornecedoresBase.map(f => {
+      const on = st.fornecedoresOff[f.nome] === undefined ? f.padrao : st.fornecedoresOff[f.nome];
+      return {
+        nome: f.nome, nota: f.nota, prazo: f.prazo, desempenho: f.desempenho, cor: f.cor,
+        marca: on ? '✓' : '', marcaBg: on ? 'var(--color-primary)' : 'var(--surface-card)',
+        marcaBorda: on ? 'var(--color-primary)' : 'var(--border-default)',
+        bg: on ? 'var(--ll-teal-050)' : 'var(--surface-card)',
+        alterna: () => this.setState(s => ({ fornecedoresOff: Object.assign({}, s.fornecedoresOff, { [f.nome]: !on }) }))
+      };
+    });
+    const totalFornecedores = fornecedores.filter(f => f.marca === '✓').length;
+
+    const auditoriaBase = [
+      { quando: '21/08 16:20', tipo: 'SLA', mudanca: 'SLA de prioridade Alta: 12h → 8h', detalhe: '31 chamados abertos passaram a contar com o prazo novo a partir de hoje.', autor: 'Marcos Ribeiro' },
+      { quando: '19/08 09:05', tipo: 'Permissões', mudanca: 'Compras passou a editar estoque de todos os setores', detalhe: 'Antes tinha apenas visualização; pedido da Diretoria Administrativa.', autor: 'Marcos Ribeiro' },
+      { quando: '14/08 11:42', tipo: 'Regras', mudanca: 'Documentação deixou de bloquear Atendimento', detalhe: 'Cobertura de documentação em atendimento passou a ser apenas indicador.', autor: 'Aline Duarte' },
+      { quando: '09/08 15:10', tipo: 'Estoque', mudanca: 'Sugestão de reposição: média de 2 → 3 meses', detalhe: 'Reduziu compras emergenciais de EPI na Produção.', autor: 'Renata Alves' },
+      { quando: '02/08 08:30', tipo: 'Regras', mudanca: 'Retrabalho passou a exigir causa e chamado de origem', detalhe: 'Indicador de retrabalho ganhou motivo; 6 lançamentos foram devolvidos.', autor: 'Marcos Ribeiro' },
+      { quando: '28/07 17:55', tipo: 'Permissões', mudanca: 'Perfil Gerente do setor criado', detalhe: 'Separou quem movimenta o estoque de quem aprova solicitação.', autor: 'Marcos Ribeiro' }
+    ];
+    const auditoria = auditoriaBase.filter(a => st.filtroAuditoria === 'Tudo' || a.tipo === st.filtroAuditoria);
+
+    const resultadosBase = [
+      { tipo: 'Chamado', tipoCor: BLUE7, titulo: 'Integração do apontamento de produção com o Sankhya', contexto: '#2841 · Produção · Marcos Ribeiro', meta: '47h / 40h', tela: 'tarefa' },
+      { tipo: 'Chamado', tipoCor: BLUE7, titulo: 'Ajuste de rateio de custo por ordem', contexto: '#2811 · Financeiro · Rafael Nunes', meta: 'retrabalho', tela: 'tarefas' },
+      { tipo: 'Projeto', tipoCor: 'var(--ll-teal-700)', titulo: 'Etiquetas QR do almoxarifado', contexto: 'Planejado · 25% · Aline Duarte', meta: '15/09/26', tela: 'projetos' },
+      { tipo: 'Item', tipoCor: AM_FG, titulo: 'Cabo de rede Cat6 (metro)', contexto: 'MN-014 · Manutenção · CC 3102', meta: 'saldo 85', tela: 'almox' },
+      { tipo: 'Item', tipoCor: AM_FG, titulo: 'Luva nitrílica CA 28.907', contexto: 'PR-008 · Produção · abaixo do mínimo', meta: 'saldo 12', tela: 'compras' },
+      { tipo: 'Documento', tipoCor: MUT, titulo: 'Manual do apontamento no terminal', contexto: 'v3 · revisado em 21/08/2026', meta: 'em revisão', tela: 'tarefa' }
+    ];
+    const resultados = resultadosBase.filter(r => st.tipoBusca === 'Tudo' || r.tipo === st.tipoBusca)
+      .map(r => Object.assign({}, r, { ir: () => this.setState({ modal: null, tela: r.tela }) }));
+
+    const encerradosBase = [
+      { nome: 'Portal de chamados via WhatsApp', responsavel: 'Marcos Ribeiro', setor: 'Todos', data: '30/07/26', prev: 90, real: 96, situacao: 'Concluído', motivo: 'Em sustentação desde agosto.' },
+      { nome: 'Painel de produtividade da Expedição', responsavel: 'Aline Duarte', setor: 'Expedição', data: '18/07/26', prev: 60, real: 54, situacao: 'Concluído', motivo: 'Entregue antes do prazo.' },
+      { nome: 'Integração de boletos com o banco', responsavel: 'Rafael Nunes', setor: 'Financeiro', data: '28/06/26', prev: 120, real: 168, situacao: 'Concluído', motivo: 'Duas mudanças de regra durante o desenvolvimento.' },
+      { nome: 'App de conferência de carga', responsavel: 'Juliana Prado', setor: 'Expedição', data: '10/06/26', prev: 140, real: 62, situacao: 'Cancelado', motivo: 'Sem patrocinador definido; escopo não fechou.' },
+      { nome: 'Automação de e-mail de cobrança v1', responsavel: 'Aline Duarte', setor: 'Cobrança', data: '22/05/26', prev: 40, real: 44, situacao: 'Concluído', motivo: 'Substituído pela régua automática atual.' },
+      { nome: 'BI de margem por produto', responsavel: '—', setor: 'Comercial', data: '05/05/26', prev: 200, real: 88, situacao: 'Cancelado', motivo: 'Sem patrocinador; dados de custo inconsistentes.' },
+      { nome: 'Controle de frota', responsavel: 'Diego Matos', setor: 'Manutenção', data: '14/04/26', prev: 80, real: 76, situacao: 'Concluído', motivo: 'Entregue e em uso pela Manutenção.' }
+    ];
+    const encerrados = encerradosBase
+      .filter(e => st.filtroHistorico === 'Todos' || e.situacao === st.filtroHistorico.replace('s', ''))
+      .map(e => {
+        const desvio = Math.round((e.real - e.prev) / e.prev * 100);
+        return {
+          nome: e.nome, responsavel: e.responsavel, setor: e.setor, data: e.data,
+          horas: e.prev + 'h / ' + e.real + 'h',
+          desvio: (desvio > 0 ? '+' : '') + desvio + '%',
+          desvioCor: desvio > 15 ? VM : desvio > 0 ? AM_FG : VD,
+          situacao: e.situacao, motivo: e.motivo,
+          cor: e.situacao === 'Concluído' ? VD : VM,
+          bg: e.situacao === 'Concluído' ? VD_BG : VM_BG
+        };
+      });
+
+    const modais = {
+      exportar: { eyebrow: cx.eyebrow, titulo: cx.titulo, subtitulo: 'Escolha o que vai no arquivo — colunas desligadas não aparecem no destino.', acao: cx.acao, largura: '700px', nota: 'O arquivo é gerado com os filtros da tela de origem.', msg: 'Arquivo gerado · ' + st.formato },
+      entrega: { eyebrow: 'Chamado #2841', titulo: 'Enviar entrega para aprovação', subtitulo: 'A entrega vai para o solicitante e, depois, para o gerente de TI. O que estiver pendente aparece abaixo.', acao: entregaPendencias ? 'Enviar mesmo assim' : 'Enviar entrega', largura: '720px', nota: 'O envio congela as horas do chamado até a resposta.', msg: 'Entrega enviada para validação da Produção' },
+      qr: { eyebrow: 'Almoxarifado · ' + st.setor, titulo: 'Leitura de QR Code', subtitulo: 'A leitura já traz o item, o saldo e o centro de custo — só falta dizer o que fazer com ele.', acao: st.acaoQr, largura: '720px', nota: 'Movimentação por leitura dispensa digitação de código.', msg: st.acaoQr + ' · ' + qrLinha[1] },
+      cotacao: { eyebrow: 'Compras', titulo: 'Abrir cotação', subtitulo: 'Os itens em ruptura entram juntos na cotação; cada fornecedor responde pelo que atende.', acao: 'Enviar cotação', largura: '760px', nota: 'Fornecedor sem histórico entra como cotação de referência.', msg: 'Cotação enviada a ' + totalFornecedores + ' fornecedores' },
+      auditoria: { eyebrow: 'Configuração', titulo: 'Histórico de mudanças', subtitulo: 'Toda alteração de SLA, permissão ou regra fica registrada com autor, horário e efeito.', acao: 'Fechar', largura: '760px', nota: 'Mudança de regra nunca altera chamados já abertos.', msg: '' },
+      busca: { eyebrow: 'Busca', titulo: 'Resultados', subtitulo: 'Chamados, projetos, itens de estoque e documentos no mesmo lugar.', acao: 'Fechar', largura: '740px', nota: 'Clique em um resultado para abrir a tela dele.', msg: '' },
+      chamado: { eyebrow: 'Central de tarefas', titulo: 'Novo chamado', subtitulo: 'A prioridade define o SLA e entra no indicador de cumprimento — escolha pelo impacto real na operação.', acao: 'Abrir chamado', largura: '760px', nota: 'O chamado nasce com número, SLA contando e responsável notificado.', msg: 'Chamado #2842 aberto · SLA de ' + slaPorPrioridade[st.prioridade] + ' iniciado' },
+      material: { eyebrow: 'Almoxarifado · ' + st.setor, titulo: 'Solicitar material', subtitulo: 'O que o saldo cobre sai na hora; o que exceder vira necessidade de compra com o centro de custo do setor.', acao: 'Enviar solicitação', largura: '820px', nota: 'Segue para o gerente do setor e, se houver falta, para Compras.', msg: 'Solicitação enviada ao gerente de ' + st.setor },
+      horas: { eyebrow: 'Chamado #2841', titulo: 'Lançamento manual de horas', subtitulo: 'Hora sem cronômetro precisa de justificativa — é o que mantém o indicador de horas confiável.', acao: 'Lançar horas', largura: '680px', nota: 'O lançamento entra no histórico marcado como manual, com autor e horário.', msg: duracaoManual + ' lançadas em ' + st.tipoManual },
+      aprovacao: { eyebrow: 'Aprovação do gerente do setor', titulo: 'Disco de corte 7" · 30 unidades', subtitulo: 'Everton Silva · Manutenção · solicitado hoje às 08:12 para a parada programada de sábado.', acao: st.decisao, largura: '720px', nota: 'A decisão notifica o solicitante e atualiza a fila de Compras.', msg: 'Solicitação ' + (st.decisao === 'Recusar' ? 'recusada' : 'aprovada') + ' · Compras notificada' },
+      entrada: { eyebrow: 'Almoxarifado · ' + st.setor, titulo: 'Entrada por nota fiscal', subtitulo: 'Conferência item a item: o saldo sobe pelo que foi contado no recebimento, não pelo que a nota diz.', acao: 'Registrar entrada', largura: '780px', nota: 'A entrada atualiza saldo, custo médio e encerra a pendência do pedido.', msg: 'Entrada da NF 88.402 registrada em ' + st.setor },
+      transferencia: { eyebrow: 'Almoxarifado', titulo: 'Transferência entre setores', subtitulo: 'O material troca de centro de custo — o consumo passa a pesar no setor de destino.', acao: 'Transferir', largura: '700px', nota: 'Precisa de aceite do responsável do setor de destino.', msg: 'Transferência enviada para aceite de ' + destinoAtual },
+      inventario: { eyebrow: 'Almoxarifado · ' + st.setor, titulo: 'Inventário cíclico', subtitulo: 'Conte o que existe na prateleira. A divergência é o indicador — não o erro a esconder.', acao: 'Fechar inventário', largura: '800px', nota: 'O ajuste fica no histórico com responsável, horário e valor da diferença.', msg: 'Inventário de ' + st.setor + ' fechado · ajuste ' + impactoFmt },
+      projeto: { eyebrow: 'Portfólio de TI', titulo: 'Novo projeto', subtitulo: 'Projeto entra no portfólio já com etapa, patrocinador e horas previstas — sem isso o indicador de previsto × realizado não fecha.', acao: 'Criar projeto', largura: '760px', nota: 'Aparece no quadro na etapa escolhida, com 0% de conclusão.', msg: 'Projeto criado em “' + st.etapaInicial + '”' }
+    };
+    const exemploSla = { 'Crítica': 'linha parada', 'Alta': 'setor bloqueado', 'Média': 'melhoria pedida', 'Baixa': 'ajuste cosmético' };
+    const somaSla = st.sla['Crítica'] + st.sla['Alta'] + st.sla['Média'] + st.sla['Baixa'];
+    const chamadosNoPrazo = Math.max(18, Math.min(34, Math.round(18 + (somaSla - 108) / 8)));
+    const pctSlaNovo = Math.round(chamadosNoPrazo / 34 * 100);
+
+    const perfisMatriz = ['Colab.', 'Resp. setor', 'Ger. setor', 'Compras', 'Admin'];
+    const niveis = ['Sem acesso', 'Ver', 'Editar'];
+    const nivelEstilo = {
+      'Sem acesso': ['var(--text-muted)', 'var(--ll-slate-100)', 'var(--border-subtle)'],
+      'Ver': [BLUE7, 'var(--ll-blue-050)', 'var(--ll-blue-100)'],
+      'Editar': ['var(--ll-teal-700)', 'var(--ll-teal-050)', 'var(--ll-teal-100)']
+    };
+    const matrizBase = [
+      ['Central de tarefas', ['Editar', 'Editar', 'Editar', 'Ver', 'Editar']],
+      ['Apontamento de horas', ['Editar', 'Editar', 'Ver', 'Sem acesso', 'Editar']],
+      ['Documentação técnica', ['Ver', 'Ver', 'Editar', 'Sem acesso', 'Editar']],
+      ['Projetos de TI', ['Sem acesso', 'Ver', 'Ver', 'Ver', 'Editar']],
+      ['Estoque do próprio setor', ['Ver', 'Editar', 'Editar', 'Editar', 'Editar']],
+      ['Estoque de todos os setores', ['Sem acesso', 'Sem acesso', 'Sem acesso', 'Editar', 'Editar']],
+      ['Aprovação de solicitação', ['Sem acesso', 'Ver', 'Editar', 'Ver', 'Editar']],
+      ['Painel de indicadores', ['Sem acesso', 'Ver', 'Ver', 'Ver', 'Editar']]
+    ];
+    const matriz = matrizBase.map(([modulo, linhaNiveis], li) => ({
+      modulo,
+      celulas: linhaNiveis.map((padrao, ci) => {
+        const chave = li + ':' + ci;
+        const nivel = st.permissoes[chave] || padrao;
+        const est = nivelEstilo[nivel];
+        return {
+          nivel, cor: est[0], bg: est[1], borda: est[2],
+          alterna: () => this.setState(s => {
+            const prox = niveis[(niveis.indexOf(s.permissoes[chave] || padrao) + 1) % 3];
+            return { permissoes: Object.assign({}, s.permissoes, { [chave]: prox }) };
+          })
+        };
+      })
+    }));
+
+    const m = modais[st.modal] || null;
+
+    const abrirExport = ctx => () => this.setState({ modal: 'exportar', exportContexto: ctx, toast: '' });
+
+    return {
+      telaHistorico: st.tela === 'historico',
+      irHistorico: ir('historico'), voltarProjetos: ir('projetos'),
+      filtrosHistorico: this.grupo(['Todos', 'Concluídos', 'Cancelados'], st.filtroHistorico, 'filtroHistorico'),
+      encerrados,
+      modalExportar: st.modal === 'exportar', modalEntrega: st.modal === 'entrega',
+      modalQr: st.modal === 'qr', modalCotacao: st.modal === 'cotacao',
+      modalAuditoria: st.modal === 'auditoria', modalBusca: st.modal === 'busca',
+      exportarPainel: abrirExport('painel'), exportarTarefas: abrirExport('tarefas'),
+      exportarCompras: abrirExport('compras'), exportarHistorico: abrirExport('historico'),
+      abrirEntrega: this.abrir('entrega'), abrirQr: this.abrir('qr'),
+      abrirCotacao: this.abrir('cotacao'), abrirAuditoria: this.abrir('auditoria'),
+      abrirBusca: this.abrir('busca'),
+      formatos: this.grupo(['Excel (.xlsx)', 'CSV', 'PDF'], st.formato, 'formato'),
+      periodos: this.grupo(['Este mês', 'Últimos 3 meses', 'Ano', 'Personalizado'], st.periodo, 'periodo'),
+      colunasExport, linhasExport: cx.linhas,
+      avisoExport: colunasAtivas + ' de ' + cx.colunas.length + ' colunas selecionadas · período: ' + st.periodo.toLowerCase() + '. ' + (st.formato === 'PDF' ? 'Em PDF o arquivo sai formatado para impressão, sem edição.' : 'Em planilha os valores saem numéricos, prontos para tabela dinâmica.'),
+      checklistEntrega,
+      entregaAviso: entregaPendencias
+        ? 'A regra atual bloqueia o fechamento sem documento aprovado: a entrega pode ser enviada, mas o chamado só fecha quando o manual for aprovado.'
+        : 'Sem pendências bloqueantes. O chamado fecha automaticamente quando o solicitante validar.',
+      entregaAvisoBg: entregaPendencias ? AM_BG : VD_BG,
+      entregaAvisoCor: entregaPendencias ? AM_FG : 'var(--ll-slate-700)',
+      qrItem: qrLinha[1], qrCodigo: qrLinha[0], qrSaldo: qrLinha[2] + ' un',
+      qrSituacao: qrSit[0], qrCor: qrSit[1], qrBg: qrSit[2],
+      acoesQr: this.grupo(['Registrar saída', 'Registrar entrada', 'Contar no inventário', 'Ver ficha do item'], st.acaoQr, 'acaoQr'),
+      qtdQr: st.qtdQr,
+      maisQr: () => this.setState(s => ({ qtdQr: s.qtdQr + 1 })),
+      menosQr: () => this.setState(s => ({ qtdQr: Math.max(1, s.qtdQr - 1) })),
+      qrAviso: qrAvisos[st.acaoQr],
+      fornecedores, totalFornecedores: String(totalFornecedores),
+      avisoCotacao: totalFornecedores < 2
+        ? 'Com menos de dois fornecedores não há comparação de preço — a política de compras pede no mínimo três para itens acima de R$ 1.000.'
+        : 'Os convidados recebem a lista por e-mail e respondem pelo portal. As respostas voltam comparadas lado a lado nesta tela.',
+      filtrosAuditoria: this.grupo(['Tudo', 'SLA', 'Permissões', 'Regras', 'Estoque'], st.filtroAuditoria, 'filtroAuditoria'),
+      auditoria,
+      termoBusca: 'apontamento', totalResultados: resultados.length + ' resultados',
+      tiposBusca: this.grupo(['Tudo', 'Chamado', 'Projeto', 'Item', 'Documento'], st.tipoBusca, 'tipoBusca'),
+      resultados,
+      modalEntrada: st.modal === 'entrada', modalTransferencia: st.modal === 'transferencia',
+      modalInventario: st.modal === 'inventario',
+      abrirEntrada: this.abrir('entrada'), abrirTransferencia: this.abrir('transferencia'),
+      abrirInventario: this.abrir('inventario'),
+      conferencia,
+      etiquetagem: this.grupo(['Gerar QR Code', 'Sem etiqueta'], st.etiqueta, 'etiqueta'),
+      entradaAviso: notaDivergente
+        ? 'Divergência entre pedido e recebido: a entrada é registrada pelo contado e abre pendência com o fornecedor no pedido PC 1.204.'
+        : 'Nota conforme. A entrada atualiza o saldo do setor e encerra a pendência de reposição destes itens.',
+      entradaAvisoBg: notaDivergente ? AM_BG : 'var(--ll-slate-050)',
+      entradaAvisoCor: notaDivergente ? AM_FG : 'var(--text-body)',
+      setorDestino: destinoAtual, ccDestino: centros[destinoAtual] || '—',
+      destinos: setoresOutros.map(label => Object.assign(
+        { label, ir: () => this.setState({ destino: label }) },
+        this.pill(destinoAtual === label)
+      )),
+      itemTransferencia: itemTransf[1], saldoOrigem: saldoOrigem + ' un',
+      qtdTransferencia: st.qtdTransf,
+      maisTransf: () => this.setState(s => ({ qtdTransf: Math.min(saldoOrigem, s.qtdTransf + 1) })),
+      menosTransf: () => this.setState(s => ({ qtdTransf: Math.max(1, s.qtdTransf - 1) })),
+      transfAviso: furaMinimo
+        ? 'A transferência deixa a origem com ' + sobra + ' un, abaixo do mínimo de ' + minimoOrigem + ' — o item entra na fila de reposição de Compras hoje.'
+        : 'A origem fica com ' + sobra + ' un, acima do mínimo de ' + minimoOrigem + '. Movimento registrado nos dois centros de custo.',
+      transfAvisoBg: furaMinimo ? AM_BG : 'var(--ll-slate-050)',
+      transfAvisoCor: furaMinimo ? AM_FG : 'var(--text-body)',
+      contagem,
+      progressoInventario: contagem.length + ' de ' + linhas.length + ' itens contados',
+      impactoInventario: impactoFmt,
+      invAviso: divergencias
+        ? divergencias + ' item(ns) com divergência. Fechar o inventário ajusta o saldo e registra a diferença no histórico, com responsável e horário.'
+        : 'Nenhuma divergência. Fechar o inventário confirma os saldos e reinicia o ciclo de contagem do setor.',
+      invAvisoBg: divergencias ? VM_BG : VD_BG,
+      invAvisoCor: divergencias ? VM : VD,
+      modalAberto: !!m,
+      modalEyebrow: m ? m.eyebrow : '', modalTitulo: m ? m.titulo : '',
+      modalSubtitulo: m ? m.subtitulo : '', modalAcao: m ? m.acao : '',
+      modalLargura: m ? m.largura : '720px', modalNota: m ? m.nota : '',
+      modalChamado: st.modal === 'chamado', modalMaterial: st.modal === 'material',
+      modalHoras: st.modal === 'horas', modalAprovacao: st.modal === 'aprovacao',
+      modalProjeto: st.modal === 'projeto',
+      abrirChamado: this.abrir('chamado'), abrirMaterial: this.abrir('material'),
+      abrirHoras: this.abrir('horas'), abrirProjeto: this.abrir('projeto'),
+      fecharModal: () => this.setState({ modal: null }),
+      confirmarModal: this.confirma(m ? m.msg : ''),
+      toast: st.toast || false,
+      categorias: this.grupo(['Desenvolvimento', 'Atendimento', 'Análise', 'Implantação'], st.categoria, 'categoria'),
+      prioridades,
+      horasPrevistas: st.horasPrevistas,
+      maisHoras: () => this.setState(s => ({ horasPrevistas: s.horasPrevistas + 4 })),
+      menosHoras: () => this.setState(s => ({ horasPrevistas: Math.max(2, s.horasPrevistas - 4) })),
+      consequenciaSla: 'Prioridade ' + st.prioridade.toLowerCase() + ' fecha o prazo em ' + slaPorPrioridade[st.prioridade] +
+        ' úteis e coloca o chamado à frente de ' + (st.prioridade === 'Crítica' ? '31' : st.prioridade === 'Alta' ? '24' : st.prioridade === 'Média' ? '12' : '3') +
+        ' demandas na fila de ' + (st.categoria === 'Desenvolvimento' ? 'Rafael Nunes' : 'Juliana Prado') + '. Estimativa de ' + st.horasPrevistas + 'h entra no previsto do mês.',
+      carrinho, sugestoes,
+      vinculos: this.grupo(['Ordem de serviço', 'Projeto', 'Somente centro de custo'], st.vinculo, 'vinculo'),
+      vinculoValor: st.vinculo === 'Ordem de serviço' ? 'OS 4471 · parada programada' : st.vinculo === 'Projeto' ? 'Etiquetas QR do almoxarifado' : 'CC ' + (centros[st.setor] || '—'),
+      prazos: this.grupo(['Hoje', 'Esta semana', 'Próximo mês'], st.prazoPedido, 'prazoPedido'),
+      valorPedido: 'R$ ' + totalPedido.toFixed(2).replace('.', ','),
+      avisoPedido: st.itens.some(i => i.qtd > i.saldo)
+        ? 'Um dos itens excede o saldo do setor: a diferença vira necessidade de compra e aparece na tela de Compras hoje mesmo.'
+        : 'Todos os itens saem do saldo atual do setor, sem gerar compra.',
+      tiposManual: this.grupo(['Análise', 'Desenvolvimento', 'Testes', 'Reunião', 'Atendimento', 'Documentação', 'Implantação', 'Retrabalho'], st.tipoManual, 'tipoManual'),
+      duracaoManual,
+      maisDuracao: () => this.setState(s => ({ minutosManual: s.minutosManual + 30 })),
+      menosDuracao: () => this.setState(s => ({ minutosManual: Math.max(30, s.minutosManual - 30) })),
+      avisoManual: manualBloqueado
+        ? 'Retrabalho exige apontar a causa e o chamado de origem — sem isso o lançamento não é aceito.'
+        : 'O total de ' + duracaoManual + ' em ' + st.tipoManual + ' entra no realizado do chamado, hoje em 47h03 contra 40h previstas.',
+      avisoManualBg: manualBloqueado ? AM_BG : 'var(--ll-slate-050)',
+      avisoManualCor: manualBloqueado ? AM_FG : 'var(--text-body)',
+      pedidoResumo: [
+        { rotulo: 'Solicitante', valor: 'Everton Silva · Manutenção', cor: 'var(--text-strong)' },
+        { rotulo: 'Saldo atual', valor: '5 un · mínimo 12', cor: VM },
+        { rotulo: 'Valor do pedido', valor: 'R$ 441,00', cor: 'var(--text-strong)' },
+        { rotulo: 'Centro de custo', valor: '3102 · Manutenção', cor: 'var(--text-strong)' }
+      ],
+      verificacoes: [
+        { marca: '✕', cor: VM, texto: 'Saldo do setor não cobre a quantidade pedida', dado: '5 de 30' },
+        { marca: '✓', cor: VD, texto: 'Vínculo com ordem de serviço informado', dado: 'OS 4471' },
+        { marca: '!', cor: AM, texto: 'Consumo 40% acima da média dos últimos 3 meses', dado: '21 un/mês' },
+        { marca: '✓', cor: VD, texto: 'Outro setor tem saldo disponível para transferência', dado: 'Produção · 14 un' }
+      ],
+      decisoes: this.grupo(['Aprovar', 'Aprovar parcial', 'Recusar'], st.decisao, 'decisao'),
+      decisaoTexto: dec[0], decisaoBg: dec[1], decisaoCor: dec[2],
+      etapasIniciais: this.grupo(['Ideia', 'Em análise', 'Aguardando aprovação', 'Planejado'], st.etapaInicial, 'etapaInicial'),
+      riscosProjeto: ['Baixo', 'Médio', 'Alto'].map(label => {
+        const at = st.riscoProjeto === label;
+        const notas = { 'Baixo': 'acompanhamento mensal', 'Médio': 'revisão a cada quinzena', 'Alto': 'entra no painel da diretoria' };
+        return {
+          label, nota: notas[label], ir: () => this.setState({ riscoProjeto: label }),
+          ponto: label === 'Alto' ? VM : label === 'Médio' ? AM : VD,
+          bg: at ? 'var(--ll-teal-050)' : 'var(--surface-card)',
+          borda: at ? 'var(--ll-teal-100)' : 'var(--border-subtle)'
+        };
+      }),
+      nav, perfis, perfil: st.perfil, perfilDescricao: descricoes[st.perfil],
+      trocaPerfil: e => {
+        const np = e.target.value;
+        const cp = np === 'Compras' || np === 'Administrador';
+        const pj = np !== 'Colaborador';
+        let tela = st.tela;
+        if (tela === 'compras' && !cp) tela = 'almox';
+        if (tela === 'painel' && np === 'Colaborador') tela = 'tarefas';
+        if (tela === 'projetos' && !pj) tela = 'tarefas';
+        if (tela === 'config' && np !== 'Administrador') tela = 'tarefas';
+        this.setState({ perfil: np, tela, setor: cp ? st.setor : 'Manutenção' });
+      },
+      migalha: migalhas[st.tela],
+      alertaTopo: st.tela === 'compras' || st.tela === 'almox' ? '19 itens em ruptura' : '6 chamados atrasados',
+      telaPainel: st.tela === 'painel', telaTarefas: st.tela === 'tarefas',
+      telaTarefa: st.tela === 'tarefa', telaProjetos: st.tela === 'projetos',
+      telaAlmox: st.tela === 'almox', telaCompras: st.tela === 'compras',
+      telaConfig: st.tela === 'config',
+      regrasSla: ['Crítica', 'Alta', 'Média', 'Baixa'].map(pr => ({
+        prioridade: pr, horas: st.sla[pr], ponto: pontoPrio[pr],
+        exemplo: exemploSla[pr],
+        mais: () => this.setState(s => ({ sla: Object.assign({}, s.sla, { [pr]: s.sla[pr] + (s.sla[pr] >= 24 ? 8 : 2) }) })),
+        menos: () => this.setState(s => ({ sla: Object.assign({}, s.sla, { [pr]: Math.max(1, s.sla[pr] - (s.sla[pr] > 24 ? 8 : 2)) }) }))
+      })),
+      efeitoSla: 'Com estes prazos, os 34 chamados abertos hoje teriam ' + chamadosNoPrazo + ' dentro do SLA — o indicador iria de 87% para ' + pctSlaNovo + '%.',
+      regrasGerais: [
+        ['docDev', 'Documentação bloqueia o fechamento em Desenvolvimento', 'Tarefa de desenvolvimento ou mudança de regra de negócio não fecha sem documento aprovado.'],
+        ['docAtend', 'Documentação bloqueia também Atendimento', 'Recomendado deixar desligado: em atendimento, meça a cobertura em vez de travar o time.'],
+        ['causaRetrabalho', 'Retrabalho exige causa e chamado de origem', 'Sem isso o indicador de retrabalho mostra o volume, mas não o motivo.'],
+        ['cronometroUnico', 'Um cronômetro por vez, por pessoa', 'Iniciar um tipo de hora pausa o anterior e registra a virada — evita hora fantasma.'],
+        ['aprovacaoEntrega', 'Entrega precisa de validação do solicitante', 'O chamado só vai para concluído depois que o setor confirma o recebimento.']
+      ].map(([chave, titulo, desc]) => {
+        const on = !!st.flags[chave];
+        return {
+          titulo, desc,
+          alterna: () => this.setState(s => ({ flags: Object.assign({}, s.flags, { [chave]: !s.flags[chave] }) })),
+          trilha: on ? 'var(--gradient-brand)' : 'var(--ll-slate-300)',
+          pino: on ? '16px' : '2px',
+          bg: on ? 'var(--ll-teal-050)' : 'var(--surface-card)',
+          borda: on ? 'var(--ll-teal-100)' : 'var(--border-subtle)'
+        };
+      }),
+      perfisMatriz: perfisMatriz,
+      matriz: matriz,
+      regrasEstoque: [
+        { regra: 'Alerta de estoque mínimo', desc: 'Notifica o responsável do setor e Compras no mesmo momento.', valor: 'Ativo', cor: VD, bg: VD_BG },
+        { regra: 'Sugestão de reposição', desc: 'Calculada pelo consumo médio dos últimos 3 meses mais 20% de folga.', valor: '3 meses', cor: BLUE7, bg: 'var(--ll-blue-050)' },
+        { regra: 'Transferência antes de comprar', desc: 'Se outro setor tem saldo acima do mínimo, o sistema sugere transferir.', valor: 'Ativo', cor: VD, bg: VD_BG },
+        { regra: 'Inventário cíclico obrigatório', desc: 'Cada setor conta seus itens de maior valor uma vez por mês.', valor: 'Mensal', cor: AM_FG, bg: AM_BG },
+        { regra: 'Vínculo obrigatório na saída', desc: 'Toda saída precisa de ordem de serviço, projeto ou centro de custo.', valor: 'Ativo', cor: VD, bg: VD_BG }
+      ],
+      integracoesConfig: [
+        { nome: 'Sankhya', desc: 'Pedidos de compra, entradas e centros de custo.', estado: 'CONECTADO', cor: VD },
+        { nome: 'WhatsApp da operação', desc: 'Mensagens do grupo viram chamado com triagem por IA.', estado: 'CONECTADO', cor: VD },
+        { nome: 'Coletor de código de barras', desc: 'Leitura de QR Code para entrada, saída e inventário.', estado: '2 APARELHOS', cor: BLUE7 },
+        { nome: 'E-mail de aprovação', desc: 'Gerente aprova solicitação sem entrar no sistema.', estado: 'PENDENTE', cor: AM }
+      ],
+      salvarConfig: this.confirma('Regras salvas · valem para chamados novos'),
+      irTarefas: ir('tarefas'), voltarLista: ir('tarefas'),
+      timerAtivo: !!st.rodando, timerTexto: this.hms(st.segundos),
+      timerContexto: '#2841 · ' + (st.rodando || ''),
+      pausar: () => this.setState({ rodando: null }),
+      horasTipo, colaboradores, risco, resumoEtapas, alertasEstoque,
+      filtros, tarefas, contagemTarefas: tarefas.length + ' chamados · filtro: ' + st.filtro,
+      metaTarefa, tiposHora, documentacao, aprovacoes, historico, anexos,
+      resumoApontamento: 'total 47h03 · previsto 40h',
+      avisoDoc: this.props.docBloqueante === false ? 'Documentação recomendada, não bloqueante' : 'Manual do usuário pendente bloqueia o fechamento',
+      colunas, setoresVisiveis, setorAtual: st.setor,
+      escopoAlmox: perm.todosSetores ? 'Você vê todos os 11 setores' : 'Você vê apenas o seu setor',
+      tituloEstoque: 'Itens do setor ' + st.setor, centroCusto: centros[st.setor] || '—',
+      estoque, kpiAlmox, solicitacoes, movimentos,
+      setoresCompras, reposicao, integracoes,
+      mostrarIntegracoes: this.props.mostrarIntegracoes !== false
+    };
+  }
+}
+</script>
+</body>
+</html>

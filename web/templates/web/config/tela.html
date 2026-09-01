@@ -1,7 +1,11 @@
 {% extends "web/base.html" %}{% load ui %}
 {% block titulo %}SLA e permissões{% endblock %}{% block modulo %}SLA e permissões{% endblock %}
 {% block conteudo %}
-<div class="tela__head"><div><h1>SLA e permissões</h1><p class="tela__sub">o que muda aqui vale na hora, para todos — cada alteração fica na auditoria</p></div><div class="tela__acoes"><a class="btn btn--secundario" href="{% url 'web:historico' %}">Histórico de mudanças</a></div></div>
+<div class="tela__head"><div>
+  <div class="tela__sobre">Configuração</div>
+  <h1>SLA, permissões e regras</h1>
+  <p class="tela__sub">O que aqui muda vale para todos os chamados novos — os já abertos mantêm o SLA com que nasceram. Cada alteração fica na auditoria.</p>
+</div><div class="tela__acoes"><a class="btn btn--secundario" href="{% url 'web:historico' %}">Histórico de mudanças</a></div></div>
 <div class="grid-cards">
   <div class="card">
     <form hx-post="{% url 'web:config_salvar_sla' %}" hx-target="#modal-erro" x-data="{ sim: {{ simulacao.no_prazo }}, total: {{ simulacao.total }}, pct: {{ simulacao.percentual }},

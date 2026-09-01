@@ -59,9 +59,18 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* ---------- cabeçalho de tela ---------- */
 .tela__head { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-.tela__head h1 { margin: 0; font: 800 27px/1.2 var(--font-display); letter-spacing: -.02em; color: var(--text-strong); max-width: 720px; }
-.tela__sub { margin: 4px 0 0; font-size: 12.5px; color: var(--text-muted); }
+/* Cabeçalho de tela do protótipo: sobretítulo (módulo) → H1 (o que a tela responde)
+   → subtítulo explicativo. Valores conferidos em `referencias/Sistema Interno TI.dc.html`. */
+.tela__sobre { font: 700 11px/1 var(--font-display); letter-spacing: .14em; text-transform: uppercase; color: var(--color-primary); margin-bottom: 8px; }
+.tela__head h1 { margin: 0; font: 800 30px/1.15 var(--font-display); letter-spacing: -.02em; color: var(--text-strong); }
+/* A tela de tarefa carrega o título do chamado: menor e com medida de leitura (06 §2). */
+.tela__head--titulo-longo h1 { font-size: 27px; line-height: 1.2; max-width: 720px; }
+.tela__sub { margin: 8px 0 0; font-size: 14px; color: var(--text-muted); max-width: 620px; }
 .tela__acoes { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.filtros__chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+/* A contagem acompanha os chips de filtro, não o subtítulo: ela responde "quantos, deste
+   recorte", e muda quando o filtro muda (protótipo, tela de tarefas). */
+.filtros__contagem { font-size: 12.5px; color: var(--text-muted); margin-left: 4px; }
 .tela__chips { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
 
 /* ---------- botões ---------- */

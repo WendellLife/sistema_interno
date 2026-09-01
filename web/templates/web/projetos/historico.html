@@ -2,7 +2,11 @@
 {% block titulo %}Projetos encerrados{% endblock %}{% block modulo %}Projetos de TI / histórico{% endblock %}
 {% block conteudo %}
 <div class="tela__head" x-data="{ exportar: false }">
-  <div><h1>Projetos concluídos e cancelados</h1><p class="tela__sub">{% if ano == "todos" %}todos os anos{% else %}{{ ano }}{% endif %}</p></div>
+  <div>
+    <div class="tela__sobre">Portfólio · encerrados · {% if ano == "todos" %}todos os anos{% else %}{{ ano }}{% endif %}</div>
+    <h1>Concluídos e cancelados</h1>
+    <p class="tela__sub">O histórico é onde a estimativa aprende: previsto contra realizado de cada projeto encerrado, e o motivo de quem não chegou ao fim.</p>
+  </div>
   <div class="tela__acoes"><a class="btn btn--secundario" href="{% url 'web:projetos' %}">Voltar ao kanban</a><a class="btn btn--secundario" href="/api/v1/projetos/?historico=true" target="_blank">Exportar</a></div>
 </div>
 <div class="kpis">
