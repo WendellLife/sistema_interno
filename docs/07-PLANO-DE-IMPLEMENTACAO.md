@@ -68,6 +68,18 @@
 
 **Depende das 4 decisões abertas — confirmar com o time de TI antes de começar.**
 
+### Decisões tomadas (2026-09-01, Wendell)
+
+| Questão | Decisão |
+| --- | --- |
+| Sankhya — direção do dado por entidade | **Adiada.** Possibilidade futura; não entra agora. As portas ficam abertas: `Item.codigo_sankhya` já existe e `POST integracoes/itens/sync` já faz upsert por ele, então um client futuro pluga sem migration. |
+| WhatsApp — canal | **Adiada**, mesma razão. `Solicitacao.origem` já aceita `whatsapp`, e a camada `integracoes` (chave por sistema, `Idempotency-Key`, outbox) já recebe qualquer sistema externo — inclusive um bot — sem código novo. |
+| Identificação do remetente | **Tabela de vínculo telefone → usuário**, com histórico. Não usar campo no `User`: uma pessoa pode ter mais de um número, e trocar de aparelho não pode órfãos as mensagens antigas nem atribuí-las ao dono novo do número — isso é dado de auditoria. |
+| IA de triagem | **Claude API (Anthropic)**, sempre como SUGESTÃO revisada por humano (`revisada_por` preenchido antes de virar chamado ou solicitação, conforme o `CLAUDE.md`). Exige chave de API e aval de que dado de chamado pode sair da rede. |
+
+As duas primeiras ficam adiadas; as duas últimas valem quando a F6 começar. Enquanto
+isso, **o sistema é a verdade do consumo interno**, como a tabela de riscos já previa.
+
 1. Sankhya: client, mapeamento de itens (`codigo_sankhya`), sync noturno idempotente por `hash_payload`, log em `SincronizacaoSankhya`, tela de conflitos.
 2. WhatsApp: webhook, `MensagemWhatsApp` com payload cru em JSONB, identificação do remetente por telefone, fila de triagem.
 3. IA: `classificar_mensagem` sugerindo categoria/prioridade/setor/itens com nível de confiança — **sempre** com revisão humana antes de criar chamado ou solicitação.
