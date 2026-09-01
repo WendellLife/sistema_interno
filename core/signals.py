@@ -18,6 +18,23 @@ def garantir_papeis_e_matriz(**kwargs) -> None:
         )
 
 
+def guardar_ano_do_feriado(sender, instance: Feriado, **kwargs) -> None:
+    """Antes de salvar, guarda o ano que está no banco.
+
+    Mover um feriado de ano precisa limpar os DOIS caches: sem o ano de origem, ele
+    segue tratando a data antiga como feriado até o TTL expirar, e o SLA em horas
+    úteis sai errado nesse meio-tempo.
+    """
+    anterior = (
+        Feriado.objects.filter(pk=instance.pk).values_list("data", flat=True).first()
+        if instance.pk
+        else None
+    )
+    instance._ano_anterior = anterior.year if anterior else None
+
+
 def limpar_cache_de_feriados(sender, instance: Feriado, **kwargs) -> None:
     """Editar o calendário tem de valer na próxima requisição, não no fim do TTL."""
-    invalidar_feriados(instance.data.year)
+    anos = {instance.data.year, instance._ano_anterior}
+    for ano in filter(None, anos):
+        invalidar_feriados(ano)

@@ -37,3 +37,22 @@ def test_minutos_uteis_entre_inverso_de_somar():
     inicio = dt(2026, 8, 21, 16)
     fim = somar_horas_uteis(inicio, 4)
     assert minutos_uteis_entre(inicio, fim) == 240
+
+
+def test_mover_feriado_de_ano_limpa_os_dois_caches(db):
+    """Mover um feriado de ano precisa invalidar o ano ANTIGO também.
+
+    Sem isso o cache do ano de origem segue tratando a data como feriado até o TTL
+    (24h) expirar, e o SLA em horas úteis sai errado nesse meio-tempo.
+    """
+    from core.calendario import feriados_do_sistema
+    from core.models import Feriado
+
+    f = Feriado.objects.create(data=date(2026, 3, 10), nome="Aniversário da cidade")
+    assert date(2026, 3, 10) in feriados_do_sistema(2026)  # popula o cache de 2026
+
+    f.data = date(2027, 3, 10)
+    f.save()
+
+    assert date(2026, 3, 10) not in feriados_do_sistema(2026)
+    assert date(2027, 3, 10) in feriados_do_sistema(2027)
